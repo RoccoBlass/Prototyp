@@ -3,7 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Icon from '$lib/components/Icon.svelte';
 
-	let { children } = $props();
+	let { data, children } = $props();
 
 	const navItems = [
 		{ href: '/', label: 'Dashboard', icon: 'home' },
@@ -36,16 +36,31 @@
 				</a>
 			{/each}
 		</nav>
-		<div class="sidebar-footer">
-			<span class="footer-label">Tagesziel</span>
-			<span class="footer-value">2000 kcal</span>
-		</div>
+		<a
+			href="/profile"
+			class="sidebar-footer profile-link"
+			class:active={page.url.pathname === '/profile'}
+		>
+			<span class="profile-avatar"><Icon name="user" size={18} /></span>
+			<span class="profile-info">
+				<span class="footer-label">Mein Profil</span>
+				<span class="footer-value">{data.calorieGoal} kcal Ziel</span>
+			</span>
+		</a>
 	</aside>
 
 	<header class="topbar">
 		<a href="/" class="brand brand-mobile">
 			<span class="brand-mark"><Icon name="flame" size={18} /></span>
 			<span class="brand-text">Kalorientracker</span>
+		</a>
+		<a
+			href="/profile"
+			class="topbar-profile"
+			class:active={page.url.pathname === '/profile'}
+			aria-label="Profil"
+		>
+			<Icon name="user" size={18} />
 		</a>
 	</header>
 
@@ -143,6 +158,32 @@
 		position: sticky;
 		top: 0;
 		z-index: 10;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	.topbar-profile {
+		width: 36px;
+		height: 36px;
+		border-radius: 999px;
+		background: var(--surface-2);
+		color: var(--text-muted);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		text-decoration: none;
+		flex-shrink: 0;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+
+	.topbar-profile:hover,
+	.topbar-profile.active {
+		background: var(--brand-soft);
+		color: var(--brand-strong);
 	}
 
 	.brand {
@@ -319,12 +360,43 @@
 
 		.sidebar-footer {
 			margin-top: auto;
-			padding: 14px;
+			padding: 12px 14px;
 			background: var(--surface-2);
 			border-radius: var(--radius-md);
 			display: flex;
+			align-items: center;
+			gap: 12px;
+			text-decoration: none;
+			color: inherit;
+			transition:
+				background 0.15s,
+				box-shadow 0.15s;
+		}
+
+		.sidebar-footer:hover,
+		.sidebar-footer.active {
+			background: var(--brand-soft-2);
+			box-shadow: var(--shadow-sm);
+		}
+
+		.profile-avatar {
+			width: 36px;
+			height: 36px;
+			border-radius: 999px;
+			background: var(--brand);
+			color: white;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+		}
+
+		.profile-info {
+			display: flex;
 			flex-direction: column;
-			gap: 2px;
+			gap: 1px;
+			min-width: 0;
 		}
 
 		.footer-label {
@@ -332,11 +404,15 @@
 			color: var(--text-subtle);
 			text-transform: uppercase;
 			letter-spacing: 0.06em;
-			font-weight: 600;
+			font-weight: 700;
+		}
+
+		.sidebar-footer.active .footer-label {
+			color: var(--brand-strong);
 		}
 
 		.footer-value {
-			font-size: 1.05rem;
+			font-size: 0.88rem;
 			font-weight: 700;
 			color: var(--text);
 		}

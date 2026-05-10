@@ -222,3 +222,31 @@ export async function deleteEntry(id) {
 	const database = await connect();
 	await database.collection('entries').deleteOne({ _id: new ObjectId(id) });
 }
+
+// --- Settings ---
+
+const DEFAULT_CALORIE_GOAL = 2000;
+
+export async function getCalorieGoal() {
+	try {
+		const database = await connect();
+		const doc = await database.collection('settings').findOne({ _id: 'user' });
+		const value = doc?.calorieGoal;
+		if (typeof value === 'number' && value > 0) return value;
+		return DEFAULT_CALORIE_GOAL;
+	} catch (error) {
+		console.error('Fehler beim Laden des Kalorienziels:', error);
+		return DEFAULT_CALORIE_GOAL;
+	}
+}
+
+export async function setCalorieGoal(goal) {
+	const database = await connect();
+	await database
+		.collection('settings')
+		.updateOne(
+			{ _id: 'user' },
+			{ $set: { calorieGoal: goal, updatedAt: new Date() } },
+			{ upsert: true }
+		);
+}

@@ -44,7 +44,7 @@
 	</div>
 
 	<div class="stats-grid">
-		<CalorieBar current={totalCalories} goal={2000} />
+		<CalorieBar current={totalCalories} goal={data.calorieGoal} />
 		<NutrientSummary protein={totalProtein} carbs={totalCarbs} fat={totalFat} />
 	</div>
 

@@ -84,5 +84,12 @@
 	{:else if name === 'arrow-left'}
 		<path d="M19 12H5" />
 		<path d="m12 19-7-7 7-7" />
+	{:else if name === 'user'}
+		<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+		<circle cx="12" cy="7" r="4" />
+	{:else if name === 'target'}
+		<circle cx="12" cy="12" r="10" />
+		<circle cx="12" cy="12" r="6" />
+		<circle cx="12" cy="12" r="2" />
 	{/if}
 </svg>
