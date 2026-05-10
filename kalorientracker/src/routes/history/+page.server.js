@@ -1,4 +1,4 @@
-import { getMealsByDate, deleteMeal } from '$lib/server/db.js';
+import { getEntriesByDate, deleteEntry } from '$lib/server/db.js';
 import { redirect } from '@sveltejs/kit';
 
 function getDateStr(daysAgo) {
@@ -11,7 +11,7 @@ export async function load() {
 	const days = await Promise.all(
 		Array.from({ length: 7 }, (_, i) => i).map(async (i) => {
 			const date = getDateStr(i);
-			const meals = await getMealsByDate(date);
+			const meals = await getEntriesByDate(date);
 			return {
 				date,
 				meals,
@@ -30,7 +30,7 @@ export const actions = {
 		const data = await request.formData();
 		const id = data.get('id');
 		if (id) {
-			await deleteMeal(id);
+			await deleteEntry(id);
 		}
 		redirect(303, '/history');
 	}

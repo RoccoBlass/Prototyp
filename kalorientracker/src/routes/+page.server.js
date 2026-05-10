@@ -1,4 +1,4 @@
-import { getMealsByDate, deleteMeal } from '$lib/server/db.js';
+import { getEntriesByDate, deleteEntry } from '$lib/server/db.js';
 
 function getLocalDateStr() {
 	const d = new Date();
@@ -7,7 +7,7 @@ function getLocalDateStr() {
 
 export async function load() {
 	const today = getLocalDateStr();
-	const meals = await getMealsByDate(today);
+	const meals = await getEntriesByDate(today);
 	return { meals, today };
 }
 
@@ -16,7 +16,7 @@ export const actions = {
 		const data = await request.formData();
 		const id = data.get('id');
 		if (id) {
-			await deleteMeal(id);
+			await deleteEntry(id);
 		}
 		return { success: true };
 	}

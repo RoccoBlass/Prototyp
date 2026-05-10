@@ -78,5 +78,11 @@
 		<path d="M16 6c1.5 0 4 1.5 4 4" />
 	{:else if name === 'droplet'}
 		<path d="M12 2.69 5.64 9.05a9 9 0 1 0 12.72 0z" />
+	{:else if name === 'pencil'}
+		<path d="M12 20h9" />
+		<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+	{:else if name === 'arrow-left'}
+		<path d="M19 12H5" />
+		<path d="m12 19-7-7 7-7" />
 	{/if}
 </svg>
