@@ -42,8 +42,9 @@ export const actions = {
 			await saveSettings(settings);
 		} catch (error) {
 			console.error('Fehler beim Speichern der Einstellungen:', error);
+			// TEMP-DIAGNOSE: echten Fehler anzeigen (kein Passwort enthalten). Wieder entfernen.
 			return fail(500, {
-				error: 'Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen.',
+				error: `Speichern fehlgeschlagen [DIAG ${error?.name}: ${error?.message}]`,
 				values: rawValues
 			});
 		}
