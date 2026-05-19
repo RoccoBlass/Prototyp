@@ -13,6 +13,16 @@
 <div class="card" class:over={isOver}>
 	<div class="ring-wrap">
 		<svg viewBox="0 0 140 140" class="ring" aria-hidden="true">
+			<defs>
+				<linearGradient id="calRing" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#34d399" />
+					<stop offset="100%" stop-color="#16a34a" />
+				</linearGradient>
+				<linearGradient id="calRingOver" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#fb7185" />
+					<stop offset="100%" stop-color="#ef4444" />
+				</linearGradient>
+			</defs>
 			<circle cx="70" cy="70" r={radius} class="ring-track" />
 			<circle
 				cx="70"
@@ -51,13 +61,13 @@
 <style>
 	.card {
 		background: var(--surface);
-		border-radius: var(--radius-lg);
-		padding: 18px;
+		border-radius: var(--radius-xl);
+		padding: 22px;
 		border: 1px solid var(--border);
-		box-shadow: var(--shadow-sm);
+		box-shadow: var(--shadow-md);
 		display: flex;
 		align-items: center;
-		gap: 18px;
+		gap: 20px;
 		margin-bottom: 14px;
 	}
 
@@ -77,21 +87,21 @@
 	.ring-track {
 		fill: none;
 		stroke: var(--surface-2);
-		stroke-width: 12;
+		stroke-width: 13;
 	}
 
 	.ring-fill {
 		fill: none;
-		stroke: var(--brand);
-		stroke-width: 12;
+		stroke: url(#calRing);
+		stroke-width: 13;
 		stroke-linecap: round;
 		transition:
-			stroke-dashoffset 0.6s ease,
+			stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1),
 			stroke 0.2s;
 	}
 
 	.card.over .ring-fill {
-		stroke: var(--danger);
+		stroke: url(#calRingOver);
 	}
 
 	.ring-center {
@@ -163,10 +173,10 @@
 
 	.track-fill {
 		height: 100%;
-		background: var(--brand);
+		background: var(--brand-gradient);
 		border-radius: 999px;
 		transition:
-			width 0.6s ease,
+			width 0.6s cubic-bezier(0.4, 0, 0.2, 1),
 			background 0.2s;
 	}
 

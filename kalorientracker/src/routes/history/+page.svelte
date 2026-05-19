@@ -99,8 +99,16 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-lg);
-		padding: 16px;
+		padding: 18px;
 		box-shadow: var(--shadow-sm);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.day-card:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
 	}
 
 	.day-header {
@@ -172,9 +180,9 @@
 
 	.mini-bar-fill {
 		height: 100%;
-		background: var(--brand);
+		background: var(--brand-gradient);
 		border-radius: 999px;
-		transition: width 0.5s ease;
+		transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.mini-bar-fill.over {
@@ -204,10 +212,10 @@
 	}
 
 	.macro {
-		font-size: 0.7rem;
-		font-weight: 600;
-		padding: 3px 9px;
-		border-radius: 7px;
+		font-size: 0.72rem;
+		font-weight: 650;
+		padding: 4px 11px;
+		border-radius: 999px;
 	}
 
 	.macro.p {

@@ -74,11 +74,19 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
-		padding: 12px;
+		padding: 14px;
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 7px;
 		box-shadow: var(--shadow-sm);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.cell:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
 	}
 
 	.row {
@@ -129,7 +137,7 @@
 	}
 
 	.track {
-		height: 4px;
+		height: 6px;
 		background: var(--surface-2);
 		border-radius: 999px;
 		overflow: hidden;
@@ -137,9 +145,9 @@
 
 	.track-fill {
 		height: 100%;
-		background: var(--color);
+		background: linear-gradient(90deg, color-mix(in srgb, var(--color) 70%, white), var(--color));
 		border-radius: 999px;
-		transition: width 0.5s ease;
+		transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	@media (min-width: 900px) {

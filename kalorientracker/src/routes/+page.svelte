@@ -93,8 +93,8 @@
 		gap: 8px;
 		background: var(--brand-soft);
 		color: var(--brand-strong);
-		padding: 10px 14px;
-		border-radius: var(--radius-sm);
+		padding: 12px 16px;
+		border-radius: var(--radius-md);
 		margin-bottom: 14px;
 		font-size: 0.86rem;
 		font-weight: 600;
@@ -129,20 +129,23 @@
 	.header-cta {
 		display: none;
 		align-items: center;
-		gap: 6px;
-		background: var(--brand);
+		gap: 7px;
+		background: var(--brand-gradient);
 		color: white;
-		padding: 9px 14px;
-		border-radius: 10px;
+		padding: 11px 18px;
+		border-radius: 14px;
 		text-decoration: none;
 		font-size: 0.88rem;
-		font-weight: 600;
-		box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
-		transition: background 0.15s;
+		font-weight: 700;
+		box-shadow: 0 6px 16px rgba(22, 163, 74, 0.32);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
 	}
 
 	.header-cta:hover {
-		background: var(--brand-strong);
+		transform: translateY(-2px);
+		box-shadow: 0 10px 22px rgba(22, 163, 74, 0.4);
 	}
 
 	.stats-grid {
@@ -160,11 +163,10 @@
 	}
 
 	.section-title {
-		font-size: 0.78rem;
-		font-weight: 700;
-		color: var(--text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.07em;
+		font-size: 0.95rem;
+		font-weight: 750;
+		color: var(--text);
+		letter-spacing: -0.01em;
 		margin: 0;
 	}
 
@@ -187,22 +189,23 @@
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
-		padding: 40px 16px;
+		padding: 48px 20px;
 		background: var(--surface);
-		border: 1px dashed var(--border-strong);
-		border-radius: var(--radius-lg);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.empty-icon {
-		width: 56px;
-		height: 56px;
-		border-radius: 16px;
+		width: 64px;
+		height: 64px;
+		border-radius: 20px;
 		background: var(--brand-soft);
 		color: var(--brand-strong);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		margin-bottom: 14px;
+		margin-bottom: 16px;
 	}
 
 	.empty-title {
@@ -221,20 +224,23 @@
 	.cta-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		background: var(--brand);
+		gap: 7px;
+		background: var(--brand-gradient);
 		color: white;
 		text-decoration: none;
-		padding: 11px 20px;
-		border-radius: 10px;
-		font-weight: 600;
-		font-size: 0.9rem;
-		box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
-		transition: background 0.15s;
+		padding: 13px 22px;
+		border-radius: 14px;
+		font-weight: 700;
+		font-size: 0.92rem;
+		box-shadow: 0 6px 16px rgba(22, 163, 74, 0.32);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
 	}
 
 	.cta-btn:hover {
-		background: var(--brand-strong);
+		transform: translateY(-2px);
+		box-shadow: 0 10px 22px rgba(22, 163, 74, 0.4);
 	}
 
 	@media (min-width: 900px) {

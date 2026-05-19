@@ -74,23 +74,26 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
-		padding: 12px 14px;
-		margin-bottom: 8px;
+		padding: 14px 16px;
+		margin-bottom: 10px;
 		box-shadow: var(--shadow-sm);
 		transition:
 			border-color 0.15s,
-			transform 0.1s;
+			box-shadow 0.15s,
+			transform 0.15s ease;
 	}
 
 	.meal-card:hover {
 		border-color: var(--border-strong);
+		box-shadow: var(--shadow-md);
+		transform: translateY(-2px);
 	}
 
 	.meal-icon {
 		grid-area: icon;
-		width: 36px;
-		height: 36px;
-		border-radius: 10px;
+		width: 38px;
+		height: 38px;
+		border-radius: 12px;
 		background: var(--s);
 		color: var(--c);
 		display: inline-flex;
@@ -134,9 +137,9 @@
 
 	.macro {
 		font-size: 0.66rem;
-		font-weight: 600;
-		padding: 2px 7px;
-		border-radius: 6px;
+		font-weight: 650;
+		padding: 3px 9px;
+		border-radius: 999px;
 	}
 
 	.macro.p {
