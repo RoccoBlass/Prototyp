@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from 'mongodb';
-import { DB_URI } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 let client;
 let db;
@@ -9,7 +9,13 @@ async function connect() {
 	if (db) return db;
 	if (!connectPromise) {
 		connectPromise = (async () => {
-			client = new MongoClient(DB_URI);
+			const uri = env.DB_URI;
+			if (!uri) {
+				throw new Error(
+					'DB_URI ist nicht gesetzt. Bitte die Umgebungsvariable in Netlify (Site configuration → Environment variables) hinterlegen.'
+				);
+			}
+			client = new MongoClient(uri);
 			await client.connect();
 			db = client.db('KalorienTrackerDB');
 			await Promise.all([
@@ -20,7 +26,12 @@ async function connect() {
 			]);
 			await migrateLegacyMealsIfNeeded();
 			return db;
-		})();
+		})().catch((error) => {
+			// Reset so a later request can retry once the cause is fixed
+			// (e.g. DB_URI added in Netlify) without waiting for a cold start.
+			connectPromise = undefined;
+			throw error;
+		});
 	}
 	return connectPromise;
 }

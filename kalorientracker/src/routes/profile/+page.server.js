@@ -17,22 +17,37 @@ export const actions = {
 	updateProfile: async ({ request }) => {
 		const data = await request.formData();
 
-		const name = String(data.get('name') ?? '').trim().slice(0, 60);
-		const values = { name };
+		const name = String(data.get('name') ?? '')
+			.trim()
+			.slice(0, 60);
 
+		const rawValues = {
+			name,
+			...Object.fromEntries(NUMERIC_FIELDS.map((f) => [f.name, data.get(f.name)]))
+		};
+
+		const settings = { name };
 		for (const field of NUMERIC_FIELDS) {
-			const raw = data.get(field.name);
-			const num = Number(raw);
+			const num = Number(data.get(field.name));
 			if (!Number.isFinite(num) || num < field.min || num > field.max) {
 				return fail(400, {
 					error: `${field.label}: Bitte einen Wert zwischen ${field.min} und ${field.max} angeben.`,
-					values: { name, ...Object.fromEntries(NUMERIC_FIELDS.map((f) => [f.name, data.get(f.name)])) }
+					values: rawValues
 				});
 			}
-			values[field.name] = Math.round(num);
+			settings[field.name] = Math.round(num);
 		}
 
-		await saveSettings(values);
+		try {
+			await saveSettings(settings);
+		} catch (error) {
+			console.error('Fehler beim Speichern der Einstellungen:', error);
+			return fail(500, {
+				error: 'Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen.',
+				values: rawValues
+			});
+		}
+
 		redirect(303, '/profile?success=1');
 	}
 };
