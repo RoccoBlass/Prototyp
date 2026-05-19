@@ -43,8 +43,8 @@
 		>
 			<span class="profile-avatar"><Icon name="user" size={18} /></span>
 			<span class="profile-info">
-				<span class="footer-label">Mein Profil</span>
-				<span class="footer-value">{data.calorieGoal} kcal Ziel</span>
+				<span class="footer-label">{data.settings.name || 'Mein Profil'}</span>
+				<span class="footer-value">{data.settings.calorieGoal} kcal Ziel</span>
 			</span>
 		</a>
 	</aside>

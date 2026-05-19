@@ -1,14 +1,21 @@
 <script>
 	import Icon from './Icon.svelte';
 
-	let { protein = 0, carbs = 0, fat = 0 } = $props();
+	let {
+		protein = 0,
+		carbs = 0,
+		fat = 0,
+		proteinGoal = 150,
+		carbsGoal = 250,
+		fatGoal = 70
+	} = $props();
 
 	const items = $derived([
 		{
 			key: 'protein',
 			value: protein,
 			label: 'Protein',
-			goal: 150,
+			goal: proteinGoal,
 			icon: 'beef',
 			color: 'var(--protein)',
 			soft: 'var(--protein-soft)'
@@ -17,7 +24,7 @@
 			key: 'carbs',
 			value: carbs,
 			label: 'Kohlenhydrate',
-			goal: 250,
+			goal: carbsGoal,
 			icon: 'wheat',
 			color: 'var(--carbs)',
 			soft: 'var(--carbs-soft)'
@@ -26,7 +33,7 @@
 			key: 'fat',
 			value: fat,
 			label: 'Fett',
-			goal: 70,
+			goal: fatGoal,
 			icon: 'droplet',
 			color: 'var(--fat)',
 			soft: 'var(--fat-soft)'

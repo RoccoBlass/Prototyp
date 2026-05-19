@@ -44,8 +44,15 @@
 	</div>
 
 	<div class="stats-grid">
-		<CalorieBar current={totalCalories} goal={data.calorieGoal} />
-		<NutrientSummary protein={totalProtein} carbs={totalCarbs} fat={totalFat} />
+		<CalorieBar current={totalCalories} goal={data.settings.calorieGoal} />
+		<NutrientSummary
+			protein={totalProtein}
+			carbs={totalCarbs}
+			fat={totalFat}
+			proteinGoal={data.settings.proteinGoal}
+			carbsGoal={data.settings.carbsGoal}
+			fatGoal={data.settings.fatGoal}
+		/>
 	</div>
 
 	<div class="section-header">

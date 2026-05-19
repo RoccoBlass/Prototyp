@@ -1,6 +1,6 @@
-import { getCalorieGoal } from '$lib/server/db.js';
+import { getSettings } from '$lib/server/db.js';
 
 export async function load() {
-	const calorieGoal = await getCalorieGoal();
-	return { calorieGoal };
+	const settings = await getSettings();
+	return { settings };
 }

@@ -4,10 +4,23 @@
 
 	let { data, form } = $props();
 
-	let goalInput = $state(String(data.calorieGoal));
+	const start = form?.values ?? data.settings;
+
+	let name = $state(String(start.name ?? ''));
+	let goalInput = $state(String(start.calorieGoal ?? data.settings.calorieGoal));
+	let proteinGoal = $state(String(start.proteinGoal ?? data.settings.proteinGoal));
+	let carbsGoal = $state(String(start.carbsGoal ?? data.settings.carbsGoal));
+	let fatGoal = $state(String(start.fatGoal ?? data.settings.fatGoal));
+
 	const showSuccess = $derived(page.url.searchParams.get('success') === '1');
 
 	const presets = [1500, 1800, 2000, 2200, 2500, 3000];
+
+	const macros = [
+		{ state: () => proteinGoal, set: (v) => (proteinGoal = v), name: 'proteinGoal', label: 'Protein', icon: 'beef' },
+		{ state: () => carbsGoal, set: (v) => (carbsGoal = v), name: 'carbsGoal', label: 'Kohlenhydrate', icon: 'wheat' },
+		{ state: () => fatGoal, set: (v) => (fatGoal = v), name: 'fatGoal', label: 'Fett', icon: 'droplet' }
+	];
 </script>
 
 <div class="profile-page">
@@ -19,7 +32,7 @@
 	{#if showSuccess}
 		<div class="success-banner" role="status">
 			<Icon name="check-circle" size={18} />
-			<span>Kalorienziel aktualisiert</span>
+			<span>Einstellungen aktualisiert</span>
 		</div>
 	{/if}
 
@@ -27,29 +40,52 @@
 		<div class="profile-head">
 			<span class="profile-avatar"><Icon name="user" size={28} /></span>
 			<div class="profile-meta">
-				<span class="profile-name">Mein Profil</span>
-				<span class="profile-sub">Aktuelles Tagesziel: {data.calorieGoal} kcal</span>
+				<span class="profile-name">{data.settings.name || 'Mein Profil'}</span>
+				<span class="profile-sub">Aktuelles Tagesziel: {data.settings.calorieGoal} kcal</span>
 			</div>
 		</div>
 	</section>
 
-	<section class="card goal-card">
-		<header class="card-head">
-			<span class="card-icon"><Icon name="target" size={20} /></span>
-			<div>
-				<h2>Tägliches Kalorienziel</h2>
-				<p>Wird auf dem Dashboard und im Verlauf verwendet.</p>
-			</div>
-		</header>
+	{#if form?.error}
+		<div class="error-banner" role="alert">
+			<Icon name="alert" size={18} />
+			<span>{form.error}</span>
+		</div>
+	{/if}
 
-		{#if form?.error}
-			<div class="error-banner" role="alert">
-				<Icon name="alert" size={18} />
-				<span>{form.error}</span>
-			</div>
-		{/if}
+	<form method="POST" action="?/updateProfile" class="settings-form">
+		<section class="card">
+			<header class="card-head">
+				<span class="card-icon"><Icon name="user" size={20} /></span>
+				<div>
+					<h2>Persönliche Angaben</h2>
+					<p>Wird in der Seitenleiste angezeigt.</p>
+				</div>
+			</header>
 
-		<form method="POST" action="?/updateGoal" class="goal-form">
+			<label class="field">
+				<span class="field-label">Name</span>
+				<div class="input-wrap">
+					<input
+						type="text"
+						name="name"
+						maxlength="60"
+						placeholder="Dein Name"
+						bind:value={name}
+					/>
+				</div>
+			</label>
+		</section>
+
+		<section class="card">
+			<header class="card-head">
+				<span class="card-icon"><Icon name="target" size={20} /></span>
+				<div>
+					<h2>Tägliches Kalorienziel</h2>
+					<p>Wird auf dem Dashboard und im Verlauf verwendet.</p>
+				</div>
+			</header>
+
 			<label class="field">
 				<span class="field-label">Kalorien pro Tag (kcal)</span>
 				<div class="input-wrap">
@@ -81,13 +117,44 @@
 					{/each}
 				</div>
 			</div>
+		</section>
 
-			<button type="submit" class="save-btn">
-				<Icon name="check-circle" size={16} />
-				<span>Speichern</span>
-			</button>
-		</form>
-	</section>
+		<section class="card">
+			<header class="card-head">
+				<span class="card-icon"><Icon name="wheat" size={20} /></span>
+				<div>
+					<h2>Makro-Ziele</h2>
+					<p>Zielwerte pro Tag für die Nährstoff-Übersicht.</p>
+				</div>
+			</header>
+
+			<div class="macro-grid">
+				{#each macros as m (m.name)}
+					<label class="field">
+						<span class="field-label">{m.label} (g)</span>
+						<div class="input-wrap">
+							<input
+								type="number"
+								name={m.name}
+								min="5"
+								max="1000"
+								step="5"
+								required
+								value={m.state()}
+								oninput={(e) => m.set(e.currentTarget.value)}
+							/>
+							<span class="input-suffix">g</span>
+						</div>
+					</label>
+				{/each}
+			</div>
+		</section>
+
+		<button type="submit" class="save-btn">
+			<Icon name="check-circle" size={16} />
+			<span>Speichern</span>
+		</button>
+	</form>
 </div>
 
 <style>
@@ -190,19 +257,28 @@
 		font-weight: 500;
 	}
 
+	.settings-form {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+
 	.card {
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-lg);
 		padding: 18px;
 		box-shadow: var(--shadow-sm);
+		display: flex;
+		flex-direction: column;
+		gap: 18px;
 	}
 
 	.card-head {
 		display: flex;
 		align-items: flex-start;
 		gap: 12px;
-		margin-bottom: 18px;
+		margin: 0;
 	}
 
 	.card-icon {
@@ -229,12 +305,6 @@
 		font-size: 0.82rem;
 		color: var(--text-muted);
 		margin: 0;
-	}
-
-	.goal-form {
-		display: flex;
-		flex-direction: column;
-		gap: 18px;
 	}
 
 	.field {
@@ -335,6 +405,12 @@
 		color: var(--brand-strong);
 	}
 
+	.macro-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 14px;
+	}
+
 	.save-btn {
 		display: inline-flex;
 		align-items: center;
@@ -356,6 +432,12 @@
 
 	.save-btn:hover {
 		background: var(--brand-strong);
+	}
+
+	@media (min-width: 600px) {
+		.macro-grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
 	}
 
 	@media (min-width: 900px) {

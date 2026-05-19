@@ -225,28 +225,42 @@ export async function deleteEntry(id) {
 
 // --- Settings ---
 
-const DEFAULT_CALORIE_GOAL = 2000;
+export const DEFAULT_SETTINGS = {
+	name: '',
+	calorieGoal: 2000,
+	proteinGoal: 150,
+	carbsGoal: 250,
+	fatGoal: 70
+};
 
-export async function getCalorieGoal() {
+function positiveNumber(value, fallback) {
+	return typeof value === 'number' && value > 0 ? value : fallback;
+}
+
+export async function getSettings() {
 	try {
 		const database = await connect();
 		const doc = await database.collection('settings').findOne({ _id: 'user' });
-		const value = doc?.calorieGoal;
-		if (typeof value === 'number' && value > 0) return value;
-		return DEFAULT_CALORIE_GOAL;
+		return {
+			name: typeof doc?.name === 'string' ? doc.name : DEFAULT_SETTINGS.name,
+			calorieGoal: positiveNumber(doc?.calorieGoal, DEFAULT_SETTINGS.calorieGoal),
+			proteinGoal: positiveNumber(doc?.proteinGoal, DEFAULT_SETTINGS.proteinGoal),
+			carbsGoal: positiveNumber(doc?.carbsGoal, DEFAULT_SETTINGS.carbsGoal),
+			fatGoal: positiveNumber(doc?.fatGoal, DEFAULT_SETTINGS.fatGoal)
+		};
 	} catch (error) {
-		console.error('Fehler beim Laden des Kalorienziels:', error);
-		return DEFAULT_CALORIE_GOAL;
+		console.error('Fehler beim Laden der Einstellungen:', error);
+		return { ...DEFAULT_SETTINGS };
 	}
 }
 
-export async function setCalorieGoal(goal) {
+export async function saveSettings(settings) {
 	const database = await connect();
 	await database
 		.collection('settings')
 		.updateOne(
 			{ _id: 'user' },
-			{ $set: { calorieGoal: goal, updatedAt: new Date() } },
+			{ $set: { ...settings, updatedAt: new Date() } },
 			{ upsert: true }
 		);
 }

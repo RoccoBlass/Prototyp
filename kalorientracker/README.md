@@ -140,12 +140,12 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 
 ## 4. Erweiterungen
 
-### 4.1 Persönliches Kalorientagesziel im Profil
-- **Beschreibung & Nutzen:** Statt eines fix verdrahteten Ziels von 2000 kcal kann das Ziel jetzt auf der Profilseite frei eingegeben (500–10000 kcal) oder per Schnell-Preset (1500/1800/2000/2200/2500/3000) gesetzt werden. Das Ziel wirkt sich direkt auf den Kalorienring im Dashboard und auf die Soll/Ist-Anzeige im Verlauf aus. Damit ist der Tracker auch für unterschiedliche Phasen (Cut, Maintain, Bulk) sinnvoll nutzbar.
+### 4.1 Persönliches Profil mit Kalorien- und Makro-Zielen
+- **Beschreibung & Nutzen:** Über das Feld unten links (Sidebar/Topbar) gelangt man auf eine Profilseite, auf der ein Anzeigename, das tägliche Kalorienziel (500–10000 kcal, frei oder per Schnell-Preset 1500/1800/2000/2200/2500/3000, Standard 2000 kcal) sowie die Tagesziele für Protein, Kohlenhydrate und Fett festgelegt werden. Kalorienziel wirkt auf den Kalorienring im Dashboard und die Soll/Ist-Anzeige im Verlauf, die Makro-Ziele auf die Nährstoff-Übersicht. Damit ist der Tracker für unterschiedliche Phasen (Cut, Maintain, Bulk) sinnvoll nutzbar.
 - **Wo umgesetzt:**
-  - **Frontend:** neue Route [src/routes/profile/+page.svelte](src/routes/profile/+page.svelte); Profil-Eintrag in der Sidebar/Topbar in [src/routes/+layout.svelte](src/routes/+layout.svelte); Verwendung des Wertes in [src/routes/+page.svelte](src/routes/+page.svelte) und [src/routes/history/+page.svelte](src/routes/history/+page.svelte).
-  - **Backend:** Form-Action `updateGoal` in [src/routes/profile/+page.server.js](src/routes/profile/+page.server.js); globaler Loader [src/routes/+layout.server.js](src/routes/+layout.server.js) stellt das Ziel allen Routen bereit.
-  - **Datenbank:** neue Collection `settings` mit `getCalorieGoal()` / `setCalorieGoal()` in [src/lib/server/db.js](src/lib/server/db.js).
+  - **Frontend:** Route [src/routes/profile/+page.svelte](src/routes/profile/+page.svelte); Profil-Eintrag in der Sidebar/Topbar in [src/routes/+layout.svelte](src/routes/+layout.svelte); Verwendung der Werte in [src/routes/+page.svelte](src/routes/+page.svelte), [src/routes/history/+page.svelte](src/routes/history/+page.svelte) und konfigurierbare Ziele in [src/lib/components/NutrientSummary.svelte](src/lib/components/NutrientSummary.svelte).
+  - **Backend:** Form-Action `updateProfile` in [src/routes/profile/+page.server.js](src/routes/profile/+page.server.js); globaler Loader [src/routes/+layout.server.js](src/routes/+layout.server.js) stellt die Einstellungen allen Routen bereit.
+  - **Datenbank:** Collection `settings` mit `getSettings()` / `saveSettings()` in [src/lib/server/db.js](src/lib/server/db.js).
 - **Referenz:** vgl. Kap. 3.4.2 (Daten & Schnittstellen).
 - **Aus Evaluation abgeleitet?:** _[Ja/Nein – falls aus Test-Issue abgeleitet, hier verlinken]_
 
