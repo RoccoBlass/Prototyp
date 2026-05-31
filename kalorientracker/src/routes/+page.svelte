@@ -13,6 +13,7 @@
 	const totalFat = $derived(data.meals.reduce((sum, m) => sum + (m.fat || 0), 0));
 
 	const showSuccess = $derived(page.url.searchParams.get('success') === '1');
+	const showWelcome = $derived(page.url.searchParams.get('welcome') === '1');
 
 	function formatDate(dateStr) {
 		const [year, month, day] = dateStr.split('-').map(Number);
@@ -25,7 +26,12 @@
 </script>
 
 <div class="dashboard">
-	{#if showSuccess}
+	{#if showWelcome}
+		<div class="success-banner" role="status">
+			<Icon name="check-circle" size={18} />
+			<span>Willkommen! Dein persönliches Tagesziel ist startklar.</span>
+		</div>
+	{:else if showSuccess}
 		<div class="success-banner" role="status">
 			<Icon name="check-circle" size={18} />
 			<span>Mahlzeit erfolgreich gespeichert</span>

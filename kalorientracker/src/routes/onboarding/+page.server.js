@@ -1,41 +1,31 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
+import { calculateTargets, getActivityLevel, getGoal, SEXES, LIMITS } from '$lib/nutrition.js';
 import { saveProfile } from '$lib/server/db.js';
-import { caloriesFromMacros, getActivityLevel, getGoal, SEXES, LIMITS } from '$lib/nutrition.js';
 
 const SEX_KEYS = SEXES.map((s) => s.key);
-
-const MACRO_LIMITS = {
-	proteinGoal: { min: 20, max: 500, label: 'Protein' },
-	carbsGoal: { min: 0, max: 1000, label: 'Kohlenhydrate' },
-	fatGoal: { min: 10, max: 400, label: 'Fett' }
-};
 
 function inRange(value, { min, max }) {
 	return Number.isFinite(value) && value >= min && value <= max;
 }
 
 export async function load({ locals }) {
-	return { user: locals.user };
+	if (locals.user?.onboarded) {
+		redirect(303, '/');
+	}
+	return {};
 }
 
 export const actions = {
-	updateProfile: async ({ request, locals }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
-
-		const name = String(data.get('name') ?? '')
-			.trim()
-			.slice(0, 60);
 		const sex = String(data.get('sex') ?? '');
 		const age = Number(data.get('age'));
 		const height = Number(data.get('height'));
 		const weight = Number(data.get('weight'));
 		const activityLevel = String(data.get('activityLevel') ?? '');
 		const goal = String(data.get('goal') ?? '');
-		const proteinGoal = Number(data.get('proteinGoal'));
-		const carbsGoal = Number(data.get('carbsGoal'));
-		const fatGoal = Number(data.get('fatGoal'));
 
-		const values = { name, sex, age, height, weight, activityLevel, goal, proteinGoal, carbsGoal, fatGoal };
+		const values = { sex, age, height, weight, activityLevel, goal };
 
 		if (!SEX_KEYS.includes(sex)) {
 			return fail(400, { error: 'Bitte ein Geschlecht wählen.', values });
@@ -55,41 +45,31 @@ export const actions = {
 		if (!getGoal(goal)) {
 			return fail(400, { error: 'Bitte ein Ziel wählen.', values });
 		}
-		for (const [key, limit] of Object.entries(MACRO_LIMITS)) {
-			if (!inRange(values[key], limit)) {
-				return fail(400, {
-					error: `${limit.label}: Bitte einen Wert zwischen ${limit.min} und ${limit.max} g angeben.`,
-					values
-				});
-			}
-		}
 
-		const macros = {
-			proteinGoal: Math.round(proteinGoal),
-			carbsGoal: Math.round(carbsGoal),
-			fatGoal: Math.round(fatGoal)
-		};
+		const ageR = Math.round(age);
+		const heightR = Math.round(height);
+		const weightR = Math.round(weight * 10) / 10;
+		const targets = calculateTargets({ sex, age: ageR, height: heightR, weight: weightR, activityLevel, goal });
 
 		try {
 			await saveProfile(locals.user.id, {
-				name,
 				sex,
-				age: Math.round(age),
-				height: Math.round(height),
-				weight: Math.round(weight * 10) / 10,
+				age: ageR,
+				height: heightR,
+				weight: weightR,
 				activityLevel,
 				goal,
-				...macros,
-				calorieGoal: caloriesFromMacros(macros)
+				calorieGoal: targets.calorieGoal,
+				proteinGoal: targets.proteinGoal,
+				carbsGoal: targets.carbsGoal,
+				fatGoal: targets.fatGoal,
+				onboardedAt: new Date()
 			});
 		} catch (error) {
-			console.error('Fehler beim Speichern der Einstellungen:', error);
-			return fail(500, {
-				error: 'Einstellungen konnten nicht gespeichert werden. Bitte erneut versuchen.',
-				values
-			});
+			console.error('Onboarding speichern fehlgeschlagen:', error);
+			return fail(500, { error: 'Speichern fehlgeschlagen. Bitte erneut versuchen.', values });
 		}
 
-		redirect(303, '/profile?success=1');
+		redirect(303, '/?welcome=1');
 	}
 };

@@ -370,7 +370,6 @@
 		box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.14);
 	}
 
-	.input:focus + .input-icon,
 	.input-wrap:focus-within .input-icon {
 		color: var(--brand);
 	}

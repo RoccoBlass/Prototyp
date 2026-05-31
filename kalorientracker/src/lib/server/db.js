@@ -31,7 +31,9 @@ export async function getDb() {
 				db.collection('mealTemplates').createIndex({ userId: 1, updatedAt: -1 }),
 				db.collection('mealTemplates').createIndex({ userId: 1, name: 1 }),
 				db.collection('entries').createIndex({ userId: 1, date: 1 }),
-				db.collection('entries').createIndex({ userId: 1, createdAt: -1 })
+				db.collection('entries').createIndex({ userId: 1, createdAt: -1 }),
+				// Gewichts-Tracker: ein Eintrag pro Benutzer und Tag
+				db.collection('weightEntries').createIndex({ userId: 1, date: 1 }, { unique: true })
 			]);
 			return db;
 		})().catch((error) => {
@@ -201,19 +203,65 @@ export const DEFAULT_SETTINGS = {
 	fatGoal: 70
 };
 
-export async function updateUserProfile(userId, { name, calorieGoal, proteinGoal, carbsGoal, fatGoal }) {
+/**
+ * Schreibt die übergebenen Felder ans Benutzer-Dokument (z. B. Name, Körperdaten,
+ * berechnete Ziele, onboardedAt). Die Felder werden vom Aufrufer serverseitig
+ * validiert und explizit zusammengestellt.
+ */
+export async function saveProfile(userId, fields) {
 	const database = await getDb();
 	await database.collection('users').updateOne(
 		{ _id: new ObjectId(userId) },
-		{
-			$set: {
-				name,
-				calorieGoal,
-				proteinGoal,
-				carbsGoal,
-				fatGoal,
-				updatedAt: new Date()
-			}
-		}
+		{ $set: { ...fields, updatedAt: new Date() } }
 	);
+}
+
+// --- Gewichts-Tracker (pro Benutzer, ein Eintrag pro Tag) ---
+
+export async function getWeightEntries(userId) {
+	try {
+		const database = await getDb();
+		const docs = await database
+			.collection('weightEntries')
+			.find({ userId: new ObjectId(userId) })
+			.sort({ date: 1 })
+			.toArray();
+		return docs.map((d) => ({ date: d.date, weight: d.weight }));
+	} catch (error) {
+		console.error('Fehler beim Laden der Gewichtsdaten:', error);
+		return [];
+	}
+}
+
+export async function upsertWeight(userId, date, weight) {
+	const database = await getDb();
+	await database.collection('weightEntries').updateOne(
+		{ userId: new ObjectId(userId), date },
+		{ $set: { weight, updatedAt: new Date() }, $setOnInsert: { createdAt: new Date() } },
+		{ upsert: true }
+	);
+}
+
+export async function deleteWeight(userId, date) {
+	const database = await getDb();
+	await database
+		.collection('weightEntries')
+		.deleteOne({ userId: new ObjectId(userId), date });
+}
+
+/** Jüngstes getracktes Gewicht (für „Ziel mit aktuellem Gewicht neu berechnen"). */
+export async function getLatestWeight(userId) {
+	try {
+		const database = await getDb();
+		const doc = await database
+			.collection('weightEntries')
+			.find({ userId: new ObjectId(userId) })
+			.sort({ date: -1 })
+			.limit(1)
+			.next();
+		return doc ? doc.weight : null;
+	} catch (error) {
+		console.error('Fehler beim Laden des aktuellen Gewichts:', error);
+		return null;
+	}
 }

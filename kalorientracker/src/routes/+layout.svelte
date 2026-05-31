@@ -8,6 +8,7 @@
 	const navItems = [
 		{ href: '/', label: 'Dashboard', icon: 'home' },
 		{ href: '/add', label: 'Hinzufügen', icon: 'plus' },
+		{ href: '/weight', label: 'Gewicht', icon: 'scale' },
 		{ href: '/history', label: 'Verlauf', icon: 'history' }
 	];
 </script>
@@ -18,7 +19,7 @@
 	<title>Kalorientracker</title>
 </svelte:head>
 
-{#if data.user}
+{#if data.user && data.user.onboarded}
 <div class="app">
 	<aside class="sidebar">
 		<a href="/" class="brand">
@@ -55,14 +56,6 @@
 			<span class="brand-mark"><Icon name="flame" size={18} /></span>
 			<span class="brand-text">Kalorientracker</span>
 		</a>
-		<a
-			href="/profile"
-			class="topbar-profile"
-			class:active={page.url.pathname === '/profile'}
-			aria-label="Profil"
-		>
-			<Icon name="user" size={18} />
-		</a>
 	</header>
 
 	<main>
@@ -76,13 +69,21 @@
 			<Icon name="home" size={22} />
 			<span class="nav-label">Dashboard</span>
 		</a>
+		<a href="/weight" class:active={page.url.pathname === '/weight'}>
+			<Icon name="scale" size={22} />
+			<span class="nav-label">Gewicht</span>
+		</a>
 		<a href="/add" class:active={page.url.pathname === '/add'} class="add-link">
 			<span class="add-circle"><Icon name="plus" size={22} stroke={2.4} /></span>
-			<span class="nav-label">Hinzufügen</span>
+			<span class="nav-label">Neu</span>
 		</a>
 		<a href="/history" class:active={page.url.pathname === '/history'}>
 			<Icon name="history" size={22} />
 			<span class="nav-label">Verlauf</span>
+		</a>
+		<a href="/profile" class:active={page.url.pathname === '/profile'}>
+			<Icon name="user" size={22} />
+			<span class="nav-label">Profil</span>
 		</a>
 	</nav>
 </div>
@@ -173,30 +174,6 @@
 		gap: 12px;
 	}
 
-	.topbar-profile {
-		width: 38px;
-		height: 38px;
-		border-radius: 999px;
-		background: var(--surface-2);
-		color: var(--text-muted);
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		text-decoration: none;
-		flex-shrink: 0;
-		transition:
-			background 0.15s,
-			color 0.15s,
-			transform 0.15s;
-	}
-
-	.topbar-profile:hover,
-	.topbar-profile.active {
-		background: var(--brand-soft);
-		color: var(--brand-strong);
-		transform: scale(1.05);
-	}
-
 	.brand {
 		display: inline-flex;
 		align-items: center;
@@ -278,6 +255,7 @@
 		font-size: 0.68rem;
 		font-weight: 700;
 		letter-spacing: 0.01em;
+		white-space: nowrap;
 	}
 
 	.add-link {

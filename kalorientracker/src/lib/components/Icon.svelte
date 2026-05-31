@@ -101,5 +101,25 @@
 		<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
 		<path d="m16 17 5-5-5-5" />
 		<path d="M21 12H9" />
+	{:else if name === 'arrow-right'}
+		<path d="M5 12h14" />
+		<path d="m12 5 7 7-7 7" />
+	{:else if name === 'ruler'}
+		<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
+		<path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2" />
+	{:else if name === 'scale'}
+		<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+		<path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+		<path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+	{:else if name === 'activity'}
+		<path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+	{:else if name === 'trending-down'}
+		<path d="m22 17-8.5-8.5-5 5L2 7" />
+		<path d="M16 17h6v-6" />
+	{:else if name === 'trending-up'}
+		<path d="m22 7-8.5 8.5-5-5L2 17" />
+		<path d="M16 7h6v6" />
+	{:else if name === 'minus'}
+		<path d="M5 12h14" />
 	{/if}
 </svg>

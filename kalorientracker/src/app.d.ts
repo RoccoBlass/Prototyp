@@ -10,6 +10,13 @@ declare global {
 				proteinGoal: number;
 				carbsGoal: number;
 				fatGoal: number;
+				sex: 'male' | 'female' | null;
+				age: number | null;
+				height: number | null;
+				weight: number | null;
+				activityLevel: string | null;
+				goal: string | null;
+				onboarded: boolean;
 			} | null;
 		}
 	}

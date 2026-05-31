@@ -47,7 +47,15 @@ export function serializeUser(doc) {
 		calorieGoal: doc.calorieGoal ?? DEFAULT_SETTINGS.calorieGoal,
 		proteinGoal: doc.proteinGoal ?? DEFAULT_SETTINGS.proteinGoal,
 		carbsGoal: doc.carbsGoal ?? DEFAULT_SETTINGS.carbsGoal,
-		fatGoal: doc.fatGoal ?? DEFAULT_SETTINGS.fatGoal
+		fatGoal: doc.fatGoal ?? DEFAULT_SETTINGS.fatGoal,
+		// Körperdaten für die Bedarfsberechnung (null, bis das Onboarding ausgefüllt ist)
+		sex: doc.sex ?? null,
+		age: typeof doc.age === 'number' ? doc.age : null,
+		height: typeof doc.height === 'number' ? doc.height : null,
+		weight: typeof doc.weight === 'number' ? doc.weight : null,
+		activityLevel: doc.activityLevel ?? null,
+		goal: doc.goal ?? null,
+		onboarded: Boolean(doc.onboardedAt)
 	};
 }
 
