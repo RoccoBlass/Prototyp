@@ -1,14 +1,12 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { env } from '$env/dynamic/private';
+import { scaleNutrition, mealTotals } from '$lib/food.js';
 
 let client;
 let db;
 let connectPromise;
 
-/**
- * Stellt die Verbindung zur Datenbank her (einmalig, danach gecacht) und legt
- * die benötigten Indizes an. Wird von db.js und auth.js gemeinsam genutzt.
- */
+/** Verbindung herstellen (gecacht) und Indizes anlegen. */
 export async function getDb() {
 	if (db) return db;
 	if (!connectPromise) {
@@ -23,22 +21,18 @@ export async function getDb() {
 			await client.connect();
 			db = client.db('KalorienTrackerDB');
 			await Promise.all([
-				// Accounts: E-Mail muss eindeutig sein
 				db.collection('users').createIndex({ email: 1 }, { unique: true }),
-				// Sessions laufen automatisch ab (TTL-Index auf expiresAt)
 				db.collection('sessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-				// Daten werden immer pro Benutzer abgefragt
-				db.collection('mealTemplates').createIndex({ userId: 1, updatedAt: -1 }),
-				db.collection('mealTemplates').createIndex({ userId: 1, name: 1 }),
+				db.collection('foods').createIndex({ userId: 1, updatedAt: -1 }),
+				db.collection('foods').createIndex({ userId: 1, name: 1 }),
+				db.collection('meals').createIndex({ userId: 1, updatedAt: -1 }),
+				db.collection('meals').createIndex({ userId: 1, name: 1 }),
 				db.collection('entries').createIndex({ userId: 1, date: 1 }),
 				db.collection('entries').createIndex({ userId: 1, createdAt: -1 }),
-				// Gewichts-Tracker: ein Eintrag pro Benutzer und Tag
 				db.collection('weightEntries').createIndex({ userId: 1, date: 1 }, { unique: true })
 			]);
 			return db;
 		})().catch((error) => {
-			// Zurücksetzen, damit ein späterer Request es erneut versuchen kann
-			// (z. B. nachdem DB_URI in Netlify ergänzt wurde) ohne Cold Start.
 			connectPromise = undefined;
 			throw error;
 		});
@@ -46,105 +40,222 @@ export async function getDb() {
 	return connectPromise;
 }
 
-function serializeTemplate(t) {
+// --- Serialisierung ---
+
+function num(v) {
+	return typeof v === 'number' && Number.isFinite(v) ? v : 0;
+}
+
+function serializeFood(f) {
 	return {
-		_id: t._id.toString(),
-		name: t.name,
-		calories: t.calories ?? 0,
-		protein: t.protein ?? 0,
-		carbs: t.carbs ?? 0,
-		fat: t.fat ?? 0,
-		createdAt: t.createdAt ?? null,
-		updatedAt: t.updatedAt ?? null
+		_id: f._id.toString(),
+		name: f.name,
+		unit: f.unit === 'ml' ? 'ml' : 'g',
+		caloriesPer100: num(f.caloriesPer100),
+		proteinPer100: num(f.proteinPer100),
+		carbsPer100: num(f.carbsPer100),
+		fatPer100: num(f.fatPer100),
+		photo: typeof f.photo === 'string' ? f.photo : null,
+		source: f.source ?? 'custom'
+	};
+}
+
+function serializeItem(it) {
+	return {
+		foodId: it.foodId ? it.foodId.toString() : null,
+		name: it.name,
+		unit: it.unit === 'ml' ? 'ml' : 'g',
+		amount: num(it.amount),
+		caloriesPer100: num(it.caloriesPer100),
+		proteinPer100: num(it.proteinPer100),
+		carbsPer100: num(it.carbsPer100),
+		fatPer100: num(it.fatPer100)
+	};
+}
+
+function serializeMeal(m) {
+	return {
+		_id: m._id.toString(),
+		name: m.name,
+		items: Array.isArray(m.items) ? m.items.map(serializeItem) : [],
+		calories: num(m.calories),
+		protein: num(m.protein),
+		carbs: num(m.carbs),
+		fat: num(m.fat),
+		photo: typeof m.photo === 'string' ? m.photo : null
 	};
 }
 
 function serializeEntry(e) {
 	return {
 		_id: e._id.toString(),
-		templateId: e.templateId ? e.templateId.toString() : null,
+		kind: e.kind === 'meal' ? 'meal' : 'food',
 		name: e.name,
-		calories: e.calories ?? 0,
-		protein: e.protein ?? 0,
-		carbs: e.carbs ?? 0,
-		fat: e.fat ?? 0,
 		mealType: e.mealType,
-		date: e.date,
+		amount: e.amount != null ? num(e.amount) : null,
+		unit: e.unit ?? null,
+		calories: num(e.calories),
+		protein: num(e.protein),
+		carbs: num(e.carbs),
+		fat: num(e.fat),
+		items: Array.isArray(e.items) ? e.items.map(serializeItem) : [],
 		createdAt: e.createdAt ?? null
 	};
 }
 
-// --- Templates (immer pro Benutzer) ---
+// --- Lebensmittel (eigene, pro Benutzer) ---
 
-export async function getTemplates(userId) {
+export async function getFoods(userId) {
 	try {
 		const database = await getDb();
 		const docs = await database
-			.collection('mealTemplates')
+			.collection('foods')
 			.find({ userId: new ObjectId(userId) })
 			.sort({ updatedAt: -1, name: 1 })
 			.toArray();
-		return docs.map(serializeTemplate);
+		return docs.map(serializeFood);
 	} catch (error) {
-		console.error('Fehler beim Laden der Vorlagen:', error);
+		console.error('Fehler beim Laden der Lebensmittel:', error);
 		return [];
 	}
 }
 
-export async function getTemplate(userId, id) {
+export async function getFood(userId, id) {
 	try {
 		const database = await getDb();
 		const doc = await database
-			.collection('mealTemplates')
+			.collection('foods')
 			.findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
-		return doc ? serializeTemplate(doc) : null;
+		return doc ? serializeFood(doc) : null;
 	} catch (error) {
-		console.error('Fehler beim Laden der Vorlage:', error);
+		console.error('Fehler beim Laden des Lebensmittels:', error);
 		return null;
 	}
 }
 
-export async function addTemplate(userId, { name, calories, protein = 0, carbs = 0, fat = 0 }) {
+export async function addFood(userId, data) {
 	const database = await getDb();
 	const now = new Date();
-	const result = await database.collection('mealTemplates').insertOne({
+	const result = await database.collection('foods').insertOne({
 		userId: new ObjectId(userId),
-		name,
-		calories,
-		protein,
-		carbs,
-		fat,
+		name: data.name,
+		unit: data.unit === 'ml' ? 'ml' : 'g',
+		caloriesPer100: num(data.caloriesPer100),
+		proteinPer100: num(data.proteinPer100),
+		carbsPer100: num(data.carbsPer100),
+		fatPer100: num(data.fatPer100),
+		photo: typeof data.photo === 'string' ? data.photo : null,
+		source: 'custom',
 		createdAt: now,
 		updatedAt: now
 	});
 	return result.insertedId.toString();
 }
 
-export async function updateTemplate(userId, id, { name, calories, protein = 0, carbs = 0, fat = 0 }) {
+export async function updateFood(userId, id, data) {
 	const database = await getDb();
-	await database.collection('mealTemplates').updateOne(
-		{ _id: new ObjectId(id), userId: new ObjectId(userId) },
-		{
-			$set: {
-				name,
-				calories,
-				protein,
-				carbs,
-				fat,
-				updatedAt: new Date()
-			}
-		}
-	);
+	const set = {
+		name: data.name,
+		unit: data.unit === 'ml' ? 'ml' : 'g',
+		caloriesPer100: num(data.caloriesPer100),
+		proteinPer100: num(data.proteinPer100),
+		carbsPer100: num(data.carbsPer100),
+		fatPer100: num(data.fatPer100),
+		updatedAt: new Date()
+	};
+	// Foto nur überschreiben, wenn ein neues mitkommt (oder explizit entfernt wird)
+	if (data.photo !== undefined) {
+		set.photo = typeof data.photo === 'string' ? data.photo : null;
+	}
+	await database
+		.collection('foods')
+		.updateOne({ _id: new ObjectId(id), userId: new ObjectId(userId) }, { $set: set });
 }
 
-export async function deleteTemplate(userId, id) {
+export async function deleteFood(userId, id) {
 	const database = await getDb();
 	await database
-		.collection('mealTemplates')
+		.collection('foods')
 		.deleteOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
 }
 
-// --- Entries (immer pro Benutzer) ---
+// --- Mahlzeiten (eigene, pro Benutzer; aus mehreren Lebensmitteln) ---
+
+function normalizeItems(items) {
+	return (Array.isArray(items) ? items : []).map((it) => ({
+		foodId: it.foodId && /^[a-f0-9]{24}$/i.test(String(it.foodId)) ? new ObjectId(it.foodId) : null,
+		name: String(it.name ?? '').slice(0, 120),
+		unit: it.unit === 'ml' ? 'ml' : 'g',
+		amount: num(it.amount),
+		caloriesPer100: num(it.caloriesPer100),
+		proteinPer100: num(it.proteinPer100),
+		carbsPer100: num(it.carbsPer100),
+		fatPer100: num(it.fatPer100)
+	}));
+}
+
+export async function getMeals(userId) {
+	try {
+		const database = await getDb();
+		const docs = await database
+			.collection('meals')
+			.find({ userId: new ObjectId(userId) })
+			.sort({ updatedAt: -1, name: 1 })
+			.toArray();
+		return docs.map(serializeMeal);
+	} catch (error) {
+		console.error('Fehler beim Laden der Mahlzeiten:', error);
+		return [];
+	}
+}
+
+export async function getMeal(userId, id) {
+	try {
+		const database = await getDb();
+		const doc = await database
+			.collection('meals')
+			.findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
+		return doc ? serializeMeal(doc) : null;
+	} catch (error) {
+		console.error('Fehler beim Laden der Mahlzeit:', error);
+		return null;
+	}
+}
+
+export async function addMeal(userId, { name, items }) {
+	const database = await getDb();
+	const normalized = normalizeItems(items);
+	const totals = mealTotals(normalized);
+	const now = new Date();
+	const result = await database.collection('meals').insertOne({
+		userId: new ObjectId(userId),
+		name,
+		items: normalized,
+		...totals,
+		createdAt: now,
+		updatedAt: now
+	});
+	return result.insertedId.toString();
+}
+
+export async function updateMeal(userId, id, { name, items }) {
+	const database = await getDb();
+	const normalized = normalizeItems(items);
+	const totals = mealTotals(normalized);
+	await database.collection('meals').updateOne(
+		{ _id: new ObjectId(id), userId: new ObjectId(userId) },
+		{ $set: { name, items: normalized, ...totals, updatedAt: new Date() } }
+	);
+}
+
+export async function deleteMeal(userId, id) {
+	const database = await getDb();
+	await database
+		.collection('meals')
+		.deleteOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
+}
+
+// --- Tageseinträge (Lebensmittel oder Mahlzeit) ---
 
 export async function getEntriesByDate(userId, date) {
 	try {
@@ -161,29 +272,46 @@ export async function getEntriesByDate(userId, date) {
 	}
 }
 
-export async function addEntryFromTemplate(userId, { templateId, mealType, date }) {
+export async function addFoodEntry(userId, { date, mealType, foodId, name, unit, amount, caloriesPer100, proteinPer100, carbsPer100, fatPer100 }) {
 	const database = await getDb();
-	const tpl = await database
-		.collection('mealTemplates')
-		.findOne({ _id: new ObjectId(templateId), userId: new ObjectId(userId) });
-	if (!tpl) {
-		throw new Error('Vorlage nicht gefunden');
-	}
+	const per100 = { caloriesPer100, proteinPer100, carbsPer100, fatPer100 };
+	const nutrition = scaleNutrition(per100, amount);
 	await database.collection('entries').insertOne({
 		userId: new ObjectId(userId),
-		templateId: tpl._id,
-		name: tpl.name,
-		calories: tpl.calories ?? 0,
-		protein: tpl.protein ?? 0,
-		carbs: tpl.carbs ?? 0,
-		fat: tpl.fat ?? 0,
+		kind: 'food',
+		foodId: foodId && /^[a-f0-9]{24}$/i.test(String(foodId)) ? new ObjectId(foodId) : null,
+		name,
+		unit: unit === 'ml' ? 'ml' : 'g',
+		amount: num(amount),
+		...nutrition,
 		mealType,
 		date,
 		createdAt: new Date()
 	});
-	await database
-		.collection('mealTemplates')
-		.updateOne({ _id: tpl._id }, { $set: { updatedAt: new Date() } });
+}
+
+export async function addMealEntry(userId, { date, mealType, mealId }) {
+	const database = await getDb();
+	const meal = await database
+		.collection('meals')
+		.findOne({ _id: new ObjectId(mealId), userId: new ObjectId(userId) });
+	if (!meal) {
+		throw new Error('Mahlzeit nicht gefunden');
+	}
+	await database.collection('entries').insertOne({
+		userId: new ObjectId(userId),
+		kind: 'meal',
+		mealId: meal._id,
+		name: meal.name,
+		items: Array.isArray(meal.items) ? meal.items : [],
+		calories: num(meal.calories),
+		protein: num(meal.protein),
+		carbs: num(meal.carbs),
+		fat: num(meal.fat),
+		mealType,
+		date,
+		createdAt: new Date()
+	});
 }
 
 export async function deleteEntry(userId, id) {
@@ -203,11 +331,6 @@ export const DEFAULT_SETTINGS = {
 	fatGoal: 70
 };
 
-/**
- * Schreibt die übergebenen Felder ans Benutzer-Dokument (z. B. Name, Körperdaten,
- * berechnete Ziele, onboardedAt). Die Felder werden vom Aufrufer serverseitig
- * validiert und explizit zusammengestellt.
- */
 export async function saveProfile(userId, fields) {
 	const database = await getDb();
 	await database.collection('users').updateOne(
@@ -249,7 +372,6 @@ export async function deleteWeight(userId, date) {
 		.deleteOne({ userId: new ObjectId(userId), date });
 }
 
-/** Jüngstes getracktes Gewicht (für „Ziel mit aktuellem Gewicht neu berechnen"). */
 export async function getLatestWeight(userId) {
 	try {
 		const database = await getDb();

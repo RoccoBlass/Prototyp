@@ -1,5 +1,6 @@
-import { getTemplates, addEntryFromTemplate } from '$lib/server/db.js';
-import { redirect, fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
+import { getMeals, getFoods, addMealEntry, addFoodEntry } from '$lib/server/db.js';
+import { MEAL_TYPE_VALUES } from '$lib/food.js';
 
 function getLocalDateStr() {
 	const d = new Date();
@@ -7,34 +8,79 @@ function getLocalDateStr() {
 }
 
 export async function load({ locals }) {
-	const templates = await getTemplates(locals.user.id);
-	return { templates };
+	const [meals, foods] = await Promise.all([
+		getMeals(locals.user.id),
+		getFoods(locals.user.id)
+	]);
+	return { meals, foods };
 }
 
 export const actions = {
-	log: async ({ request, locals }) => {
+	logMeal: async ({ request, locals }) => {
 		const data = await request.formData();
-		const templateId = data.get('templateId');
-		const mealType = data.get('mealType');
+		const mealId = data.get('mealId');
+		const mealType = String(data.get('mealType') ?? '');
 
-		if (!templateId) {
-			return fail(400, { error: 'Bitte eine Vorlage auswählen.' });
+		if (!mealId) {
+			return fail(400, { error: 'Bitte eine Mahlzeit wählen.' });
 		}
-		if (!mealType) {
+		if (!MEAL_TYPE_VALUES.includes(mealType)) {
 			return fail(400, { error: 'Bitte einen Mahlzeitentyp wählen.' });
 		}
 
 		try {
-			await addEntryFromTemplate(locals.user.id, {
-				templateId,
-				mealType,
-				date: getLocalDateStr()
-			});
+			await addMealEntry(locals.user.id, { date: getLocalDateStr(), mealType, mealId });
 		} catch (error) {
-			console.error(error);
+			console.error('Mahlzeit erfassen fehlgeschlagen:', error);
 			return fail(500, { error: 'Fehler beim Erfassen. Bitte erneut versuchen.' });
 		}
+		redirect(303, '/?success=1');
+	},
 
+	logFood: async ({ request, locals }) => {
+		const data = await request.formData();
+		const mealType = String(data.get('mealType') ?? '');
+		const name = String(data.get('name') ?? '')
+			.trim()
+			.slice(0, 120);
+		const unit = data.get('unit') === 'ml' ? 'ml' : 'g';
+		const amount = Number(data.get('amount'));
+		const foodId = data.get('foodId');
+		const caloriesPer100 = Number(data.get('caloriesPer100'));
+		const proteinPer100 = Number(data.get('proteinPer100'));
+		const carbsPer100 = Number(data.get('carbsPer100'));
+		const fatPer100 = Number(data.get('fatPer100'));
+
+		if (!name) {
+			return fail(400, { error: 'Lebensmittel fehlt.' });
+		}
+		if (!MEAL_TYPE_VALUES.includes(mealType)) {
+			return fail(400, { error: 'Bitte einen Mahlzeitentyp wählen.' });
+		}
+		if (!Number.isFinite(amount) || amount <= 0 || amount > 5000) {
+			return fail(400, { error: 'Bitte eine gültige Menge angeben.' });
+		}
+		if (![caloriesPer100, proteinPer100, carbsPer100, fatPer100].every(Number.isFinite)) {
+			return fail(400, { error: 'Nährwerte fehlen.' });
+		}
+
+		try {
+			await addFoodEntry(locals.user.id, {
+				date: getLocalDateStr(),
+				mealType,
+				foodId: typeof foodId === 'string' ? foodId : null,
+				name,
+				unit,
+				amount,
+				caloriesPer100,
+				proteinPer100,
+				carbsPer100,
+				fatPer100
+			});
+		} catch (error) {
+			console.error('Lebensmittel erfassen fehlgeschlagen:', error);
+			return fail(500, { error: 'Fehler beim Erfassen. Bitte erneut versuchen.' });
+		}
 		redirect(303, '/?success=1');
 	}
 };

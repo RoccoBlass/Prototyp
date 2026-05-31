@@ -1,41 +1,99 @@
 <script>
+	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
+	import { MEAL_TYPES, defaultMealType } from '$lib/food.js';
 
 	let { data, form } = $props();
 
-	const mealTypes = [
-		{ value: 'fruehstueck', label: 'Frühstück', icon: 'sunrise' },
-		{ value: 'mittagessen', label: 'Mittagessen', icon: 'sun' },
-		{ value: 'abendessen', label: 'Abendessen', icon: 'moon' },
-		{ value: 'snack', label: 'Snack', icon: 'cookie' }
-	];
+	let selectedType = $state(defaultMealType(new Date().getHours()));
+	let tab = $state(page.url.searchParams.get('tab') === 'foods' ? 'foods' : 'meals');
 
-	function defaultMealType() {
-		const hour = new Date().getHours();
-		if (hour < 10) return 'fruehstueck';
-		if (hour < 14) return 'mittagessen';
-		if (hour < 17) return 'snack';
-		return 'abendessen';
+	let mealQuery = $state('');
+	let foodQuery = $state('');
+
+	let offQuery = $state('');
+	let offResults = $state([]);
+	let offSearching = $state(false);
+	let offError = $state('');
+	let offTimer;
+
+	const filteredMeals = $derived.by(() => {
+		const q = mealQuery.trim().toLowerCase();
+		return q ? data.meals.filter((m) => m.name.toLowerCase().includes(q)) : data.meals;
+	});
+
+	const filteredFoods = $derived.by(() => {
+		const q = foodQuery.trim().toLowerCase();
+		return q ? data.foods.filter((f) => f.name.toLowerCase().includes(q)) : data.foods;
+	});
+
+	async function runOff() {
+		const q = offQuery.trim();
+		if (q.length < 2) {
+			offResults = [];
+			return;
+		}
+		offSearching = true;
+		offError = '';
+		try {
+			const res = await fetch(`/api/food-search?q=${encodeURIComponent(q)}`);
+			if (!res.ok) throw new Error('failed');
+			offResults = (await res.json()).results ?? [];
+		} catch {
+			offError = 'Suche fehlgeschlagen. Bitte erneut versuchen.';
+			offResults = [];
+		} finally {
+			offSearching = false;
+		}
 	}
 
-	let selectedType = $state(defaultMealType());
-	let query = $state('');
-
-	const filtered = $derived.by(() => {
-		const q = query.trim().toLowerCase();
-		if (!q) return data.templates;
-		return data.templates.filter((t) => t.name.toLowerCase().includes(q));
-	});
+	function onOff() {
+		clearTimeout(offTimer);
+		offTimer = setTimeout(runOff, 400);
+	}
 </script>
+
+{#snippet foodAddRow(food, editHref)}
+	<li class="food-row">
+		<form method="POST" action="?/logFood" class="food-add">
+			<input type="hidden" name="mealType" value={selectedType} />
+			<input type="hidden" name="foodId" value={food._id ?? ''} />
+			<input type="hidden" name="name" value={food.name} />
+			<input type="hidden" name="unit" value={food.unit} />
+			<input type="hidden" name="caloriesPer100" value={food.caloriesPer100} />
+			<input type="hidden" name="proteinPer100" value={food.proteinPer100} />
+			<input type="hidden" name="carbsPer100" value={food.carbsPer100} />
+			<input type="hidden" name="fatPer100" value={food.fatPer100} />
+
+			{#if food.photo}
+				<img class="thumb" src={food.photo} alt="" />
+			{/if}
+			<div class="food-main">
+				<span class="food-name">{food.name}</span>
+				<span class="food-meta">{food.caloriesPer100} kcal / 100 {food.unit}</span>
+			</div>
+			<div class="food-amount">
+				<input class="amount" type="number" name="amount" inputmode="decimal" min="1" max="5000" value="100" aria-label="Menge" />
+				<span class="amount-unit">{food.unit}</span>
+			</div>
+			<button type="submit" class="add-pill" aria-label="Hinzufügen">
+				<Icon name="plus" size={16} stroke={2.4} />
+			</button>
+		</form>
+		{#if editHref}
+			<a href={editHref} class="row-edit" aria-label="Bearbeiten"><Icon name="pencil" size={15} /></a>
+		{/if}
+	</li>
+{/snippet}
 
 <div class="add-page">
 	<div class="page-header">
-		<h1>Mahlzeit erfassen</h1>
-		<p class="subtitle">Wähle eine Vorlage aus deiner Liste oder lege eine neue an.</p>
+		<h1>Hinzufügen</h1>
+		<p class="subtitle">Erfasse eine Mahlzeit oder ein einzelnes Lebensmittel.</p>
 	</div>
 
 	{#if form?.error}
-		<div class="error-banner" role="alert">
+		<div class="alert" role="alert">
 			<Icon name="alert" size={18} />
 			<span>{form.error}</span>
 		</div>
@@ -43,15 +101,13 @@
 
 	<section class="card type-card">
 		<span class="card-label">Mahlzeitentyp</span>
-		<div class="type-grid" role="radiogroup" aria-label="Mahlzeitentyp">
-			{#each mealTypes as type (type.value)}
+		<div class="type-grid">
+			{#each MEAL_TYPES as type (type.value)}
 				<button
 					type="button"
 					class="type-option"
 					class:selected={selectedType === type.value}
 					onclick={() => (selectedType = type.value)}
-					role="radio"
-					aria-checked={selectedType === type.value}
 				>
 					<span class="type-icon"><Icon name={type.icon} size={18} /></span>
 					<span class="type-label">{type.label}</span>
@@ -60,87 +116,124 @@
 		</div>
 	</section>
 
-	<section class="library">
-		<header class="library-header">
-			<div>
-				<h2>Deine Vorlagen</h2>
-				<span class="count">{data.templates.length}</span>
-			</div>
-			<a href="/add/new?mealType={selectedType}" class="new-btn">
-				<Icon name="plus" size={16} stroke={2.4} />
-				<span>Neue Vorlage</span>
-			</a>
-		</header>
+	<div class="tabs">
+		<button type="button" class="tab" class:active={tab === 'meals'} onclick={() => (tab = 'meals')}>
+			Mahlzeiten
+		</button>
+		<button type="button" class="tab" class:active={tab === 'foods'} onclick={() => (tab = 'foods')}>
+			Lebensmittel
+		</button>
+	</div>
 
-		{#if data.templates.length > 0}
-			<div class="search">
-				<input
-					type="search"
-					placeholder="Vorlage suchen..."
-					bind:value={query}
-					autocomplete="off"
-				/>
-			</div>
-		{/if}
-
-		{#if data.templates.length === 0}
-			<div class="empty-state">
-				<span class="empty-icon"><Icon name="utensils" size={28} /></span>
-				<p class="empty-title">Noch keine Vorlagen</p>
-				<p class="empty-text">
-					Lege deine erste Mahlzeitenvorlage an. Du kannst sie später jederzeit erneut auswählen.
-				</p>
-				<a href="/add/new?mealType={selectedType}" class="cta-btn">
+	{#if tab === 'meals'}
+		<section class="panel">
+			<header class="panel-head">
+				<h2>Deine Mahlzeiten <span class="count">{data.meals.length}</span></h2>
+				<a href="/add/meal/new" class="new-btn">
 					<Icon name="plus" size={16} stroke={2.4} />
-					<span>Erste Vorlage anlegen</span>
+					<span>Neue Mahlzeit</span>
 				</a>
-			</div>
-		{:else if filtered.length === 0}
-			<p class="no-match">Keine Vorlage für „{query}" gefunden.</p>
-		{:else}
-			<ul class="template-list">
-				{#each filtered as tpl (tpl._id)}
-					<li class="template-row">
-						<form method="POST" action="?/log" class="log-form">
-							<input type="hidden" name="templateId" value={tpl._id} />
-							<input type="hidden" name="mealType" value={selectedType} />
-							<button type="submit" class="template-card" aria-label="{tpl.name} hinzufügen">
-								<div class="tpl-main">
-									<span class="tpl-name">{tpl.name}</span>
-									<div class="tpl-macros">
-										{#if tpl.protein}<span class="macro p">P {tpl.protein}g</span>{/if}
-										{#if tpl.carbs}<span class="macro c">K {tpl.carbs}g</span>{/if}
-										{#if tpl.fat}<span class="macro f">F {tpl.fat}g</span>{/if}
+			</header>
+
+			{#if data.meals.length === 0}
+				<div class="empty-state">
+					<span class="empty-icon"><Icon name="utensils" size={26} /></span>
+					<p class="empty-title">Noch keine Mahlzeiten</p>
+					<p class="empty-text">Stelle eine Mahlzeit aus mehreren Lebensmitteln zusammen.</p>
+					<a href="/add/meal/new" class="cta-btn">
+						<Icon name="plus" size={16} stroke={2.4} />
+						<span>Erste Mahlzeit erstellen</span>
+					</a>
+				</div>
+			{:else}
+				{#if data.meals.length > 3}
+					<input class="search" type="search" placeholder="Mahlzeit suchen…" bind:value={mealQuery} />
+				{/if}
+				<ul class="meal-list">
+					{#each filteredMeals as meal (meal._id)}
+						<li class="meal-row">
+							<form method="POST" action="?/logMeal" class="meal-log">
+								<input type="hidden" name="mealId" value={meal._id} />
+								<input type="hidden" name="mealType" value={selectedType} />
+								<button type="submit" class="meal-card" aria-label="{meal.name} hinzufügen">
+									<div class="meal-main">
+										<span class="meal-name">{meal.name}</span>
+										<div class="meal-macros">
+											<span class="macro p">P {meal.protein}g</span>
+											<span class="macro c">K {meal.carbs}g</span>
+											<span class="macro f">F {meal.fat}g</span>
+											<span class="meal-items">· {meal.items.length} Zutaten</span>
+										</div>
 									</div>
-								</div>
-								<div class="tpl-right">
-									<span class="tpl-cal">{tpl.calories}<small>kcal</small></span>
-									<span class="add-pill"><Icon name="plus" size={16} stroke={2.4} /></span>
-								</div>
-							</button>
-						</form>
-						<a
-							href="/add/edit/{tpl._id}"
-							class="edit-btn"
-							aria-label="{tpl.name} bearbeiten"
-						>
-							<Icon name="pencil" size={16} />
-						</a>
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	</section>
+									<div class="meal-right">
+										<span class="meal-cal">{meal.calories}<small>kcal</small></span>
+										<span class="add-pill"><Icon name="plus" size={16} stroke={2.4} /></span>
+									</div>
+								</button>
+							</form>
+							<a href="/add/meal/{meal._id}" class="row-edit" aria-label="Bearbeiten"><Icon name="pencil" size={15} /></a>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</section>
+	{:else}
+		<section class="panel">
+			<header class="panel-head">
+				<h2>Lebensmittel suchen</h2>
+				<a href="/add/food/new" class="new-btn">
+					<Icon name="plus" size={16} stroke={2.4} />
+					<span>Neues Lebensmittel</span>
+				</a>
+			</header>
+
+			<input
+				class="search"
+				type="search"
+				placeholder="In Open Food Facts suchen (z. B. Banane)…"
+				bind:value={offQuery}
+				oninput={onOff}
+			/>
+
+			{#if offSearching}
+				<p class="hint">Suche läuft…</p>
+			{:else if offError}
+				<p class="hint err">{offError}</p>
+			{:else if offResults.length}
+				<ul class="food-list">
+					{#each offResults as r (r.offId ?? r.name)}
+						{@render foodAddRow(r, null)}
+					{/each}
+				</ul>
+			{:else if offQuery.trim().length >= 2}
+				<p class="hint">Keine Treffer.</p>
+			{/if}
+
+			<header class="panel-head sub">
+				<h2>Deine Lebensmittel <span class="count">{data.foods.length}</span></h2>
+			</header>
+
+			{#if data.foods.length === 0}
+				<p class="hint">Noch keine eigenen Lebensmittel. Lege oben eines an.</p>
+			{:else}
+				{#if data.foods.length > 4}
+					<input class="search" type="search" placeholder="Eigene Lebensmittel filtern…" bind:value={foodQuery} />
+				{/if}
+				<ul class="food-list">
+					{#each filteredFoods as f (f._id)}
+						{@render foodAddRow(f, `/add/food/${f._id}`)}
+					{/each}
+				</ul>
+			{/if}
+		</section>
+	{/if}
 </div>
 
 <style>
 	.add-page {
 		display: flex;
 		flex-direction: column;
-	}
-
-	.page-header {
-		margin-bottom: 18px;
+		gap: 16px;
 	}
 
 	.page-header h1 {
@@ -157,17 +250,16 @@
 		margin: 0;
 	}
 
-	.error-banner {
+	.alert {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 10px;
 		background: var(--danger-soft);
 		color: #b91c1c;
 		padding: 12px 14px;
-		border-radius: var(--radius-sm);
-		margin-bottom: 14px;
-		font-size: 0.88rem;
-		font-weight: 500;
+		border-radius: 13px;
+		font-size: 0.86rem;
+		font-weight: 600;
 		border: 1px solid #fecaca;
 	}
 
@@ -183,14 +275,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		margin-bottom: 16px;
 	}
 
 	.card-label {
 		font-size: 0.85rem;
 		font-weight: 700;
 		color: var(--text);
-		letter-spacing: -0.01em;
 	}
 
 	.type-grid {
@@ -203,7 +293,7 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 13px 14px;
+		padding: 12px 14px;
 		border: 1.5px solid transparent;
 		border-radius: 14px;
 		background: var(--surface-2);
@@ -212,19 +302,8 @@
 		font-weight: 650;
 		color: var(--text);
 		text-align: left;
-		transition:
-			border-color 0.15s,
-			background 0.15s,
-			color 0.15s,
-			transform 0.12s;
-	}
-
-	.type-option:hover {
-		background: var(--border);
-	}
-
-	.type-option:active {
-		transform: scale(0.97);
+		font-family: inherit;
+		transition: border-color 0.15s, background 0.15s, color 0.15s;
 	}
 
 	.type-option.selected {
@@ -243,34 +322,59 @@
 		color: var(--brand);
 	}
 
-	.library {
+	.tabs {
+		display: flex;
+		gap: 4px;
+		padding: 5px;
+		background: var(--surface-2);
+		border-radius: 14px;
+	}
+
+	.tab {
+		flex: 1;
+		padding: 11px;
+		border: none;
+		border-radius: 10px;
+		background: transparent;
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		font-weight: 700;
+		font-family: inherit;
+		cursor: pointer;
+		transition: background 0.18s, color 0.18s;
+	}
+
+	.tab.active {
+		background: var(--surface);
+		color: var(--brand-strong);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.panel {
 		display: flex;
 		flex-direction: column;
 		gap: 12px;
 	}
 
-	.library-header {
+	.panel-head {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		gap: 10px;
 	}
 
-	.library-header h2 {
+	.panel-head.sub {
+		margin-top: 6px;
+	}
+
+	.panel-head h2 {
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
 		font-size: 0.95rem;
 		font-weight: 750;
 		color: var(--text);
-		letter-spacing: -0.01em;
 		margin: 0;
-	}
-
-	.library-header > div {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
 	}
 
 	.count {
@@ -294,109 +398,45 @@
 		font-size: 0.82rem;
 		font-weight: 700;
 		box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-		transition:
-			transform 0.15s ease,
-			box-shadow 0.15s ease;
+		flex-shrink: 0;
 	}
 
-	.new-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 18px rgba(22, 163, 74, 0.4);
-	}
-
-	.search input {
+	.search {
 		width: 100%;
-		padding: 14px 16px;
+		padding: 13px 15px;
 		border: 1.5px solid transparent;
-		border-radius: 14px;
+		border-radius: 13px;
 		font-size: 0.95rem;
 		font-weight: 500;
 		font-family: inherit;
 		background: var(--surface-2);
 		color: var(--text);
 		outline: none;
-		transition:
-			border-color 0.18s,
-			background 0.18s,
-			box-shadow 0.18s;
 		-webkit-appearance: none;
+		transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
 	}
 
-	.search input:focus {
+	.search:focus {
 		background: var(--surface);
 		border-color: var(--brand);
 		box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.14);
 	}
 
-	.no-match {
+	.hint {
+		font-size: 0.85rem;
+		color: var(--text-subtle);
 		text-align: center;
-		font-size: 0.88rem;
-		color: var(--text-muted);
-		padding: 24px 12px;
+		padding: 10px 0;
 		margin: 0;
 	}
 
-	.empty-state {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		text-align: center;
-		padding: 44px 20px;
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow-sm);
+	.hint.err {
+		color: var(--danger);
 	}
 
-	.empty-icon {
-		width: 64px;
-		height: 64px;
-		border-radius: 20px;
-		background: var(--brand-soft);
-		color: var(--brand-strong);
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 16px;
-	}
-
-	.empty-title {
-		margin: 0 0 4px;
-		font-size: 1rem;
-		font-weight: 700;
-		color: var(--text);
-	}
-
-	.empty-text {
-		margin: 0 0 18px;
-		font-size: 0.88rem;
-		color: var(--text-muted);
-		max-width: 32ch;
-	}
-
-	.cta-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 7px;
-		background: var(--brand-gradient);
-		color: white;
-		text-decoration: none;
-		padding: 13px 22px;
-		border-radius: 14px;
-		font-weight: 700;
-		font-size: 0.92rem;
-		box-shadow: 0 6px 16px rgba(22, 163, 74, 0.32);
-		transition:
-			transform 0.15s ease,
-			box-shadow 0.15s ease;
-	}
-
-	.cta-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 10px 22px rgba(22, 163, 74, 0.4);
-	}
-
-	.template-list {
+	/* Meal list */
+	.meal-list,
+	.food-list {
 		list-style: none;
 		padding: 0;
 		margin: 0;
@@ -405,20 +445,26 @@
 		gap: 8px;
 	}
 
-	.template-row {
+	.meal-row,
+	.food-row {
 		position: relative;
+		display: flex;
+		align-items: stretch;
+		gap: 6px;
 	}
 
-	.log-form {
+	.meal-log {
+		flex: 1;
+		min-width: 0;
 		margin: 0;
 	}
 
-	.template-card {
+	.meal-card {
 		width: 100%;
 		display: flex;
 		align-items: center;
-		gap: 14px;
-		padding: 12px 56px 12px 14px;
+		gap: 12px;
+		padding: 12px 14px;
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
@@ -427,23 +473,15 @@
 		font: inherit;
 		text-align: left;
 		color: var(--text);
-		transition:
-			border-color 0.15s,
-			transform 0.05s,
-			box-shadow 0.15s;
+		transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
 	}
 
-	.template-card:hover {
+	.meal-card:hover {
 		border-color: var(--brand);
 		box-shadow: 0 8px 20px rgba(22, 163, 74, 0.12);
-		transform: translateY(-2px);
 	}
 
-	.template-card:active {
-		transform: scale(0.995);
-	}
-
-	.tpl-main {
+	.meal-main {
 		flex: 1;
 		min-width: 0;
 		display: flex;
@@ -451,20 +489,26 @@
 		gap: 4px;
 	}
 
-	.tpl-name {
+	.meal-name {
 		font-size: 0.95rem;
-		font-weight: 600;
+		font-weight: 650;
 		color: var(--text);
-		letter-spacing: -0.01em;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	.tpl-macros {
+	.meal-macros {
 		display: flex;
 		gap: 5px;
 		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.meal-items {
+		font-size: 0.72rem;
+		color: var(--text-subtle);
+		font-weight: 600;
 	}
 
 	.macro {
@@ -489,73 +533,199 @@
 		color: var(--fat);
 	}
 
-	.tpl-right {
+	.meal-right {
 		display: flex;
 		align-items: center;
 		gap: 10px;
 		flex-shrink: 0;
 	}
 
-	.tpl-cal {
+	.meal-cal {
 		font-size: 1rem;
 		font-weight: 800;
 		color: var(--text);
-		letter-spacing: -0.02em;
 		display: inline-flex;
 		align-items: baseline;
 		gap: 3px;
 		white-space: nowrap;
 	}
 
-	.tpl-cal small {
+	.meal-cal small {
 		font-size: 0.65rem;
 		color: var(--text-subtle);
 		font-weight: 600;
 	}
 
+	/* Food add rows */
+	.food-add {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 12px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-sm);
+		margin: 0;
+	}
+
+	.thumb {
+		width: 36px;
+		height: 36px;
+		border-radius: 9px;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+
+	.food-main {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.food-name {
+		font-size: 0.9rem;
+		font-weight: 650;
+		color: var(--text);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.food-meta {
+		font-size: 0.74rem;
+		color: var(--text-muted);
+		font-weight: 600;
+	}
+
+	.food-amount {
+		position: relative;
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.amount {
+		width: 72px;
+		padding: 9px 28px 9px 10px;
+		border: 1.5px solid var(--border);
+		border-radius: 10px;
+		font-size: 0.88rem;
+		font-weight: 700;
+		font-family: inherit;
+		background: var(--surface-2);
+		color: var(--text);
+		outline: none;
+		-webkit-appearance: none;
+	}
+
+	.amount:focus {
+		border-color: var(--brand);
+		background: var(--surface);
+	}
+
+	.amount-unit {
+		position: absolute;
+		right: 9px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--text-subtle);
+		pointer-events: none;
+	}
+
 	.add-pill {
-		width: 30px;
-		height: 30px;
+		width: 34px;
+		height: 34px;
 		border-radius: 999px;
 		background: var(--brand-soft);
 		color: var(--brand-strong);
+		border: none;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		transition:
-			background 0.15s,
-			color 0.15s;
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
 	}
 
-	.template-card:hover .add-pill {
+	.add-pill:hover {
 		background: var(--brand);
 		color: white;
 	}
 
-	.edit-btn {
-		position: absolute;
-		top: 50%;
-		right: 12px;
-		transform: translateY(-50%);
-		width: 30px;
-		height: 30px;
-		border-radius: 8px;
+	.row-edit {
+		flex-shrink: 0;
+		width: 34px;
+		border-radius: 10px;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		color: var(--text-subtle);
 		text-decoration: none;
-		transition:
-			background 0.15s,
-			color 0.15s;
-		background: transparent;
-		z-index: 1;
+		background: var(--surface-2);
+		transition: background 0.15s, color 0.15s;
 	}
 
-	.edit-btn:hover {
-		background: var(--surface-2);
+	.row-edit:hover {
+		background: var(--border);
 		color: var(--text);
+	}
+
+	/* Empty state */
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		padding: 38px 20px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.empty-icon {
+		width: 60px;
+		height: 60px;
+		border-radius: 18px;
+		background: var(--brand-soft);
+		color: var(--brand-strong);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 14px;
+	}
+
+	.empty-title {
+		margin: 0 0 4px;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--text);
+	}
+
+	.empty-text {
+		margin: 0 0 16px;
+		font-size: 0.88rem;
+		color: var(--text-muted);
+		max-width: 32ch;
+	}
+
+	.cta-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		background: var(--brand-gradient);
+		color: white;
+		text-decoration: none;
+		padding: 12px 20px;
+		border-radius: 14px;
+		font-weight: 700;
+		font-size: 0.9rem;
+		box-shadow: 0 6px 16px rgba(22, 163, 74, 0.32);
 	}
 
 	@media (min-width: 900px) {
@@ -563,16 +733,8 @@
 			font-size: 1.7rem;
 		}
 
-		.subtitle {
-			font-size: 0.95rem;
-		}
-
 		.type-grid {
 			grid-template-columns: repeat(4, 1fr);
-		}
-
-		.template-card {
-			padding: 14px 56px 14px 18px;
 		}
 	}
 </style>

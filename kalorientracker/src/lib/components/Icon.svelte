@@ -121,5 +121,7 @@
 		<path d="M16 7h6v6" />
 	{:else if name === 'minus'}
 		<path d="M5 12h14" />
+	{:else if name === 'chevron-down'}
+		<path d="m6 9 6 6 6-6" />
 	{/if}
 </svg>
