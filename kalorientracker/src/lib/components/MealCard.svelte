@@ -19,16 +19,16 @@
 		snack: 'Snack'
 	};
 	const typeColor = {
-		fruehstueck: '#f59e0b',
-		mittagessen: '#f97316',
-		abendessen: '#6366f1',
-		snack: '#ec4899'
+		fruehstueck: 'var(--type-breakfast)',
+		mittagessen: 'var(--type-lunch)',
+		abendessen: 'var(--type-dinner)',
+		snack: 'var(--type-snack)'
 	};
 	const typeSoft = {
-		fruehstueck: '#fef3c7',
-		mittagessen: '#ffedd5',
-		abendessen: '#e0e7ff',
-		snack: '#fce7f3'
+		fruehstueck: 'var(--type-breakfast-soft)',
+		mittagessen: 'var(--type-lunch-soft)',
+		abendessen: 'var(--type-dinner-soft)',
+		snack: 'var(--type-snack-soft)'
 	};
 
 	const itemCount = $derived(meal.items?.length ?? 0);
@@ -50,8 +50,8 @@
 	<div class="meal-head">
 		<span
 			class="meal-icon"
-			style:--c={typeColor[meal.mealType] ?? '#94a3b8'}
-			style:--s={typeSoft[meal.mealType] ?? '#f1f5f9'}
+			style:--c={typeColor[meal.mealType] ?? 'var(--text-subtle)'}
+			style:--s={typeSoft[meal.mealType] ?? 'var(--surface-2)'}
 		>
 			<Icon name={typeIcons[meal.mealType] ?? 'utensils'} size={18} />
 		</span>

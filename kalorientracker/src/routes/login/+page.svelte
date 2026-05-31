@@ -211,8 +211,8 @@
 	.auth-card {
 		width: 100%;
 		max-width: 420px;
-		background: rgba(255, 255, 255, 0.97);
-		border: 1px solid rgba(255, 255, 255, 0.6);
+		background: var(--surface);
+		border: 1px solid var(--border);
 		border-radius: var(--radius-lg);
 		padding: var(--space-8) var(--space-6) var(--space-6);
 		box-shadow: 0 24px 60px rgba(8, 40, 22, 0.32);

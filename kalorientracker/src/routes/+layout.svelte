@@ -106,7 +106,7 @@
 
 	/* Top bar (mobile only) */
 	.topbar {
-		background: rgba(255, 255, 255, 0.78);
+		background: var(--glass);
 		backdrop-filter: saturate(180%) blur(14px);
 		-webkit-backdrop-filter: saturate(180%) blur(14px);
 		border-bottom: 1px solid var(--border);
@@ -169,7 +169,7 @@
 		bottom: calc(14px + env(safe-area-inset-bottom, 0));
 		left: 16px;
 		right: 16px;
-		background: rgba(255, 255, 255, 0.85);
+		background: var(--glass);
 		backdrop-filter: saturate(180%) blur(16px);
 		-webkit-backdrop-filter: saturate(180%) blur(16px);
 		border: 1px solid var(--border);
