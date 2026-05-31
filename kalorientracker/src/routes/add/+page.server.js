@@ -6,13 +6,13 @@ function getLocalDateStr() {
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export async function load() {
-	const templates = await getTemplates();
+export async function load({ locals }) {
+	const templates = await getTemplates(locals.user.id);
 	return { templates };
 }
 
 export const actions = {
-	log: async ({ request }) => {
+	log: async ({ request, locals }) => {
 		const data = await request.formData();
 		const templateId = data.get('templateId');
 		const mealType = data.get('mealType');
@@ -25,7 +25,7 @@ export const actions = {
 		}
 
 		try {
-			await addEntryFromTemplate({
+			await addEntryFromTemplate(locals.user.id, {
 				templateId,
 				mealType,
 				date: getLocalDateStr()

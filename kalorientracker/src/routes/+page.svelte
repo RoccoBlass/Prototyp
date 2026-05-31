@@ -44,14 +44,14 @@
 	</div>
 
 	<div class="stats-grid">
-		<CalorieBar current={totalCalories} goal={data.settings.calorieGoal} />
+		<CalorieBar current={totalCalories} goal={data.user.calorieGoal} />
 		<NutrientSummary
 			protein={totalProtein}
 			carbs={totalCarbs}
 			fat={totalFat}
-			proteinGoal={data.settings.proteinGoal}
-			carbsGoal={data.settings.carbsGoal}
-			fatGoal={data.settings.fatGoal}
+			proteinGoal={data.user.proteinGoal}
+			carbsGoal={data.user.carbsGoal}
+			fatGoal={data.user.fatGoal}
 		/>
 	</div>
 

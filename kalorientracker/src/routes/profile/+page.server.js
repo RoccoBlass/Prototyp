@@ -1,9 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { getSettings, saveSettings } from '$lib/server/db.js';
+import { updateUserProfile } from '$lib/server/db.js';
 
-export async function load() {
-	const settings = await getSettings();
-	return { settings };
+export async function load({ locals }) {
+	return { user: locals.user };
 }
 
 const NUMERIC_FIELDS = [
@@ -14,7 +13,7 @@ const NUMERIC_FIELDS = [
 ];
 
 export const actions = {
-	updateProfile: async ({ request }) => {
+	updateProfile: async ({ request, locals }) => {
 		const data = await request.formData();
 
 		const name = String(data.get('name') ?? '')
@@ -39,7 +38,7 @@ export const actions = {
 		}
 
 		try {
-			await saveSettings(settings);
+			await updateUserProfile(locals.user.id, settings);
 		} catch (error) {
 			console.error('Fehler beim Speichern der Einstellungen:', error);
 			return fail(500, {

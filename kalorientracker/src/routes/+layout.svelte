@@ -18,6 +18,7 @@
 	<title>Kalorientracker</title>
 </svelte:head>
 
+{#if data.user}
 <div class="app">
 	<aside class="sidebar">
 		<a href="/" class="brand">
@@ -43,8 +44,8 @@
 		>
 			<span class="profile-avatar"><Icon name="user" size={18} /></span>
 			<span class="profile-info">
-				<span class="footer-label">{data.settings.name || 'Mein Profil'}</span>
-				<span class="footer-value">{data.settings.calorieGoal} kcal Ziel</span>
+				<span class="footer-label">{data.user.name || 'Mein Profil'}</span>
+				<span class="footer-value">{data.user.calorieGoal} kcal Ziel</span>
 			</span>
 		</a>
 	</aside>
@@ -85,6 +86,9 @@
 		</a>
 	</nav>
 </div>
+{:else}
+	{@render children()}
+{/if}
 
 <style>
 	:global(:root) {

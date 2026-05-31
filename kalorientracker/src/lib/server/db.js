@@ -5,7 +5,11 @@ let client;
 let db;
 let connectPromise;
 
-async function connect() {
+/**
+ * Stellt die Verbindung zur Datenbank her (einmalig, danach gecacht) und legt
+ * die benötigten Indizes an. Wird von db.js und auth.js gemeinsam genutzt.
+ */
+export async function getDb() {
 	if (db) return db;
 	if (!connectPromise) {
 		connectPromise = (async () => {
@@ -19,78 +23,25 @@ async function connect() {
 			await client.connect();
 			db = client.db('KalorienTrackerDB');
 			await Promise.all([
-				db.collection('mealTemplates').createIndex({ name: 1 }),
-				db.collection('mealTemplates').createIndex({ updatedAt: -1 }),
-				db.collection('entries').createIndex({ date: 1 }),
-				db.collection('entries').createIndex({ createdAt: -1 })
+				// Accounts: E-Mail muss eindeutig sein
+				db.collection('users').createIndex({ email: 1 }, { unique: true }),
+				// Sessions laufen automatisch ab (TTL-Index auf expiresAt)
+				db.collection('sessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+				// Daten werden immer pro Benutzer abgefragt
+				db.collection('mealTemplates').createIndex({ userId: 1, updatedAt: -1 }),
+				db.collection('mealTemplates').createIndex({ userId: 1, name: 1 }),
+				db.collection('entries').createIndex({ userId: 1, date: 1 }),
+				db.collection('entries').createIndex({ userId: 1, createdAt: -1 })
 			]);
-			await migrateLegacyMealsIfNeeded();
 			return db;
 		})().catch((error) => {
-			// Reset so a later request can retry once the cause is fixed
-			// (e.g. DB_URI added in Netlify) without waiting for a cold start.
+			// Zurücksetzen, damit ein späterer Request es erneut versuchen kann
+			// (z. B. nachdem DB_URI in Netlify ergänzt wurde) ohne Cold Start.
 			connectPromise = undefined;
 			throw error;
 		});
 	}
 	return connectPromise;
-}
-
-async function migrateLegacyMealsIfNeeded() {
-	const existingEntry = await db
-		.collection('entries')
-		.findOne({}, { projection: { _id: 1 } });
-	if (existingEntry) return;
-
-	const legacyMeals = await db
-		.collection('meals')
-		.find({})
-		.sort({ createdAt: 1 })
-		.toArray();
-	if (legacyMeals.length === 0) return;
-
-	const now = new Date();
-	const templateByName = new Map();
-	for (const meal of legacyMeals) {
-		const key = (meal.name ?? '').trim();
-		if (!key) continue;
-		templateByName.set(key, {
-			name: key,
-			calories: meal.calories ?? 0,
-			protein: meal.protein ?? 0,
-			carbs: meal.carbs ?? 0,
-			fat: meal.fat ?? 0,
-			createdAt: meal.createdAt ?? now,
-			updatedAt: meal.createdAt ?? now
-		});
-	}
-
-	const templateDocs = Array.from(templateByName.values());
-	const nameToId = new Map();
-	if (templateDocs.length > 0) {
-		const insertResult = await db.collection('mealTemplates').insertMany(templateDocs);
-		Array.from(templateByName.keys()).forEach((name, idx) => {
-			nameToId.set(name, insertResult.insertedIds[idx]);
-		});
-	}
-
-	const entryDocs = legacyMeals
-		.filter((m) => (m.name ?? '').trim())
-		.map((m) => ({
-			templateId: nameToId.get((m.name ?? '').trim()) ?? null,
-			name: m.name,
-			calories: m.calories ?? 0,
-			protein: m.protein ?? 0,
-			carbs: m.carbs ?? 0,
-			fat: m.fat ?? 0,
-			mealType: m.mealType,
-			date: m.date,
-			createdAt: m.createdAt ?? now
-		}));
-
-	if (entryDocs.length > 0) {
-		await db.collection('entries').insertMany(entryDocs);
-	}
 }
 
 function serializeTemplate(t) {
@@ -121,14 +72,14 @@ function serializeEntry(e) {
 	};
 }
 
-// --- Templates ---
+// --- Templates (immer pro Benutzer) ---
 
-export async function getTemplates() {
+export async function getTemplates(userId) {
 	try {
-		const database = await connect();
+		const database = await getDb();
 		const docs = await database
 			.collection('mealTemplates')
-			.find({})
+			.find({ userId: new ObjectId(userId) })
 			.sort({ updatedAt: -1, name: 1 })
 			.toArray();
 		return docs.map(serializeTemplate);
@@ -138,12 +89,12 @@ export async function getTemplates() {
 	}
 }
 
-export async function getTemplate(id) {
+export async function getTemplate(userId, id) {
 	try {
-		const database = await connect();
+		const database = await getDb();
 		const doc = await database
 			.collection('mealTemplates')
-			.findOne({ _id: new ObjectId(id) });
+			.findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
 		return doc ? serializeTemplate(doc) : null;
 	} catch (error) {
 		console.error('Fehler beim Laden der Vorlage:', error);
@@ -151,10 +102,11 @@ export async function getTemplate(id) {
 	}
 }
 
-export async function addTemplate({ name, calories, protein = 0, carbs = 0, fat = 0 }) {
-	const database = await connect();
+export async function addTemplate(userId, { name, calories, protein = 0, carbs = 0, fat = 0 }) {
+	const database = await getDb();
 	const now = new Date();
 	const result = await database.collection('mealTemplates').insertOne({
+		userId: new ObjectId(userId),
 		name,
 		calories,
 		protein,
@@ -166,10 +118,10 @@ export async function addTemplate({ name, calories, protein = 0, carbs = 0, fat 
 	return result.insertedId.toString();
 }
 
-export async function updateTemplate(id, { name, calories, protein = 0, carbs = 0, fat = 0 }) {
-	const database = await connect();
+export async function updateTemplate(userId, id, { name, calories, protein = 0, carbs = 0, fat = 0 }) {
+	const database = await getDb();
 	await database.collection('mealTemplates').updateOne(
-		{ _id: new ObjectId(id) },
+		{ _id: new ObjectId(id), userId: new ObjectId(userId) },
 		{
 			$set: {
 				name,
@@ -183,19 +135,21 @@ export async function updateTemplate(id, { name, calories, protein = 0, carbs = 
 	);
 }
 
-export async function deleteTemplate(id) {
-	const database = await connect();
-	await database.collection('mealTemplates').deleteOne({ _id: new ObjectId(id) });
+export async function deleteTemplate(userId, id) {
+	const database = await getDb();
+	await database
+		.collection('mealTemplates')
+		.deleteOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
 }
 
-// --- Entries ---
+// --- Entries (immer pro Benutzer) ---
 
-export async function getEntriesByDate(date) {
+export async function getEntriesByDate(userId, date) {
 	try {
-		const database = await connect();
+		const database = await getDb();
 		const entries = await database
 			.collection('entries')
-			.find({ date })
+			.find({ userId: new ObjectId(userId), date })
 			.sort({ createdAt: -1 })
 			.toArray();
 		return entries.map(serializeEntry);
@@ -205,15 +159,16 @@ export async function getEntriesByDate(date) {
 	}
 }
 
-export async function addEntryFromTemplate({ templateId, mealType, date }) {
-	const database = await connect();
+export async function addEntryFromTemplate(userId, { templateId, mealType, date }) {
+	const database = await getDb();
 	const tpl = await database
 		.collection('mealTemplates')
-		.findOne({ _id: new ObjectId(templateId) });
+		.findOne({ _id: new ObjectId(templateId), userId: new ObjectId(userId) });
 	if (!tpl) {
 		throw new Error('Vorlage nicht gefunden');
 	}
 	await database.collection('entries').insertOne({
+		userId: new ObjectId(userId),
 		templateId: tpl._id,
 		name: tpl.name,
 		calories: tpl.calories ?? 0,
@@ -229,12 +184,14 @@ export async function addEntryFromTemplate({ templateId, mealType, date }) {
 		.updateOne({ _id: tpl._id }, { $set: { updatedAt: new Date() } });
 }
 
-export async function deleteEntry(id) {
-	const database = await connect();
-	await database.collection('entries').deleteOne({ _id: new ObjectId(id) });
+export async function deleteEntry(userId, id) {
+	const database = await getDb();
+	await database
+		.collection('entries')
+		.deleteOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
 }
 
-// --- Settings ---
+// --- Profil / Einstellungen (am Benutzer-Dokument) ---
 
 export const DEFAULT_SETTINGS = {
 	name: '',
@@ -244,34 +201,19 @@ export const DEFAULT_SETTINGS = {
 	fatGoal: 70
 };
 
-function positiveNumber(value, fallback) {
-	return typeof value === 'number' && value > 0 ? value : fallback;
-}
-
-export async function getSettings() {
-	try {
-		const database = await connect();
-		const doc = await database.collection('settings').findOne({ _id: 'user' });
-		return {
-			name: typeof doc?.name === 'string' ? doc.name : DEFAULT_SETTINGS.name,
-			calorieGoal: positiveNumber(doc?.calorieGoal, DEFAULT_SETTINGS.calorieGoal),
-			proteinGoal: positiveNumber(doc?.proteinGoal, DEFAULT_SETTINGS.proteinGoal),
-			carbsGoal: positiveNumber(doc?.carbsGoal, DEFAULT_SETTINGS.carbsGoal),
-			fatGoal: positiveNumber(doc?.fatGoal, DEFAULT_SETTINGS.fatGoal)
-		};
-	} catch (error) {
-		console.error('Fehler beim Laden der Einstellungen:', error);
-		return { ...DEFAULT_SETTINGS };
-	}
-}
-
-export async function saveSettings(settings) {
-	const database = await connect();
-	await database
-		.collection('settings')
-		.updateOne(
-			{ _id: 'user' },
-			{ $set: { ...settings, updatedAt: new Date() } },
-			{ upsert: true }
-		);
+export async function updateUserProfile(userId, { name, calorieGoal, proteinGoal, carbsGoal, fatGoal }) {
+	const database = await getDb();
+	await database.collection('users').updateOne(
+		{ _id: new ObjectId(userId) },
+		{
+			$set: {
+				name,
+				calorieGoal,
+				proteinGoal,
+				carbsGoal,
+				fatGoal,
+				updatedAt: new Date()
+			}
+		}
+	);
 }

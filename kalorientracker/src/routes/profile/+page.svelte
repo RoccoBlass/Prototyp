@@ -4,13 +4,13 @@
 
 	let { data, form } = $props();
 
-	const start = form?.values ?? data.settings;
+	const start = form?.values ?? data.user;
 
 	let name = $state(String(start.name ?? ''));
-	let calorieGoal = $state(String(start.calorieGoal ?? data.settings.calorieGoal));
-	let proteinGoal = $state(String(start.proteinGoal ?? data.settings.proteinGoal));
-	let carbsGoal = $state(String(start.carbsGoal ?? data.settings.carbsGoal));
-	let fatGoal = $state(String(start.fatGoal ?? data.settings.fatGoal));
+	let calorieGoal = $state(String(start.calorieGoal ?? data.user.calorieGoal));
+	let proteinGoal = $state(String(start.proteinGoal ?? data.user.proteinGoal));
+	let carbsGoal = $state(String(start.carbsGoal ?? data.user.carbsGoal));
+	let fatGoal = $state(String(start.fatGoal ?? data.user.fatGoal));
 
 	const showSuccess = $derived(page.url.searchParams.get('success') === '1');
 	const presets = [1500, 1800, 2000, 2200, 2500, 3000];
@@ -30,7 +30,7 @@
 			<span class="avatar">{initials}</span>
 			<div class="hero-text">
 				<h1>{name.trim() || 'Mein Profil'}</h1>
-				<p>{data.settings.calorieGoal} kcal Tagesziel</p>
+				<p>{data.user.email}</p>
 			</div>
 		</div>
 	</section>
@@ -188,6 +188,22 @@
 			<span>Speichern</span>
 		</button>
 	</form>
+
+	<section class="card account-card">
+		<header class="card-head">
+			<span class="card-icon"><Icon name="user" size={18} /></span>
+			<div>
+				<h2>Konto</h2>
+				<p>Angemeldet als {data.user.email}</p>
+			</div>
+		</header>
+		<form method="POST" action="/logout">
+			<button type="submit" class="logout-btn">
+				<Icon name="log-out" size={18} />
+				<span>Abmelden</span>
+			</button>
+		</form>
+	</section>
 </div>
 
 <style>
@@ -496,6 +512,36 @@
 	}
 
 	.save-btn:active {
+		transform: translateY(1px);
+	}
+
+	.logout-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		width: 100%;
+		background: var(--surface-2);
+		color: var(--danger);
+		border: 1.5px solid var(--border);
+		padding: 14px 20px;
+		border-radius: 14px;
+		font-size: 0.95rem;
+		font-weight: 700;
+		cursor: pointer;
+		font-family: inherit;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease,
+			transform 0.12s ease;
+	}
+
+	.logout-btn:hover {
+		background: var(--danger-soft);
+		border-color: #fecaca;
+	}
+
+	.logout-btn:active {
 		transform: translateY(1px);
 	}
 

@@ -1,8 +1,8 @@
 import { getTemplate, updateTemplate, deleteTemplate } from '$lib/server/db.js';
 import { error, redirect, fail } from '@sveltejs/kit';
 
-export async function load({ params }) {
-	const template = await getTemplate(params.id);
+export async function load({ params, locals }) {
+	const template = await getTemplate(locals.user.id, params.id);
 	if (!template) {
 		error(404, 'Vorlage nicht gefunden');
 	}
@@ -10,7 +10,7 @@ export async function load({ params }) {
 }
 
 export const actions = {
-	update: async ({ request, params }) => {
+	update: async ({ request, params, locals }) => {
 		const data = await request.formData();
 
 		const name = data.get('name')?.trim();
@@ -29,7 +29,7 @@ export const actions = {
 		}
 
 		try {
-			await updateTemplate(params.id, { name, calories, protein, carbs, fat });
+			await updateTemplate(locals.user.id, params.id, { name, calories, protein, carbs, fat });
 		} catch (err) {
 			console.error(err);
 			return fail(500, { error: 'Fehler beim Aktualisieren. Bitte erneut versuchen.', values });
@@ -38,9 +38,9 @@ export const actions = {
 		redirect(303, '/add');
 	},
 
-	delete: async ({ params }) => {
+	delete: async ({ params, locals }) => {
 		try {
-			await deleteTemplate(params.id);
+			await deleteTemplate(locals.user.id, params.id);
 		} catch (err) {
 			console.error(err);
 			return fail(500, { error: 'Fehler beim Löschen.' });

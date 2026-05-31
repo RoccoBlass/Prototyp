@@ -5,18 +5,18 @@ function getLocalDateStr() {
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export async function load() {
+export async function load({ locals }) {
 	const today = getLocalDateStr();
-	const meals = await getEntriesByDate(today);
+	const meals = await getEntriesByDate(locals.user.id, today);
 	return { meals, today };
 }
 
 export const actions = {
-	delete: async ({ request }) => {
+	delete: async ({ request, locals }) => {
 		const data = await request.formData();
 		const id = data.get('id');
 		if (id) {
-			await deleteEntry(id);
+			await deleteEntry(locals.user.id, id);
 		}
 		return { success: true };
 	}

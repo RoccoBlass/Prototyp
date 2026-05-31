@@ -3,7 +3,7 @@
 
 	let { data } = $props();
 
-	const CALORIE_GOAL = $derived(data.settings.calorieGoal);
+	const CALORIE_GOAL = $derived(data.user.calorieGoal);
 
 	function formatDate(dateStr) {
 		const [year, month, day] = dateStr.split('-').map(Number);

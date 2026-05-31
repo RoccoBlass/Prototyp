@@ -7,11 +7,11 @@ function getDateStr(daysAgo) {
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export async function load() {
+export async function load({ locals }) {
 	const days = await Promise.all(
 		Array.from({ length: 7 }, (_, i) => i).map(async (i) => {
 			const date = getDateStr(i);
-			const meals = await getEntriesByDate(date);
+			const meals = await getEntriesByDate(locals.user.id, date);
 			return {
 				date,
 				meals,
@@ -26,11 +26,11 @@ export async function load() {
 }
 
 export const actions = {
-	delete: async ({ request }) => {
+	delete: async ({ request, locals }) => {
 		const data = await request.formData();
 		const id = data.get('id');
 		if (id) {
-			await deleteEntry(id);
+			await deleteEntry(locals.user.id, id);
 		}
 		redirect(303, '/history');
 	}

@@ -7,7 +7,7 @@ function getLocalDateStr() {
 }
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
 
 		const name = data.get('name')?.trim();
@@ -34,9 +34,9 @@ export const actions = {
 		}
 
 		try {
-			const templateId = await addTemplate({ name, calories, protein, carbs, fat });
+			const templateId = await addTemplate(locals.user.id, { name, calories, protein, carbs, fat });
 			if (logToday) {
-				await addEntryFromTemplate({
+				await addEntryFromTemplate(locals.user.id, {
 					templateId,
 					mealType,
 					date: getLocalDateStr()
