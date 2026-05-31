@@ -1,10 +1,12 @@
 import { json, error } from '@sveltejs/kit';
 
-const OFF_URL = 'https://world.openfoodfacts.org/cgi/search.pl';
+// Schweizer Subdomain + lc=de liefert deutsche Produktnamen und europäische Produkte.
+const OFF_URL = 'https://ch.openfoodfacts.org/cgi/search.pl';
 
 /** Wandelt ein Open-Food-Facts-Produkt in unser Lebensmittel-Format (je 100 g). */
 function mapProduct(p) {
-	const name = String(p.product_name ?? '').trim();
+	// deutschen Produktnamen bevorzugen, sonst den Standardnamen
+	const name = String(p.product_name_de || p.product_name || '').trim();
 	if (!name) return null;
 
 	const n = p.nutriments ?? {};
@@ -45,7 +47,8 @@ export async function GET({ url, locals }) {
 		action: 'process',
 		json: '1',
 		page_size: '20',
-		fields: 'code,product_name,brands,nutriments'
+		lc: 'de',
+		fields: 'code,product_name,product_name_de,brands,nutriments'
 	});
 
 	let data;
