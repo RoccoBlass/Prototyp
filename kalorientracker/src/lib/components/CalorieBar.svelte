@@ -15,8 +15,8 @@
 		<svg viewBox="0 0 140 140" class="ring" aria-hidden="true">
 			<defs>
 				<linearGradient id="calRing" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#34d399" />
-					<stop offset="100%" stop-color="#16a34a" />
+					<stop offset="0%" stop-color="var(--green-400)" />
+					<stop offset="100%" stop-color="var(--green-600)" />
 				</linearGradient>
 				<linearGradient id="calRingOver" x1="0" y1="0" x2="1" y2="1">
 					<stop offset="0%" stop-color="#fb7185" />
@@ -61,14 +61,14 @@
 <style>
 	.card {
 		background: var(--surface);
-		border-radius: var(--radius-xl);
-		padding: 22px;
+		border-radius: var(--radius-lg);
+		padding: var(--space-6);
 		border: 1px solid var(--border);
 		box-shadow: var(--shadow-md);
 		display: flex;
 		align-items: center;
-		gap: 20px;
-		margin-bottom: 14px;
+		gap: var(--space-6);
+		margin-bottom: var(--space-4);
 	}
 
 	.ring-wrap {
@@ -115,17 +115,17 @@
 	}
 
 	.ring-value {
-		font-size: 1.6rem;
-		font-weight: 800;
+		font-size: var(--text-display);
+		font-weight: var(--weight-extrabold);
 		color: var(--text);
 		letter-spacing: -0.02em;
 		line-height: 1;
 	}
 
 	.ring-unit {
-		font-size: 0.72rem;
+		font-size: var(--text-caption);
 		color: var(--text-subtle);
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
 	}
@@ -135,20 +135,20 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: var(--space-1);
 	}
 
 	.label {
-		font-size: 0.7rem;
-		font-weight: 700;
+		font-size: var(--text-overline);
+		font-weight: var(--weight-bold);
 		color: var(--text-subtle);
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 	}
 
 	.headline {
-		font-size: 1.05rem;
-		font-weight: 700;
+		font-size: var(--text-h2);
+		font-weight: var(--weight-bold);
 		color: var(--text);
 		letter-spacing: -0.01em;
 		line-height: 1.25;
@@ -159,22 +159,22 @@
 	}
 
 	.goal {
-		font-size: 0.78rem;
+		font-size: var(--text-caption);
 		color: var(--text-muted);
-		margin-bottom: 10px;
+		margin-bottom: var(--space-3);
 	}
 
 	.track {
 		height: 6px;
 		background: var(--surface-2);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		overflow: hidden;
 	}
 
 	.track-fill {
 		height: 100%;
 		background: var(--brand-gradient);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		transition:
 			width 0.6s cubic-bezier(0.4, 0, 0.2, 1),
 			background 0.2s;
@@ -186,8 +186,8 @@
 
 	@media (min-width: 900px) {
 		.card {
-			padding: 24px 28px;
-			gap: 28px;
+			padding: var(--space-6) var(--space-6);
+			gap: var(--space-6);
 			margin-bottom: 0;
 			height: 100%;
 		}
@@ -198,15 +198,15 @@
 		}
 
 		.ring-value {
-			font-size: 2rem;
+			font-size: var(--text-display-lg);
 		}
 
 		.headline {
-			font-size: 1.25rem;
+			font-size: var(--text-h1);
 		}
 
 		.goal {
-			font-size: 0.85rem;
+			font-size: var(--text-body-sm);
 		}
 	}
 </style>

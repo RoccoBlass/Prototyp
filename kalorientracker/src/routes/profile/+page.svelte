@@ -300,16 +300,16 @@
 	.profile-page {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: var(--space-6);
 	}
 
-	/* Hero */
+	/* Hero – kompakt & dezent */
 	.hero {
 		position: relative;
-		border-radius: 24px;
+		border-radius: var(--radius-lg);
 		overflow: hidden;
-		padding: 28px 22px;
-		color: #fff;
+		padding: var(--space-4) var(--space-6);
+		color: var(--gray-0);
 		isolation: isolate;
 	}
 
@@ -317,44 +317,42 @@
 		position: absolute;
 		inset: 0;
 		z-index: -1;
-		background:
-			radial-gradient(120% 120% at 0% 0%, #34d399 0%, transparent 55%),
-			linear-gradient(135deg, #16a34a 0%, #15803d 60%, #166534 100%);
+		background: linear-gradient(135deg, var(--green-600), var(--green-700));
 	}
 
 	.hero-content {
 		display: flex;
 		align-items: center;
-		gap: 18px;
+		gap: var(--space-4);
 	}
 
 	.avatar {
-		width: 64px;
-		height: 64px;
-		border-radius: 22px;
+		width: 48px;
+		height: 48px;
+		border-radius: var(--radius-md);
 		background: rgba(255, 255, 255, 0.18);
 		backdrop-filter: blur(4px);
 		border: 1px solid rgba(255, 255, 255, 0.35);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.4rem;
-		font-weight: 800;
+		font-size: var(--text-h2);
+		font-weight: var(--weight-extrabold);
 		letter-spacing: 0.02em;
 		flex-shrink: 0;
 	}
 
 	.hero-text h1 {
 		margin: 0;
-		font-size: 1.5rem;
-		font-weight: 800;
+		font-size: var(--text-h1);
+		font-weight: var(--weight-extrabold);
 		letter-spacing: -0.02em;
 	}
 
 	.hero-text p {
-		margin: 4px 0 0;
-		font-size: 0.9rem;
-		font-weight: 600;
+		margin: var(--space-1) 0 0;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 		color: rgba(255, 255, 255, 0.85);
 	}
 
@@ -362,53 +360,53 @@
 	.toast {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 16px;
-		border-radius: 14px;
-		font-size: 0.88rem;
-		font-weight: 600;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border-radius: var(--radius-md);
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 	}
 
 	.toast-ok {
 		background: var(--brand-soft);
 		color: var(--brand-strong);
-		border: 1px solid #bbf7d0;
+		border: 1px solid var(--green-200);
 	}
 
 	.toast-err {
 		background: var(--danger-soft);
-		color: #b91c1c;
-		border: 1px solid #fecaca;
+		color: var(--red-700);
+		border: 1px solid var(--red-200);
 	}
 
 	/* Form */
 	.settings-form {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: var(--space-6);
 	}
 
 	.card {
 		background: var(--surface);
 		border: 1px solid var(--border);
-		border-radius: 22px;
-		padding: 22px;
-		box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+		border-radius: var(--radius-lg);
+		padding: var(--space-6);
+		box-shadow: 0 6px 24px rgb(var(--gray-900-rgb) / 0.05);
 		display: flex;
 		flex-direction: column;
-		gap: 18px;
+		gap: var(--space-4);
 	}
 
 	.card-head {
 		display: flex;
 		align-items: center;
-		gap: 14px;
+		gap: var(--space-4);
 	}
 
 	.card-icon {
 		width: 42px;
 		height: 42px;
-		border-radius: 14px;
+		border-radius: var(--radius-md);
 		background: var(--brand-soft);
 		color: var(--brand-strong);
 		display: inline-flex;
@@ -418,35 +416,35 @@
 	}
 
 	.card-head h2 {
-		font-size: 1.05rem;
-		font-weight: 750;
+		font-size: var(--text-h1);
+		font-weight: var(--weight-extrabold);
 		color: var(--text);
-		margin: 0 0 3px;
-		letter-spacing: -0.01em;
+		margin: 0 0 var(--space-1);
+		letter-spacing: -0.02em;
 	}
 
 	.card-head p {
-		font-size: 0.83rem;
-		color: var(--text-muted);
+		font-size: var(--text-caption);
+		color: var(--text-subtle);
 		margin: 0;
 	}
 
 	.field {
 		display: flex;
 		flex-direction: column;
-		gap: 9px;
+		gap: var(--space-2);
 	}
 
 	.field-label {
-		font-size: 0.85rem;
-		font-weight: 650;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 		color: var(--text-muted);
 	}
 
 	.grid2 {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 14px;
+		gap: var(--space-4);
 	}
 
 	.input-wrap {
@@ -457,11 +455,11 @@
 
 	.input {
 		width: 100%;
-		padding: 15px 16px;
+		padding: var(--space-4) var(--space-4);
 		border: 1.5px solid transparent;
-		border-radius: 14px;
-		font-size: 1.05rem;
-		font-weight: 650;
+		border-radius: var(--radius-md);
+		font-size: var(--text-h2);
+		font-weight: var(--weight-semibold);
 		font-family: inherit;
 		background: var(--surface-2);
 		color: var(--text);
@@ -484,24 +482,24 @@
 
 	.input::placeholder {
 		color: var(--text-subtle);
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	.input:focus {
 		background: var(--surface);
 		border-color: var(--brand);
-		box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.14);
+		box-shadow: 0 0 0 4px rgb(var(--green-600-rgb) / 0.14);
 	}
 
 	.input-wrap .input {
-		padding-right: 48px;
+		padding-right: var(--space-12);
 	}
 
 	.suffix {
 		position: absolute;
 		right: 16px;
-		font-size: 0.85rem;
-		font-weight: 700;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-bold);
 		color: var(--text-subtle);
 		pointer-events: none;
 	}
@@ -515,47 +513,47 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 2px;
-		padding: 14px;
-		border-radius: 18px;
+		gap: var(--space-1);
+		padding: var(--space-4);
+		border-radius: var(--radius-md);
 		background: var(--surface);
-		border: 1px solid #bbf7d0;
+		border: 1px solid var(--green-200);
 	}
 
 	.kcal-value {
-		font-size: 2.4rem;
-		font-weight: 850;
+		font-size: var(--text-display-lg);
+		font-weight: var(--weight-extrabold);
 		letter-spacing: -0.03em;
 		color: var(--brand-strong);
 		line-height: 1;
 	}
 
 	.kcal-unit {
-		font-size: 0.82rem;
-		font-weight: 700;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-bold);
 		color: var(--brand-strong);
 	}
 
 	.macro-inputs {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 10px;
+		gap: var(--space-3);
 	}
 
 	.macro-field {
-		gap: 7px;
+		gap: var(--space-2);
 	}
 
 	.macro-field .field-label {
-		font-size: 0.74rem;
+		font-size: var(--text-caption);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
 	.macro-field .input {
-		padding: 13px 30px 13px 12px;
-		font-size: 1rem;
+		padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3);
+		font-size: var(--text-body);
 	}
 
 	.macro-field .suffix {
@@ -566,15 +564,15 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
+		gap: var(--space-2);
 		width: 100%;
 		background: var(--surface);
 		color: var(--brand-strong);
-		border: 1.5px solid #bbf7d0;
-		padding: 12px 16px;
-		border-radius: 13px;
-		font-size: 0.9rem;
-		font-weight: 700;
+		border: 1.5px solid var(--green-200);
+		padding: var(--space-3) var(--space-4);
+		border-radius: var(--radius-sm);
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-bold);
 		cursor: pointer;
 		font-family: inherit;
 		transition:
@@ -601,17 +599,17 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
+		gap: var(--space-2);
 		background: var(--brand);
-		color: #fff;
+		color: var(--gray-0);
 		border: none;
-		padding: 16px 20px;
-		border-radius: 16px;
-		font-size: 1rem;
-		font-weight: 700;
+		padding: var(--space-4) var(--space-6);
+		border-radius: var(--radius-md);
+		font-size: var(--text-body);
+		font-weight: var(--weight-bold);
 		cursor: pointer;
 		font-family: inherit;
-		box-shadow: 0 8px 20px rgba(22, 163, 74, 0.32);
+		box-shadow: 0 8px 20px rgb(var(--green-600-rgb) / 0.32);
 		transition:
 			transform 0.12s ease,
 			background 0.15s;
@@ -631,15 +629,15 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
+		gap: var(--space-2);
 		width: 100%;
 		background: var(--surface-2);
 		color: var(--danger);
 		border: 1.5px solid var(--border);
-		padding: 14px 20px;
-		border-radius: 14px;
-		font-size: 0.95rem;
-		font-weight: 700;
+		padding: var(--space-4) var(--space-6);
+		border-radius: var(--radius-md);
+		font-size: var(--text-body);
+		font-weight: var(--weight-bold);
 		cursor: pointer;
 		font-family: inherit;
 		transition:
@@ -650,7 +648,7 @@
 
 	.logout-btn:hover {
 		background: var(--danger-soft);
-		border-color: #fecaca;
+		border-color: var(--red-200);
 	}
 
 	.logout-btn:active {
@@ -659,20 +657,20 @@
 
 	@media (min-width: 900px) {
 		.hero {
-			padding: 34px 30px;
+			padding: var(--space-6) var(--space-6);
 		}
 
 		.hero-text h1 {
-			font-size: 1.8rem;
+			font-size: var(--text-h1);
 		}
 
 		.card {
-			padding: 26px 28px;
+			padding: var(--space-6) var(--space-6);
 		}
 
 		.save-btn {
 			align-self: flex-start;
-			padding: 15px 32px;
+			padding: var(--space-4) var(--space-8);
 			position: static;
 		}
 	}

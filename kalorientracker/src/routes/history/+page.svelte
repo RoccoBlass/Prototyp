@@ -72,19 +72,19 @@
 	}
 
 	.page-header {
-		margin-bottom: 18px;
+		margin-bottom: var(--space-4);
 	}
 
 	.page-header h1 {
-		font-size: 1.4rem;
-		font-weight: 800;
+		font-size: var(--text-display);
+		font-weight: var(--weight-extrabold);
 		color: var(--text);
 		letter-spacing: -0.02em;
-		margin: 0 0 4px;
+		margin: 0 0 var(--space-1);
 	}
 
 	.subtitle {
-		font-size: 0.88rem;
+		font-size: var(--text-body-sm);
 		color: var(--text-muted);
 		margin: 0;
 	}
@@ -92,14 +92,14 @@
 	.days-list {
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: var(--space-3);
 	}
 
 	.day-card {
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-lg);
-		padding: 18px;
+		padding: var(--space-4);
 		box-shadow: var(--shadow-sm);
 		transition:
 			transform 0.15s ease,
@@ -115,9 +115,9 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		gap: 12px;
-		margin-bottom: 12px;
-		padding-bottom: 12px;
+		gap: var(--space-3);
+		margin-bottom: var(--space-3);
+		padding-bottom: var(--space-3);
 		border-bottom: 1px solid var(--border);
 	}
 
@@ -128,8 +128,8 @@
 	}
 
 	.day-title {
-		font-size: 1rem;
-		font-weight: 700;
+		font-size: var(--text-body);
+		font-weight: var(--weight-bold);
 		color: var(--text);
 		margin: 0;
 		text-transform: capitalize;
@@ -137,33 +137,33 @@
 	}
 
 	.day-date {
-		font-size: 0.72rem;
+		font-size: var(--text-caption);
 		color: var(--text-subtle);
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	.day-summary {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: var(--space-1);
 		align-items: flex-end;
 	}
 
 	.day-calories {
-		font-size: 1.1rem;
-		font-weight: 800;
+		font-size: var(--text-h2);
+		font-weight: var(--weight-extrabold);
 		color: var(--text);
 		letter-spacing: -0.02em;
 		display: inline-flex;
 		align-items: baseline;
-		gap: 3px;
+		gap: var(--space-1);
 		line-height: 1;
 	}
 
 	.day-calories small {
-		font-size: 0.7rem;
+		font-size: var(--text-overline);
 		color: var(--text-subtle);
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 	}
 
 	.day-calories.over {
@@ -174,14 +174,14 @@
 		width: 80px;
 		height: 4px;
 		background: var(--surface-2);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		overflow: hidden;
 	}
 
 	.mini-bar-fill {
 		height: 100%;
 		background: var(--brand-gradient);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
@@ -190,32 +190,32 @@
 	}
 
 	.no-meals {
-		font-size: 0.85rem;
+		font-size: var(--text-body-sm);
 		color: var(--text-subtle);
 		text-align: center;
-		padding: 14px 0 4px;
+		padding: var(--space-4) 0 var(--space-1);
 		margin: 0;
 	}
 
 	.day-meals {
 		display: flex;
 		flex-direction: column;
-		margin-bottom: 4px;
+		margin-bottom: var(--space-1);
 	}
 
 	.day-macros {
 		display: flex;
-		gap: 6px;
+		gap: var(--space-2);
 		flex-wrap: wrap;
-		padding-top: 10px;
+		padding-top: var(--space-3);
 		border-top: 1px dashed var(--border);
 	}
 
 	.macro {
-		font-size: 0.72rem;
-		font-weight: 650;
-		padding: 4px 11px;
-		border-radius: 999px;
+		font-size: var(--text-caption);
+		font-weight: var(--weight-semibold);
+		padding: var(--space-1) var(--space-3);
+		border-radius: var(--radius-full);
 	}
 
 	.macro.p {
@@ -225,7 +225,7 @@
 
 	.macro.c {
 		background: var(--carbs-soft);
-		color: #b45309;
+		color: var(--amber-700);
 	}
 
 	.macro.f {
@@ -235,23 +235,23 @@
 
 	@media (min-width: 900px) {
 		.page-header h1 {
-			font-size: 1.7rem;
+			font-size: var(--text-display);
 		}
 
 		.subtitle {
-			font-size: 0.95rem;
+			font-size: var(--text-body);
 		}
 
 		.day-card {
-			padding: 20px 22px;
+			padding: var(--space-6) var(--space-6);
 		}
 
 		.day-title {
-			font-size: 1.1rem;
+			font-size: var(--text-h2);
 		}
 
 		.day-calories {
-			font-size: 1.3rem;
+			font-size: var(--text-h1);
 		}
 
 		.mini-bar-track {
@@ -264,7 +264,7 @@
 		.days-list {
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 14px;
+			gap: var(--space-4);
 		}
 	}
 </style>

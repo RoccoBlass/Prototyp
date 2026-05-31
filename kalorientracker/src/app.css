@@ -1,0 +1,160 @@
+/* =====================================================================
+   Design-System – Tokens
+   Primitive Skalen → semantische Aliase. In Komponenten werden konsequent
+   diese Tokens verwendet (keine hartkodierten Farben/Abstände/Grössen).
+   ===================================================================== */
+
+:root {
+	/* --- Primärfarbe: Grün 50–900 --- */
+	--green-50: #f0fdf4;
+	--green-100: #dcfce7;
+	--green-200: #bbf7d0;
+	--green-300: #86efac;
+	--green-400: #4ade80;
+	--green-500: #22c55e;
+	--green-600: #16a34a;
+	--green-700: #15803d;
+	--green-800: #166534;
+	--green-900: #14532d;
+	--green-600-rgb: 22 163 74; /* für Alpha (Focus-Ring, Marken-Schatten) */
+
+	/* --- Neutrale Graustufen 50–900 --- */
+	--gray-0: #ffffff;
+	--gray-50: #f4f6f8;
+	--gray-100: #f1f3f6;
+	--gray-200: #ebedf1;
+	--gray-300: #d9dde3;
+	--gray-400: #b6bdc8;
+	--gray-500: #9aa3b2;
+	--gray-600: #5b6573;
+	--gray-700: #3d4654;
+	--gray-800: #232b38;
+	--gray-900: #0b1220;
+	--gray-900-rgb: 15 23 42; /* für Schatten */
+
+	/* --- Akzentfarben (Makros & Status) --- */
+	--blue-100: #dbeafe;
+	--blue-500: #3b82f6; /* Protein */
+	--amber-100: #fef3c7;
+	--amber-500: #f59e0b; /* Kohlenhydrate */
+	--amber-700: #b45309;
+	--orange-100: #ffedd5;
+	--orange-500: #f97316; /* Fett */
+	--red-100: #fee2e2;
+	--red-200: #fecaca;
+	--red-500: #ef4444; /* Fehler/Status */
+	--red-700: #b91c1c;
+	--indigo-100: #e0e7ff;
+	--indigo-500: #6366f1; /* Mahlzeitentyp Abend */
+	--pink-100: #fce7f3;
+	--pink-500: #ec4899; /* Mahlzeitentyp Snack */
+
+	/* --- Spacing-Skala (4 / 8 / 12 / 16 / 24 / 32) --- */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-6: 24px;
+	--space-8: 32px;
+	--space-12: 48px; /* grosse Leerräume (Empty States, Auth) */
+
+	/* --- Border-Radius (3 Stufen + voll) --- */
+	--radius-sm: 12px;
+	--radius-md: 16px;
+	--radius-lg: 24px;
+	--radius-full: 999px;
+
+	/* --- Typografie --- */
+	--font-sans:
+		-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+	--text-display-lg: 2.25rem; /* 36px – grosse Kennzahlen (kcal-Hero) */
+	--text-display: 1.875rem; /* 30px – Display */
+	--text-h1: 1.5rem; /* 24px – Seitentitel */
+	--text-h2: 1.125rem; /* 18px – Karten-/Abschnittstitel */
+	--text-body: 1rem; /* 16px – Body, Eingaben */
+	--text-body-sm: 0.875rem; /* 14px – sekundärer Body */
+	--text-caption: 0.75rem; /* 12px – Caption/Meta */
+	--text-overline: 0.6875rem; /* 11px – Mini-Labels (Nav, Chips) */
+
+	--leading-tight: 1.15;
+	--leading-snug: 1.35;
+	--leading-normal: 1.5;
+
+	--weight-normal: 400;
+	--weight-medium: 500;
+	--weight-semibold: 600;
+	--weight-bold: 700;
+	--weight-extrabold: 800;
+
+	/* --- Schatten & Effekte --- */
+	--shadow-sm: 0 1px 2px rgb(var(--gray-900-rgb) / 0.04), 0 2px 6px rgb(var(--gray-900-rgb) / 0.04);
+	--shadow-md: 0 6px 18px rgb(var(--gray-900-rgb) / 0.06), 0 12px 32px rgb(var(--gray-900-rgb) / 0.05);
+	--shadow-lg: 0 18px 50px rgb(var(--gray-900-rgb) / 0.14);
+	--shadow-brand: 0 8px 20px rgb(var(--green-600-rgb) / 0.3);
+	--focus-ring: 0 0 0 4px rgb(var(--green-600-rgb) / 0.14);
+
+	/* --- Semantische Aliase (auf Primitive gemappt) --- */
+	--bg: var(--gray-50);
+	--surface: var(--gray-0);
+	--surface-2: var(--gray-100);
+	--border: var(--gray-200);
+	--border-strong: var(--gray-300);
+	--text: var(--gray-900);
+	--text-muted: var(--gray-600);
+	--text-subtle: var(--gray-500);
+
+	--brand: var(--green-600);
+	--brand-strong: var(--green-700);
+	--brand-soft: var(--green-100);
+	--brand-soft-2: var(--green-50);
+	--brand-gradient: linear-gradient(135deg, var(--green-500), var(--green-600));
+
+	--danger: var(--red-500);
+	--danger-soft: var(--red-100);
+
+	--protein: var(--blue-500);
+	--protein-soft: var(--blue-100);
+	--carbs: var(--amber-500);
+	--carbs-soft: var(--amber-100);
+	--fat: var(--orange-500);
+	--fat-soft: var(--orange-100);
+}
+
+/* =====================================================================
+   Globale Basis
+   ===================================================================== */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-normal);
+	background: var(--bg);
+	color: var(--text);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+button {
+	font-family: inherit;
+}
+
+/* Native Zahl-Spinner entfernen – alle Zahlfelder sind eigens gestaltet
+   (oft mit Suffix wie „g"/„kcal"), der Spinner würde den Wert überdecken. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type='number'] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}

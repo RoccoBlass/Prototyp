@@ -108,7 +108,7 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
-		margin-bottom: 10px;
+		margin-bottom: var(--space-3);
 		box-shadow: var(--shadow-sm);
 		transition: border-color 0.15s, box-shadow 0.15s;
 	}
@@ -125,15 +125,15 @@
 			'icon details calories expand delete'
 			'icon macros macros macros macros';
 		align-items: center;
-		gap: 6px 12px;
-		padding: 14px 16px;
+		gap: var(--space-2) var(--space-3);
+		padding: var(--space-4) var(--space-4);
 	}
 
 	.meal-icon {
 		grid-area: icon;
 		width: 38px;
 		height: 38px;
-		border-radius: 12px;
+		border-radius: var(--radius-sm);
 		background: var(--s);
 		color: var(--c);
 		display: inline-flex;
@@ -152,8 +152,8 @@
 
 	.meal-details h3 {
 		margin: 0;
-		font-size: 0.95rem;
-		font-weight: 600;
+		font-size: var(--text-body);
+		font-weight: var(--weight-semibold);
 		color: var(--text);
 		white-space: nowrap;
 		overflow: hidden;
@@ -162,23 +162,23 @@
 	}
 
 	.meal-sub {
-		font-size: 0.72rem;
+		font-size: var(--text-caption);
 		color: var(--text-muted);
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	.macros {
 		grid-area: macros;
 		display: flex;
-		gap: 5px;
+		gap: var(--space-1);
 		flex-wrap: wrap;
 	}
 
 	.macro {
-		font-size: 0.66rem;
-		font-weight: 650;
-		padding: 3px 9px;
-		border-radius: 999px;
+		font-size: var(--text-overline);
+		font-weight: var(--weight-semibold);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-full);
 	}
 
 	.macro.p {
@@ -188,7 +188,7 @@
 
 	.macro.c {
 		background: var(--carbs-soft);
-		color: #b45309;
+		color: var(--amber-700);
 	}
 
 	.macro.f {
@@ -198,20 +198,20 @@
 
 	.calories {
 		grid-area: calories;
-		font-size: 1rem;
-		font-weight: 800;
+		font-size: var(--text-body);
+		font-weight: var(--weight-extrabold);
 		color: var(--text);
 		letter-spacing: -0.02em;
 		display: flex;
 		align-items: baseline;
-		gap: 3px;
+		gap: var(--space-1);
 		white-space: nowrap;
 	}
 
 	.calories small {
-		font-size: 0.65rem;
+		font-size: var(--text-overline);
 		color: var(--text-subtle);
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 	}
 
 	.expand {
@@ -222,7 +222,7 @@
 		cursor: pointer;
 		width: 28px;
 		height: 28px;
-		border-radius: 8px;
+		border-radius: var(--radius-sm);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -245,8 +245,8 @@
 		border: none;
 		color: var(--text-subtle);
 		cursor: pointer;
-		padding: 6px;
-		border-radius: 8px;
+		padding: var(--space-2);
+		border-radius: var(--radius-sm);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -261,24 +261,24 @@
 	.items {
 		list-style: none;
 		margin: 0;
-		padding: 4px 16px 14px 66px;
+		padding: var(--space-1) var(--space-4) var(--space-4) 66px;
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: var(--space-2);
 	}
 
 	.item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		font-size: 0.8rem;
+		gap: var(--space-3);
+		font-size: var(--text-caption);
 	}
 
 	.item-name {
 		flex: 1;
 		min-width: 0;
 		color: var(--text);
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -286,13 +286,13 @@
 
 	.item-amount {
 		color: var(--text-subtle);
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 		flex-shrink: 0;
 	}
 
 	.item-cal {
 		color: var(--text-muted);
-		font-weight: 700;
+		font-weight: var(--weight-bold);
 		flex-shrink: 0;
 		min-width: 56px;
 		text-align: right;
@@ -302,12 +302,12 @@
 		.meal-head {
 			grid-template-columns: auto 1fr auto auto auto auto;
 			grid-template-areas: 'icon details macros calories expand delete';
-			padding: 14px 18px;
-			gap: 16px;
+			padding: var(--space-4) var(--space-4);
+			gap: var(--space-4);
 		}
 
 		.calories {
-			font-size: 1.1rem;
+			font-size: var(--text-h2);
 		}
 	}
 </style>

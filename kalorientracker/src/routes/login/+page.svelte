@@ -203,9 +203,9 @@
 		inset: 0;
 		z-index: -1;
 		background:
-			radial-gradient(120% 120% at 0% 0%, #34d399 0%, transparent 50%),
-			radial-gradient(120% 120% at 100% 100%, #15803d 0%, transparent 55%),
-			linear-gradient(135deg, #16a34a 0%, #15803d 55%, #166534 100%);
+			radial-gradient(120% 120% at 0% 0%, var(--green-400) 0%, transparent 50%),
+			radial-gradient(120% 120% at 100% 100%, var(--green-700) 0%, transparent 55%),
+			linear-gradient(135deg, var(--green-600) 0%, var(--green-700) 55%, var(--green-800) 100%);
 	}
 
 	.auth-card {
@@ -213,70 +213,70 @@
 		max-width: 420px;
 		background: rgba(255, 255, 255, 0.97);
 		border: 1px solid rgba(255, 255, 255, 0.6);
-		border-radius: 26px;
-		padding: 30px 26px 26px;
+		border-radius: var(--radius-lg);
+		padding: var(--space-8) var(--space-6) var(--space-6);
 		box-shadow: 0 24px 60px rgba(8, 40, 22, 0.32);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		display: flex;
 		flex-direction: column;
-		gap: 18px;
+		gap: var(--space-4);
 	}
 
 	.brand {
 		display: inline-flex;
 		align-items: center;
-		gap: 11px;
-		font-weight: 800;
+		gap: var(--space-3);
+		font-weight: var(--weight-extrabold);
 		letter-spacing: -0.02em;
 		color: var(--text);
-		font-size: 1.05rem;
+		font-size: var(--text-h2);
 	}
 
 	.brand-mark {
 		width: 40px;
 		height: 40px;
-		border-radius: 13px;
+		border-radius: var(--radius-sm);
 		background: var(--brand-gradient);
-		color: #fff;
+		color: var(--gray-0);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 6px 16px rgba(22, 163, 74, 0.42);
+		box-shadow: 0 6px 16px rgb(var(--green-600-rgb) / 0.42);
 	}
 
 	.intro h1 {
-		margin: 0 0 6px;
-		font-size: 1.5rem;
-		font-weight: 800;
+		margin: 0 0 var(--space-2);
+		font-size: var(--text-h1);
+		font-weight: var(--weight-extrabold);
 		letter-spacing: -0.02em;
 		color: var(--text);
 	}
 
 	.intro p {
 		margin: 0;
-		font-size: 0.9rem;
+		font-size: var(--text-body-sm);
 		line-height: 1.45;
 		color: var(--text-muted);
 	}
 
 	.tabs {
 		display: flex;
-		gap: 4px;
-		padding: 5px;
+		gap: var(--space-1);
+		padding: var(--space-1);
 		background: var(--surface-2);
-		border-radius: 14px;
+		border-radius: var(--radius-md);
 	}
 
 	.tab {
 		flex: 1;
-		padding: 10px 12px;
+		padding: var(--space-3) var(--space-3);
 		border: none;
-		border-radius: 10px;
+		border-radius: var(--radius-sm);
 		background: transparent;
 		color: var(--text-muted);
-		font-size: 0.9rem;
-		font-weight: 700;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-bold);
 		font-family: inherit;
 		cursor: pointer;
 		transition:
@@ -294,36 +294,36 @@
 	.alert {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 14px;
-		border-radius: 13px;
-		font-size: 0.85rem;
-		font-weight: 600;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border-radius: var(--radius-sm);
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 		background: var(--danger-soft);
-		color: #b91c1c;
-		border: 1px solid #fecaca;
+		color: var(--red-700);
+		border: 1px solid var(--red-200);
 	}
 
 	.form {
 		display: flex;
 		flex-direction: column;
-		gap: 14px;
+		gap: var(--space-4);
 	}
 
 	.field {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: var(--space-2);
 	}
 
 	.field-label {
-		font-size: 0.83rem;
-		font-weight: 650;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 		color: var(--text-muted);
 	}
 
 	.optional {
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 		color: var(--text-subtle);
 	}
 
@@ -343,11 +343,11 @@
 
 	.input {
 		width: 100%;
-		padding: 14px 16px 14px 44px;
+		padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
 		border: 1.5px solid transparent;
-		border-radius: 13px;
-		font-size: 1rem;
-		font-weight: 550;
+		border-radius: var(--radius-sm);
+		font-size: var(--text-body);
+		font-weight: var(--weight-medium);
 		font-family: inherit;
 		background: var(--surface-2);
 		color: var(--text);
@@ -361,13 +361,13 @@
 
 	.input::placeholder {
 		color: var(--text-subtle);
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	.input:focus {
 		background: var(--surface);
 		border-color: var(--brand);
-		box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.14);
+		box-shadow: 0 0 0 4px rgb(var(--green-600-rgb) / 0.14);
 	}
 
 	.input-wrap:focus-within .input-icon {
@@ -375,21 +375,21 @@
 	}
 
 	.submit {
-		margin-top: 4px;
+		margin-top: var(--space-1);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 9px;
+		gap: var(--space-2);
 		background: var(--brand);
-		color: #fff;
+		color: var(--gray-0);
 		border: none;
-		padding: 15px 20px;
-		border-radius: 14px;
-		font-size: 1rem;
-		font-weight: 700;
+		padding: var(--space-4) var(--space-6);
+		border-radius: var(--radius-md);
+		font-size: var(--text-body);
+		font-weight: var(--weight-bold);
 		cursor: pointer;
 		font-family: inherit;
-		box-shadow: 0 8px 20px rgba(22, 163, 74, 0.32);
+		box-shadow: 0 8px 20px rgb(var(--green-600-rgb) / 0.32);
 		transition:
 			transform 0.12s ease,
 			background 0.15s ease;
@@ -404,9 +404,9 @@
 	}
 
 	.switch {
-		margin: 2px 0 0;
+		margin: var(--space-1) 0 0;
 		text-align: center;
-		font-size: 0.86rem;
+		font-size: var(--text-body-sm);
 		color: var(--text-muted);
 	}
 
@@ -415,7 +415,7 @@
 		background: none;
 		padding: 0;
 		font: inherit;
-		font-weight: 700;
+		font-weight: var(--weight-bold);
 		color: var(--brand-strong);
 		cursor: pointer;
 		text-decoration: underline;

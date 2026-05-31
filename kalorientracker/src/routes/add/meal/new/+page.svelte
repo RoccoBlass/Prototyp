@@ -28,17 +28,17 @@
 	.sub-page {
 		display: flex;
 		flex-direction: column;
-		gap: 14px;
+		gap: var(--space-4);
 	}
 
 	.back {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
+		gap: var(--space-2);
 		color: var(--text-muted);
 		text-decoration: none;
-		font-size: 0.88rem;
-		font-weight: 650;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 		align-self: flex-start;
 	}
 
@@ -47,8 +47,8 @@
 	}
 
 	h1 {
-		font-size: 1.4rem;
-		font-weight: 800;
+		font-size: var(--text-display);
+		font-weight: var(--weight-extrabold);
 		letter-spacing: -0.02em;
 		color: var(--text);
 		margin: 0;
@@ -57,13 +57,13 @@
 	.alert {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 14px;
-		border-radius: 13px;
-		font-size: 0.86rem;
-		font-weight: 600;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border-radius: var(--radius-sm);
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
 		background: var(--danger-soft);
-		color: #b91c1c;
-		border: 1px solid #fecaca;
+		color: var(--red-700);
+		border: 1px solid var(--red-200);
 	}
 </style>

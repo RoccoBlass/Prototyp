@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import favicon from '$lib/assets/favicon.svg';
 	import Icon from '$lib/components/Icon.svelte';
+	import '../app.css';
 
 	let { data, children } = $props();
 
@@ -92,61 +93,6 @@
 {/if}
 
 <style>
-	:global(:root) {
-		--bg: #f4f6f8;
-		--surface: #ffffff;
-		--surface-2: #f1f3f6;
-		--border: #ebedf1;
-		--border-strong: #d9dde3;
-		--text: #0b1220;
-		--text-muted: #5b6573;
-		--text-subtle: #9aa3b2;
-		--brand: #16a34a;
-		--brand-strong: #15803d;
-		--brand-soft: #dcfce7;
-		--brand-soft-2: #f0fdf4;
-		--brand-gradient: linear-gradient(135deg, #22c55e, #16a34a);
-		--danger: #ef4444;
-		--danger-soft: #fee2e2;
-		--protein: #3b82f6;
-		--protein-soft: #dbeafe;
-		--carbs: #f59e0b;
-		--carbs-soft: #fef3c7;
-		--fat: #f97316;
-		--fat-soft: #ffedd5;
-		--shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 6px rgba(15, 23, 42, 0.04);
-		--shadow-md: 0 6px 18px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.05);
-		--shadow-lg: 0 18px 50px rgba(15, 23, 42, 0.14);
-		--radius-sm: 12px;
-		--radius-md: 16px;
-		--radius-lg: 22px;
-		--radius-xl: 28px;
-	}
-
-	:global(*, *::before, *::after) {
-		box-sizing: border-box;
-	}
-
-	:global(body) {
-		margin: 0;
-		font-family:
-			-apple-system,
-			BlinkMacSystemFont,
-			'Inter',
-			'Segoe UI',
-			Roboto,
-			'Helvetica Neue',
-			sans-serif;
-		background: var(--bg);
-		color: var(--text);
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-	}
-
-	:global(button) {
-		font-family: inherit;
-	}
-
 	.app {
 		min-height: 100dvh;
 		display: flex;
@@ -164,51 +110,51 @@
 		backdrop-filter: saturate(180%) blur(14px);
 		-webkit-backdrop-filter: saturate(180%) blur(14px);
 		border-bottom: 1px solid var(--border);
-		padding: 12px 18px;
+		padding: var(--space-3) var(--space-4);
 		position: sticky;
 		top: 0;
 		z-index: 20;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 12px;
+		gap: var(--space-3);
 	}
 
 	.brand {
 		display: inline-flex;
 		align-items: center;
-		gap: 10px;
+		gap: var(--space-3);
 		text-decoration: none;
 		color: var(--text);
-		font-weight: 800;
+		font-weight: var(--weight-extrabold);
 		letter-spacing: -0.02em;
 	}
 
 	.brand-mark {
 		width: 34px;
 		height: 34px;
-		border-radius: 11px;
+		border-radius: var(--radius-sm);
 		background: var(--brand-gradient);
-		color: white;
+		color: var(--gray-0);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+		box-shadow: 0 4px 12px rgb(var(--green-600-rgb) / 0.4);
 	}
 
 	.brand-mobile .brand-mark {
 		width: 30px;
 		height: 30px;
-		border-radius: 9px;
+		border-radius: var(--radius-sm);
 	}
 
 	.brand-text {
-		font-size: 0.98rem;
+		font-size: var(--text-body);
 	}
 
 	main {
 		flex: 1;
-		padding: 18px 16px 108px;
+		padding: var(--space-4) var(--space-4) 108px;
 	}
 
 	.container {
@@ -227,7 +173,7 @@
 		backdrop-filter: saturate(180%) blur(16px);
 		-webkit-backdrop-filter: saturate(180%) blur(16px);
 		border: 1px solid var(--border);
-		border-radius: 22px;
+		border-radius: var(--radius-lg);
 		display: flex;
 		z-index: 20;
 		box-shadow: var(--shadow-lg);
@@ -240,10 +186,10 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 12px 0 13px;
+		padding: var(--space-3) 0 var(--space-3);
 		text-decoration: none;
 		color: var(--text-subtle);
-		gap: 4px;
+		gap: var(--space-1);
 		transition: color 0.15s;
 	}
 
@@ -252,8 +198,8 @@
 	}
 
 	.nav-label {
-		font-size: 0.68rem;
-		font-weight: 700;
+		font-size: var(--text-overline);
+		font-weight: var(--weight-bold);
 		letter-spacing: 0.01em;
 		white-space: nowrap;
 	}
@@ -266,12 +212,12 @@
 		width: 46px;
 		height: 46px;
 		background: var(--brand-gradient);
-		color: white;
-		border-radius: 50%;
+		color: var(--gray-0);
+		border-radius: var(--radius-full);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 6px 16px rgba(22, 163, 74, 0.45);
+		box-shadow: 0 6px 16px rgb(var(--green-600-rgb) / 0.45);
 		transition: transform 0.18s ease;
 		margin-top: -16px;
 	}
@@ -305,8 +251,8 @@
 		.sidebar {
 			display: flex;
 			flex-direction: column;
-			gap: 26px;
-			padding: 26px 18px;
+			gap: var(--space-6);
+			padding: var(--space-6) var(--space-4);
 			background: var(--surface);
 			border-right: 1px solid var(--border);
 			position: sticky;
@@ -315,26 +261,26 @@
 		}
 
 		.sidebar .brand {
-			padding: 4px 8px;
-			font-size: 1.05rem;
+			padding: var(--space-1) var(--space-2);
+			font-size: var(--text-h2);
 		}
 
 		.side-nav {
 			display: flex;
 			flex-direction: column;
-			gap: 6px;
+			gap: var(--space-2);
 		}
 
 		.side-nav-link {
 			display: flex;
 			align-items: center;
-			gap: 13px;
-			padding: 12px 14px;
-			border-radius: 14px;
+			gap: var(--space-3);
+			padding: var(--space-3) var(--space-4);
+			border-radius: var(--radius-md);
 			text-decoration: none;
 			color: var(--text-muted);
-			font-size: 0.92rem;
-			font-weight: 600;
+			font-size: var(--text-body);
+			font-weight: var(--weight-semibold);
 			transition:
 				background 0.15s,
 				color 0.15s,
@@ -353,12 +299,12 @@
 
 		.sidebar-footer {
 			margin-top: auto;
-			padding: 14px 16px;
+			padding: var(--space-4) var(--space-4);
 			background: var(--surface-2);
 			border-radius: var(--radius-md);
 			display: flex;
 			align-items: center;
-			gap: 12px;
+			gap: var(--space-3);
 			text-decoration: none;
 			color: inherit;
 			transition:
@@ -377,27 +323,27 @@
 		.profile-avatar {
 			width: 38px;
 			height: 38px;
-			border-radius: 999px;
+			border-radius: var(--radius-full);
 			background: var(--brand-gradient);
-			color: white;
+			color: var(--gray-0);
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
 			flex-shrink: 0;
-			box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+			box-shadow: 0 4px 12px rgb(var(--green-600-rgb) / 0.35);
 		}
 
 		.profile-info {
 			display: flex;
 			flex-direction: column;
-			gap: 2px;
+			gap: var(--space-1);
 			min-width: 0;
 		}
 
 		.footer-label {
-			font-size: 0.82rem;
+			font-size: var(--text-body-sm);
 			color: var(--text);
-			font-weight: 700;
+			font-weight: var(--weight-bold);
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -408,13 +354,13 @@
 		}
 
 		.footer-value {
-			font-size: 0.76rem;
-			font-weight: 600;
+			font-size: var(--text-caption);
+			font-weight: var(--weight-semibold);
 			color: var(--text-muted);
 		}
 
 		main {
-			padding: 32px 40px 40px;
+			padding: var(--space-8) var(--space-8) var(--space-8);
 		}
 
 		.container {
@@ -424,7 +370,7 @@
 
 	@media (min-width: 1280px) {
 		main {
-			padding: 40px 56px 56px;
+			padding: var(--space-8) 56px 56px;
 		}
 	}
 </style>

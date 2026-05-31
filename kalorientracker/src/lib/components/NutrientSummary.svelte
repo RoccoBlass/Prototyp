@@ -66,18 +66,18 @@
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-bottom: 18px;
+		gap: var(--space-2);
+		margin-bottom: var(--space-4);
 	}
 
 	.cell {
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
-		padding: 14px;
+		padding: var(--space-4);
 		display: flex;
 		flex-direction: column;
-		gap: 7px;
+		gap: var(--space-2);
 		box-shadow: var(--shadow-sm);
 		transition:
 			transform 0.15s ease,
@@ -92,13 +92,13 @@
 	.row {
 		display: flex;
 		align-items: center;
-		gap: 6px;
+		gap: var(--space-2);
 	}
 
 	.badge {
 		width: 24px;
 		height: 24px;
-		border-radius: 7px;
+		border-radius: var(--radius-sm);
 		background: var(--soft);
 		color: var(--color);
 		display: inline-flex;
@@ -108,8 +108,8 @@
 	}
 
 	.label {
-		font-size: 0.7rem;
-		font-weight: 600;
+		font-size: var(--text-overline);
+		font-weight: var(--weight-semibold);
 		color: var(--text-muted);
 		white-space: nowrap;
 		overflow: hidden;
@@ -119,58 +119,58 @@
 	.value-row {
 		display: flex;
 		align-items: baseline;
-		gap: 4px;
+		gap: var(--space-1);
 	}
 
 	.value {
-		font-size: 1.3rem;
-		font-weight: 800;
+		font-size: var(--text-h1);
+		font-weight: var(--weight-extrabold);
 		color: var(--text);
 		letter-spacing: -0.02em;
 		line-height: 1;
 	}
 
 	.unit {
-		font-size: 0.72rem;
+		font-size: var(--text-caption);
 		color: var(--text-subtle);
-		font-weight: 500;
+		font-weight: var(--weight-medium);
 	}
 
 	.track {
 		height: 6px;
 		background: var(--surface-2);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		overflow: hidden;
 	}
 
 	.track-fill {
 		height: 100%;
-		background: linear-gradient(90deg, color-mix(in srgb, var(--color) 70%, white), var(--color));
-		border-radius: 999px;
+		background: linear-gradient(90deg, color-mix(in srgb, var(--color) 70%, var(--gray-0)), var(--color));
+		border-radius: var(--radius-full);
 		transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	@media (min-width: 900px) {
 		.grid {
 			grid-template-columns: 1fr;
-			gap: 10px;
+			gap: var(--space-3);
 			margin-bottom: 0;
 			height: 100%;
 			align-content: stretch;
 		}
 
 		.cell {
-			padding: 14px 16px;
-			gap: 8px;
+			padding: var(--space-4) var(--space-4);
+			gap: var(--space-2);
 			flex: 1;
 		}
 
 		.value {
-			font-size: 1.5rem;
+			font-size: var(--text-h1);
 		}
 
 		.label {
-			font-size: 0.78rem;
+			font-size: var(--text-caption);
 		}
 	}
 </style>

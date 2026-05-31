@@ -93,7 +93,7 @@
 	.axis-x {
 		fill: var(--text-subtle);
 		font-size: 9px;
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 	}
 
 	.axis-y {
