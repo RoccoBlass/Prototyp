@@ -92,7 +92,11 @@
 	--shadow-md: 0 6px 18px rgb(var(--gray-900-rgb) / 0.06), 0 12px 32px rgb(var(--gray-900-rgb) / 0.05);
 	--shadow-lg: 0 18px 50px rgb(var(--gray-900-rgb) / 0.14);
 	--shadow-brand: 0 8px 20px rgb(var(--green-600-rgb) / 0.3);
-	--focus-ring: 0 0 0 4px rgb(var(--green-600-rgb) / 0.14);
+	--focus-ring: 0 0 0 4px rgb(var(--green-600-rgb) / 0.16);
+
+	/* --- Transitions (Micro-Interactions) --- */
+	--transition: 180ms ease-out;
+	--transition-fast: 150ms ease-out;
 
 	/* --- Semantische Aliase (auf Primitive gemappt) --- */
 	--bg: var(--gray-50);
@@ -157,4 +161,53 @@ input[type='number']::-webkit-inner-spin-button {
 input[type='number'] {
 	-moz-appearance: textfield;
 	appearance: textfield;
+}
+
+/* =====================================================================
+   Micro-Interactions
+   ===================================================================== */
+
+/* Klarer Tastatur-Focus für Accessibility (nur bei Tastatur-Navigation,
+   nicht bei Maus-Klick). Liegt zusätzlich über den weichen Feld-Ringen. */
+:focus-visible {
+	outline: 2px solid var(--brand);
+	outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) {
+	outline: none;
+}
+
+/* Weiche, einheitliche Übergänge für interaktive Elemente.
+   Element-qualifizierte Selektoren (z. B. input.input) überschreiben gezielt
+   die in den Komponenten definierten Basisregeln. */
+button,
+a,
+.input,
+.search,
+.amount {
+	transition-timing-function: ease-out;
+}
+
+input.input,
+select.input,
+textarea.input,
+input.search,
+input.amount,
+input.amount-input {
+	transition:
+		border-color var(--transition-fast),
+		background var(--transition-fast),
+		box-shadow var(--transition-fast);
+}
+
+/* Sanfter Hover-State für Formularfelder (deutlicher als nur grauer Hintergrund) */
+input.input:hover:not(:focus),
+select.input:hover:not(:focus),
+textarea.input:hover:not(:focus),
+input.search:hover:not(:focus),
+input.amount:hover:not(:focus),
+input.amount-input:hover:not(:focus) {
+	border-color: var(--border-strong);
+	background: var(--surface);
 }

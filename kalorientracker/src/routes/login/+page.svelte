@@ -367,7 +367,7 @@
 	.input:focus {
 		background: var(--surface);
 		border-color: var(--brand);
-		box-shadow: 0 0 0 4px rgb(var(--green-600-rgb) / 0.14);
+		box-shadow: var(--focus-ring);
 	}
 
 	.input-wrap:focus-within .input-icon {
