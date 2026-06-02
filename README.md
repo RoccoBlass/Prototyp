@@ -86,7 +86,7 @@ _(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und 
 | `/login` | Registrierung & Anmeldung |
 | `/onboarding` | Ersteinrichtung: Körperdaten → automatisch berechnetes Ziel |
 | `/` | Dashboard (Tagesüberblick: Kalorienring, Makros, Einträge) |
-| `/add` | Hinzufügen-Hub mit Tabs „Mahlzeiten", „Lebensmittel" und „Foto" (KI-Schätzung) |
+| `/add` | Hinzufügen-Hub mit Tabs „Mahlzeiten", „Lebensmittel" und „Foto analysieren" (KI-Schätzung) |
 | `/add/food/new`, `/add/food/[id]` | Eigenes Lebensmittel anlegen / bearbeiten |
 | `/add/meal/new`, `/add/meal/[id]` | Mahlzeit aus Lebensmitteln zusammenstellen / bearbeiten |
 | `/weight` | Gewichtstracker mit Verlaufs-Chart |
@@ -310,9 +310,9 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 
 ### 4.8 KI-Nährwertschätzung aus Foto
 
-- **Beschreibung & Nutzen:** Auf der „Hinzufügen"-Seite gibt es neben *Mahlzeiten* und *Lebensmittel* eine dritte Kategorie **„Foto"**. Man nimmt ein Foto eines Lebensmittels oder Gerichts auf (oder wählt eines aus), und ein **multimodales Sprachmodell schätzt daraus die Nährwerte je 100 g/ml** (Kalorien, Protein, Kohlenhydrate, Fett). Die Werte erscheinen in einem editierbaren Formular – man prüft/korrigiert sie und kann den Eintrag **direkt für heute erfassen** oder **als wiederverwendbares Lebensmittel speichern**. Das senkt genau die in der Evaluation kritisierte Hürde der manuellen Nährwerteingabe.
+- **Beschreibung & Nutzen:** Auf der „Hinzufügen"-Seite gibt es neben *Mahlzeiten* und *Lebensmittel* eine dritte Kategorie **„Foto analysieren"**. Ein Klick auf den Tab öffnet **direkt** die Kamera (mobil, via `capture`) bzw. den Dateidialog (Desktop). Aus dem aufgenommenen oder gewählten Foto schätzt ein **multimodales Sprachmodell die Nährwerte je 100 g/ml** (Kalorien, Protein, Kohlenhydrate, Fett). Die Werte erscheinen in einem editierbaren Formular – man prüft/korrigiert sie und kann den Eintrag **direkt für heute erfassen** oder **als wiederverwendbares Lebensmittel speichern**. Das senkt genau die in der Evaluation kritisierte Hürde der manuellen Nährwerteingabe.
 - **Wo umgesetzt:**
-  - **Frontend:** dritter Tab „Foto" in [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) mit der Komponente [src/lib/components/PhotoScan.svelte](kalorientracker/src/lib/components/PhotoScan.svelte) – Foto wird im Browser verkleinert, der Schätz-Endpunkt per `fetch` aufgerufen, die Felder sind editierbar mit Live-Vorschau der Portion.
+  - **Frontend:** dritter Tab „Foto analysieren" in [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) – ein natives Datei-Label mit `capture="environment"`, das beim Klick direkt Kamera/Dateidialog öffnet – mit der Komponente [src/lib/components/PhotoScan.svelte](kalorientracker/src/lib/components/PhotoScan.svelte) – Foto wird im Browser verkleinert, der Schätz-Endpunkt per `fetch` aufgerufen, die Felder sind editierbar mit Live-Vorschau der Portion.
   - **Backend:** Server-Endpunkt [src/routes/api/estimate-nutrition/+server.js](kalorientracker/src/routes/api/estimate-nutrition/+server.js) und KI-Client [src/lib/server/vision.js](kalorientracker/src/lib/server/vision.js) (Vision-Prompt, Aufruf der OpenRouter-API, robustes JSON-Parsing, Validierung/Begrenzung der Werte). Speichern/Eintragen über die Actions `saveScannedFood` bzw. `logFood` in [src/routes/add/+page.server.js](kalorientracker/src/routes/add/+page.server.js).
   - **Konfiguration:** dasselbe `OPENROUTER_API_KEY`/`OPENROUTER_MODEL` wie der KI-Coach; das Modell muss Bildeingabe (Vision) unterstützen (getestet mit `google/gemini-3.1-flash-lite`).
 - **Technik:** OpenRouter wird über die OpenAI-kompatible Chat-Completions-API mit einer **Bild-Nachricht** (Foto als data-URL) angesprochen. Die Antwort ist striktes JSON, das serverseitig validiert wird. Schlägt der Aufruf fehl oder wird kein Lebensmittel erkannt, bleibt die App nutzbar und zeigt eine verständliche Meldung.

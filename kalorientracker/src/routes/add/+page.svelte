@@ -10,6 +10,17 @@
 	const initialTab = page.url.searchParams.get('tab');
 	let tab = $state(initialTab === 'foods' ? 'foods' : initialTab === 'scan' ? 'scan' : 'meals');
 
+	// Foto direkt beim Klick auf den Tab „Foto analysieren" aufnehmen/wählen.
+	let scanFile = $state(null);
+	function onScanFile(event) {
+		const file = event.currentTarget.files?.[0];
+		if (file) {
+			scanFile = file;
+			tab = 'scan';
+		}
+		event.currentTarget.value = '';
+	}
+
 	let mealQuery = $state('');
 	let foodQuery = $state('');
 
@@ -125,10 +136,11 @@
 		<button type="button" class="tab" class:active={tab === 'foods'} onclick={() => (tab = 'foods')}>
 			Lebensmittel
 		</button>
-		<button type="button" class="tab tab-foto" class:active={tab === 'scan'} onclick={() => (tab = 'scan')}>
+		<label class="tab tab-foto" class:active={tab === 'scan'} onclick={() => (tab = 'scan')}>
 			<Icon name="camera" size={15} />
-			<span>Foto</span>
-		</button>
+			<span>Foto analysieren</span>
+			<input type="file" accept="image/*" capture="environment" hidden onchange={onScanFile} />
+		</label>
 	</div>
 
 	{#if tab === 'meals'}
@@ -234,7 +246,7 @@
 		</section>
 	{:else}
 		<section class="panel">
-			<PhotoScan {selectedType} />
+			<PhotoScan {selectedType} incomingFile={scanFile} />
 		</section>
 	{/if}
 </div>
@@ -365,6 +377,8 @@
 		align-items: center;
 		justify-content: center;
 		gap: var(--space-1);
+		flex: 1.4;
+		white-space: nowrap;
 	}
 
 	.panel {

@@ -2,7 +2,7 @@
 	import Icon from './Icon.svelte';
 	import { scaleNutrition } from '$lib/food.js';
 
-	let { selectedType } = $props();
+	let { selectedType, incomingFile = null } = $props();
 
 	let photo = $state('');
 	let photoError = $state('');
@@ -63,8 +63,7 @@
 		});
 	}
 
-	async function onFile(event) {
-		const file = event.currentTarget.files?.[0];
+	async function processFile(file) {
 		if (!file) return;
 		photoError = '';
 		apiError = '';
@@ -79,6 +78,21 @@
 			photoError = 'Bild konnte nicht verarbeitet werden.';
 		}
 	}
+
+	function onFile(event) {
+		processFile(event.currentTarget.files?.[0]);
+	}
+
+	// Foto, das bereits beim Klick auf den Tab „Foto analysieren" gewählt/
+	// aufgenommen wurde, übernehmen.
+	let lastIncoming = null;
+	$effect(() => {
+		const f = incomingFile;
+		if (f && f !== lastIncoming) {
+			lastIncoming = f;
+			processFile(f);
+		}
+	});
 
 	async function estimate() {
 		if (!photo || estimating) return;
@@ -132,7 +146,7 @@
 		<label class="photo-drop">
 			<Icon name="camera" size={24} />
 			<span>Foto aufnehmen oder auswählen</span>
-			<input type="file" accept="image/*" onchange={onFile} hidden />
+			<input type="file" accept="image/*" capture="environment" onchange={onFile} hidden />
 		</label>
 	{:else}
 		<div class="photo-preview">
