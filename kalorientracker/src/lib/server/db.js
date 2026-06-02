@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from 'mongodb';
-import { DB_URI } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 let db;
 let connectPromise;
@@ -28,7 +28,11 @@ async function ensureIndexes(database) {
 }
 
 async function openDb() {
-	const mongo = new MongoClient(DB_URI);
+	const uri = env.DB_URI;
+	if (!uri) {
+		throw new Error('DB_URI ist nicht gesetzt. Bitte die Umgebungsvariable im Hosting hinterlegen.');
+	}
+	const mongo = new MongoClient(uri);
 	await mongo.connect();
 	// Eigene DB für den Prototyp-Deploy – trennt die Demo-Daten von der
 	// Produktiv-App (gleicher Connection-String, anderer DB-Name).
