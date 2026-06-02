@@ -18,10 +18,10 @@ export async function load({ locals }) {
 export const actions = {
 	logMeal: async ({ request, locals }) => {
 		const data = await request.formData();
-		const mealId = data.get('mealId');
+		const mealId = String(data.get('mealId') ?? '');
 		const mealType = String(data.get('mealType') ?? '');
 
-		if (!mealId) {
+		if (!/^[a-f0-9]{24}$/i.test(mealId)) {
 			return fail(400, { error: 'Bitte eine Mahlzeit wählen.' });
 		}
 		if (!MEAL_TYPE_VALUES.includes(mealType)) {

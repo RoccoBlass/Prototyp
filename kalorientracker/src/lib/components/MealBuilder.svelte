@@ -134,7 +134,7 @@
 			<span class="card-icon"><Icon name="utensils" size={18} /></span>
 			<div>
 				<h2>Zutaten</h2>
-				<p>{items.length} {items.length === 1 ? 'Lebensmittel' : 'Lebensmittel'}</p>
+				<p>{items.length} Lebensmittel</p>
 			</div>
 		</header>
 

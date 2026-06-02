@@ -92,7 +92,7 @@
 		</div>
 
 		{#if feedback}
-			<p class="coach-text">{feedback}</p>
+			<p class="coach-text" role="status">{feedback}</p>
 		{:else if coachError}
 			<p class="coach-error" role="alert">{coachError}</p>
 		{/if}

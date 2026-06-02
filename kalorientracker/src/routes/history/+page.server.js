@@ -29,7 +29,7 @@ export const actions = {
 	delete: async ({ request, locals }) => {
 		const data = await request.formData();
 		const id = data.get('id');
-		if (id) {
+		if (typeof id === 'string' && /^[a-f0-9]{24}$/i.test(id)) {
 			await deleteEntry(locals.user.id, id);
 		}
 		redirect(303, '/history');

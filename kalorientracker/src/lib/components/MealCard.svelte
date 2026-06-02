@@ -75,7 +75,8 @@
 				class="expand"
 				class:open={expanded}
 				onclick={() => (expanded = !expanded)}
-				aria-label="Zutaten anzeigen"
+				aria-expanded={expanded}
+				aria-label={expanded ? 'Zutaten ausblenden' : 'Zutaten anzeigen'}
 			>
 				<Icon name="chevron-down" size={16} />
 			</button>
