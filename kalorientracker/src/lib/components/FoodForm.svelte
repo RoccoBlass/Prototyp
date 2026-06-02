@@ -322,8 +322,10 @@
 
 	.photo-preview img {
 		width: 100%;
-		max-height: 220px;
-		object-fit: cover;
+		max-height: 240px;
+		object-fit: contain;
+		background: var(--surface-2);
+		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
 	}
 

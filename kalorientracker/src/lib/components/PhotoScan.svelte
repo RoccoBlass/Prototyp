@@ -312,8 +312,11 @@
 
 	.photo-preview img {
 		width: 100%;
-		max-height: 260px;
-		object-fit: cover;
+		max-height: 300px;
+		/* ganzes Foto zeigen statt beschneiden – dezenter Rahmen/Hintergrund */
+		object-fit: contain;
+		background: var(--surface-2);
+		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
 	}
 
