@@ -1,28 +1,55 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { DB_URI } from '$env/static/private';
 
-let client;
 let db;
 let connectPromise;
+let indexesEnsured = false;
+
+// Cloudflare Workers: eine DB-Verbindung darf NICHT über Requests hinweg
+// wiederverwendet werden – sonst hängt sich der nächste Request auf. Dort
+// deshalb pro Aufruf frisch verbinden; auf Node (Netlify) bleibt sie gecacht.
+const IS_WORKERS =
+	typeof globalThis.WebSocketPair !== 'undefined' ||
+	globalThis.navigator?.userAgent === 'Cloudflare-Workers';
+
+async function ensureIndexes(database) {
+	if (indexesEnsured) return;
+	try {
+		await Promise.all([
+			database.collection('mealTemplates').createIndex({ name: 1 }),
+			database.collection('mealTemplates').createIndex({ updatedAt: -1 }),
+			database.collection('entries').createIndex({ date: 1 }),
+			database.collection('entries').createIndex({ createdAt: -1 })
+		]);
+		indexesEnsured = true;
+	} catch (error) {
+		console.error('Index-Erstellung fehlgeschlagen:', error);
+	}
+}
+
+async function openDb() {
+	const mongo = new MongoClient(DB_URI);
+	await mongo.connect();
+	// Eigene DB für den Prototyp-Deploy – trennt die Demo-Daten von der
+	// Produktiv-App (gleicher Connection-String, anderer DB-Name).
+	const database = mongo.db('KalorienTrackerProto');
+	await ensureIndexes(database);
+	return database;
+}
 
 async function connect() {
+	if (IS_WORKERS) return openDb();
 	if (db) return db;
 	if (!connectPromise) {
-		connectPromise = (async () => {
-			client = new MongoClient(DB_URI);
-			await client.connect();
-			// Eigene DB für den Prototyp-Deploy – trennt die Demo-Daten von der
-			// Produktiv-App (gleicher Connection-String, anderer DB-Name).
-			db = client.db('KalorienTrackerProto');
-			await Promise.all([
-				db.collection('mealTemplates').createIndex({ name: 1 }),
-				db.collection('mealTemplates').createIndex({ updatedAt: -1 }),
-				db.collection('entries').createIndex({ date: 1 }),
-				db.collection('entries').createIndex({ createdAt: -1 })
-			]);
-			await migrateLegacyMealsIfNeeded();
-			return db;
-		})();
+		connectPromise = openDb()
+			.then((d) => {
+				db = d;
+				return d;
+			})
+			.catch((error) => {
+				connectPromise = undefined;
+				throw error;
+			});
 	}
 	return connectPromise;
 }
