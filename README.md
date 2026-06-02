@@ -166,13 +166,13 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 
 **Technologie-Stack:** SvelteKit (Svelte 5 mit Runes-Syntax, JavaScript ohne TypeScript), MongoDB Atlas über den offiziellen `mongodb`-Treiber, Plain CSS mit Custom Properties (kein UI-Framework). Vite als Build-Tool, Cloudflare-Adapter (`adapter-cloudflare`) für das Deployment auf Cloudflare Pages. Passwort-Hashing mit dem Node-Kern (`node:crypto`, scrypt) ohne externe Auth-Bibliothek. Anbindung an die öffentliche **Open-Food-Facts**-Datenbank (ohne API-Key).
 
-**Tooling:** VS Code mit Svelte-Erweiterung, Node.js + npm lokal, MongoDB Atlas in der Cloud, Cloudflare Pages als Hosting (siehe [wrangler.toml](wrangler.toml)). Der Einsatz von KI ist in **Kapitel 6 (KI-Deklaration)** beschrieben.
+**Tooling:** VS Code mit Svelte-Erweiterung, Node.js + npm lokal, MongoDB Atlas in der Cloud, Cloudflare Pages als Hosting (siehe [wrangler.toml](kalorientracker/wrangler.toml)). Der Einsatz von KI ist in **Kapitel 6 (KI-Deklaration)** beschrieben.
 
 **Struktur & Komponenten:**
-- Routen unter [src/routes/](src/routes/): `+layout.svelte` (Navigation, nur für angemeldete & eingerichtete Nutzer:innen), je Bereich `+page.svelte` (UI) und `+page.server.js` (Loader / Form-Actions). `src/hooks.server.js` löst die Session auf und schützt die Routen.
-- Wiederverwendbare Komponenten unter [src/lib/components/](src/lib/components/): `CalorieBar` (Kalorienring), `NutrientSummary` (Makros), `MealCard` (Tageseintrag, bei Mahlzeiten aufklappbar), `FoodForm` (Lebensmittel-Formular inkl. Foto-Upload), `MealBuilder` (Zutaten-Komposition mit Live-Summe), `WeightChart` (SVG-Verlaufsdiagramm), `Icon` (Inline-SVG-Set, an Lucide angelehnt).
-- Reine Hilfslogik unter [src/lib/](src/lib/): `nutrition.js` (Bedarfsberechnung nach Mifflin-St Jeor), `food.js` (Nährwert-Skalierung, Mahlzeiten-Summen, Mahlzeitentypen) – sowohl client- als auch serverseitig nutzbar.
-- Server-only unter [src/lib/server/](src/lib/server/): `db.js` (alle MongoDB-Zugriffe gekapselt), `auth.js` (scrypt-Hashing, Sessions), `foodInput.js` / `mealInput.js` (Eingabe-Validierung).
+- Routen unter [src/routes/](kalorientracker/src/routes/): `+layout.svelte` (Navigation, nur für angemeldete & eingerichtete Nutzer:innen), je Bereich `+page.svelte` (UI) und `+page.server.js` (Loader / Form-Actions). `src/hooks.server.js` löst die Session auf und schützt die Routen.
+- Wiederverwendbare Komponenten unter [src/lib/components/](kalorientracker/src/lib/components/): `CalorieBar` (Kalorienring), `NutrientSummary` (Makros), `MealCard` (Tageseintrag, bei Mahlzeiten aufklappbar), `FoodForm` (Lebensmittel-Formular inkl. Foto-Upload), `MealBuilder` (Zutaten-Komposition mit Live-Summe), `WeightChart` (SVG-Verlaufsdiagramm), `Icon` (Inline-SVG-Set, an Lucide angelehnt).
+- Reine Hilfslogik unter [src/lib/](kalorientracker/src/lib/): `nutrition.js` (Bedarfsberechnung nach Mifflin-St Jeor), `food.js` (Nährwert-Skalierung, Mahlzeiten-Summen, Mahlzeitentypen) – sowohl client- als auch serverseitig nutzbar.
+- Server-only unter [src/lib/server/](kalorientracker/src/lib/server/): `db.js` (alle MongoDB-Zugriffe gekapselt), `auth.js` (scrypt-Hashing, Sessions), `foodInput.js` / `mealInput.js` (Eingabe-Validierung).
 - Kein globaler Store: Daten kommen pro Route vom Server-Loader; der angemeldete Benutzer kommt aus `event.locals.user` (im Hook gesetzt) und über den Layout-Loader in alle Seiten.
 
 **Daten & Schnittstellen:**
@@ -184,12 +184,12 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
   - `entries` – Tageseinträge (`kind`: `food`/`meal`, Menge/Einheit, Nährwerte, Mahlzeitentyp, Datum; bei Mahlzeiten zusätzlich der Zutaten-Snapshot).
   - `weightEntries` – Gewicht pro Tag (ein Eintrag je Benutzer und Tag, eindeutiger Index).
 - Indizes u. a.: `users.email` (unique), `sessions.expiresAt` (TTL), `foods/meals/entries` je `userId`, `weightEntries` je `userId+date` (unique).
-- **Externe Schnittstelle:** Der Server-Endpunkt [`/api/food-search`](src/routes/api/food-search/+server.js) fragt Open Food Facts ab (primär die neue Such-Engine „search-a-licious", Fallback auf die ältere API), bevorzugt deutsche Produktnamen und sortiert Produkte aus DE/CH/AT nach vorne. Die Abfrage läuft serverseitig (kein CORS, kein API-Key).
-- **Externe KI-Schnittstelle:** Der Endpunkt [`/api/coach`](src/routes/api/coach/+server.js) sendet die Tageswerte (Ziel + Tagessummen) an **OpenRouter** (OpenAI-kompatible API) und zeigt das zurückgegebene Coach-Feedback an. Schlüssel und Modell liegen in der `.env` (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`); der Aufruf erfolgt serverseitig und nur auf Nutzer-Klick (siehe Kap. 4.7).
+- **Externe Schnittstelle:** Der Server-Endpunkt [`/api/food-search`](kalorientracker/src/routes/api/food-search/+server.js) fragt Open Food Facts ab (primär die neue Such-Engine „search-a-licious", Fallback auf die ältere API), bevorzugt deutsche Produktnamen und sortiert Produkte aus DE/CH/AT nach vorne. Die Abfrage läuft serverseitig (kein CORS, kein API-Key).
+- **Externe KI-Schnittstelle:** Der Endpunkt [`/api/coach`](kalorientracker/src/routes/api/coach/+server.js) sendet die Tageswerte (Ziel + Tagessummen) an **OpenRouter** (OpenAI-kompatible API) und zeigt das zurückgegebene Coach-Feedback an. Schlüssel und Modell liegen in der `.env` (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`); der Aufruf erfolgt serverseitig und nur auf Nutzer-Klick (siehe Kap. 4.7).
 - Schreiboperationen laufen über SvelteKit-Form-Actions (progressively enhanced).
 - Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden.
 
-**Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime). Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` hochgeladen (Hilfsskript [`deploy.sh`](../deploy.sh) im Repo-Root); die Projekte bleiben mit dem GitHub-Repository verknüpft. Beide Seiten sind live:
+**Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime). Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` hochgeladen (Hilfsskript [`deploy.sh`](deploy.sh) im Repo-Root); die Projekte bleiben mit dem GitHub-Repository verknüpft. Beide Seiten sind live:
 - **Hauptseite (Branch `main`):** https://kalorientracker-main.pages.dev
 - **Erster Prototyp (Branch `prototyp-1`):** https://kalorientracker-prototyp.pages.dev
 
@@ -230,8 +230,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.1 Benutzerkonten mit Login & Registrierung
 - **Beschreibung & Nutzen:** Registrierung und Anmeldung mit E-Mail und Passwort. Erst dadurch sind die Daten pro Person getrennt und über Geräte hinweg nutzbar. Passwörter werden mit scrypt gehasht (kein Klartext), Sessions laufen über ein httpOnly-Cookie mit automatischem Ablauf.
 - **Wo umgesetzt:**
-  - **Frontend:** [src/routes/login/+page.svelte](src/routes/login/+page.svelte) (Umschalter Anmelden/Registrieren), Abmelden im Profil [src/routes/profile/+page.svelte](src/routes/profile/+page.svelte).
-  - **Backend:** [src/lib/server/auth.js](src/lib/server/auth.js) (Hashing, Sessions), [src/routes/login/+page.server.js](src/routes/login/+page.server.js), [src/routes/logout/+server.js](src/routes/logout/+server.js), Zugriffsschutz in [src/hooks.server.js](src/hooks.server.js).
+  - **Frontend:** [src/routes/login/+page.svelte](kalorientracker/src/routes/login/+page.svelte) (Umschalter Anmelden/Registrieren), Abmelden im Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte).
+  - **Backend:** [src/lib/server/auth.js](kalorientracker/src/lib/server/auth.js) (Hashing, Sessions), [src/routes/login/+page.server.js](kalorientracker/src/routes/login/+page.server.js), [src/routes/logout/+server.js](kalorientracker/src/routes/logout/+server.js), Zugriffsschutz in [src/hooks.server.js](kalorientracker/src/hooks.server.js).
   - **Datenbank:** Collections `users` (eindeutiger E-Mail-Index) und `sessions` (TTL-Index).
 - **Referenz:** vgl. Kap. 3.4.2 (Daten & Schnittstellen).
 - **Aus Evaluation abgeleitet?:** Nein – Voraussetzung für Personalisierung und die übrigen Erweiterungen.
@@ -239,8 +239,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.2 Onboarding mit automatischer Bedarfsberechnung
 - **Beschreibung & Nutzen:** Ein 5-Schritt-Wizard erfragt Geschlecht, Alter, Grösse, Gewicht, Aktivitätsniveau und Ziel (Abnehmen/Halten/Aufbau) und berechnet daraus Kalorien- und Makroziel. Methode: Grundumsatz nach **Mifflin-St Jeor** → Gesamtbedarf über den Aktivitätsfaktor → Ziel-Anpassung (Defizit/Überschuss) → Makros (Protein nach Körpergewicht, Fett ~27,5 %, Rest Kohlenhydrate; 4/4/9 kcal je g). Im Profil lassen sich Werte ändern und das Ziel neu berechnen oder die Makros manuell anpassen.
 - **Wo umgesetzt:**
-  - **Frontend:** [src/routes/onboarding/+page.svelte](src/routes/onboarding/+page.svelte) (Wizard mit Live-Vorschau), Profil [src/routes/profile/+page.svelte](src/routes/profile/+page.svelte).
-  - **Backend:** Berechnungslogik [src/lib/nutrition.js](src/lib/nutrition.js); Speicherung über [src/routes/onboarding/+page.server.js](src/routes/onboarding/+page.server.js) und [src/routes/profile/+page.server.js](src/routes/profile/+page.server.js); Onboarding-Zwang im Hook.
+  - **Frontend:** [src/routes/onboarding/+page.svelte](kalorientracker/src/routes/onboarding/+page.svelte) (Wizard mit Live-Vorschau), Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte).
+  - **Backend:** Berechnungslogik [src/lib/nutrition.js](kalorientracker/src/lib/nutrition.js); Speicherung über [src/routes/onboarding/+page.server.js](kalorientracker/src/routes/onboarding/+page.server.js) und [src/routes/profile/+page.server.js](kalorientracker/src/routes/profile/+page.server.js); Onboarding-Zwang im Hook.
   - **Datenbank:** Körperdaten und berechnete Ziele am `users`-Dokument.
 - **Referenz:** Kap. 3.4.1 (Designentscheidungen).
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid (die Usability-Evaluation steht noch aus, siehe Kap. 3.5).
@@ -248,8 +248,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.3 Lebensmittel-Datenbank (Open Food Facts) & eigene Lebensmittel mit Foto
 - **Beschreibung & Nutzen:** Lebensmittel können in einer öffentlichen Datenbank gesucht und mit Mengenangabe (g/ml) erfasst werden. Alternativ legt man eigene Lebensmittel an (Nährwerte je 100 g/ml) und kann ein Foto hochladen. Die Suche ist auf deutsche/Schweizer Produkte optimiert und nutzt die neue Such-Engine von Open Food Facts mit Fallback.
 - **Wo umgesetzt:**
-  - **Frontend:** [src/routes/add/+page.svelte](src/routes/add/+page.svelte) (Suche + Tag-Logging), [src/lib/components/FoodForm.svelte](src/lib/components/FoodForm.svelte) (Formular + Foto-Verkleinerung im Browser).
-  - **Backend:** Server-Endpunkt [src/routes/api/food-search/+server.js](src/routes/api/food-search/+server.js); Lebensmittel-Routen [src/routes/add/food/new/+page.server.js](src/routes/add/food/new/+page.server.js) und [src/routes/add/food/[id]/+page.server.js](src/routes/add/food/%5Bid%5D/+page.server.js); Validierung [src/lib/server/foodInput.js](src/lib/server/foodInput.js).
+  - **Frontend:** [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) (Suche + Tag-Logging), [src/lib/components/FoodForm.svelte](kalorientracker/src/lib/components/FoodForm.svelte) (Formular + Foto-Verkleinerung im Browser).
+  - **Backend:** Server-Endpunkt [src/routes/api/food-search/+server.js](kalorientracker/src/routes/api/food-search/+server.js); Lebensmittel-Routen [src/routes/add/food/new/+page.server.js](kalorientracker/src/routes/add/food/new/+page.server.js) und [src/routes/add/food/[id]/+page.server.js](kalorientracker/src/routes/add/food/%5Bid%5D/+page.server.js); Validierung [src/lib/server/foodInput.js](kalorientracker/src/lib/server/foodInput.js).
   - **Datenbank:** Collection `foods` (eigene Lebensmittel inkl. Foto als Base64).
 - **Referenz:** Kap. 3.4.2 (Externe Schnittstelle).
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
@@ -257,8 +257,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.4 Mahlzeiten aus mehreren Lebensmitteln
 - **Beschreibung & Nutzen:** Eine Mahlzeit wird aus mehreren Lebensmitteln mit Mengen zusammengestellt (aus den eigenen Lebensmitteln, der Open-Food-Facts-Suche oder manuell). Die Gesamtnährwerte werden live berechnet. Eine gespeicherte Mahlzeit lässt sich mit einem Klick einem Tag hinzufügen und erscheint dort als aufklappbarer Block.
 - **Wo umgesetzt:**
-  - **Frontend:** [src/lib/components/MealBuilder.svelte](src/lib/components/MealBuilder.svelte) (Zutaten-Editor mit Live-Summe), [src/routes/add/meal/new/+page.svelte](src/routes/add/meal/new/+page.svelte) & [src/routes/add/meal/[id]/+page.svelte](src/routes/add/meal/%5Bid%5D/+page.svelte), Anzeige in [src/lib/components/MealCard.svelte](src/lib/components/MealCard.svelte).
-  - **Backend:** Mahlzeiten-Routen + Validierung [src/lib/server/mealInput.js](src/lib/server/mealInput.js); Berechnung in [src/lib/food.js](src/lib/food.js); CRUD in [src/lib/server/db.js](src/lib/server/db.js).
+  - **Frontend:** [src/lib/components/MealBuilder.svelte](kalorientracker/src/lib/components/MealBuilder.svelte) (Zutaten-Editor mit Live-Summe), [src/routes/add/meal/new/+page.svelte](kalorientracker/src/routes/add/meal/new/+page.svelte) & [src/routes/add/meal/[id]/+page.svelte](kalorientracker/src/routes/add/meal/%5Bid%5D/+page.svelte), Anzeige in [src/lib/components/MealCard.svelte](kalorientracker/src/lib/components/MealCard.svelte).
+  - **Backend:** Mahlzeiten-Routen + Validierung [src/lib/server/mealInput.js](kalorientracker/src/lib/server/mealInput.js); Berechnung in [src/lib/food.js](kalorientracker/src/lib/food.js); CRUD in [src/lib/server/db.js](kalorientracker/src/lib/server/db.js).
   - **Datenbank:** Collection `meals` (Zutaten-Snapshot + Gesamtnährwerte); Tageseinträge mit `kind: 'meal'`.
 - **Referenz:** Kap. 2 (Kernfunktionalität).
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
@@ -266,8 +266,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.5 Gewichtstracker mit Verlaufs-Chart
 - **Beschreibung & Nutzen:** Tägliche Gewichtserfassung mit einem SVG-Verlaufsdiagramm (ohne externe Chart-Bibliothek). Das Tracken ändert das Kalorienziel bewusst nicht; auf Wunsch lässt sich das Ziel aber mit dem aktuellen Gewicht neu berechnen.
 - **Wo umgesetzt:**
-  - **Frontend:** [src/routes/weight/+page.svelte](src/routes/weight/+page.svelte), Diagramm [src/lib/components/WeightChart.svelte](src/lib/components/WeightChart.svelte).
-  - **Backend:** [src/routes/weight/+page.server.js](src/routes/weight/+page.server.js) (Erfassen/Löschen, „neu berechnen"-Action).
+  - **Frontend:** [src/routes/weight/+page.svelte](kalorientracker/src/routes/weight/+page.svelte), Diagramm [src/lib/components/WeightChart.svelte](kalorientracker/src/lib/components/WeightChart.svelte).
+  - **Backend:** [src/routes/weight/+page.server.js](kalorientracker/src/routes/weight/+page.server.js) (Erfassen/Löschen, „neu berechnen"-Action).
   - **Datenbank:** Collection `weightEntries` (ein Eintrag pro Tag, eindeutiger Index).
 - **Referenz:** Kap. 3.4.1.
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
@@ -275,8 +275,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.6 Wählbares Farbschema (Dark/Light Mode)
 - **Beschreibung & Nutzen:** Die App bietet ein dunkles und ein helles Design. Standard ist **Dark Mode**; im Profil lässt sich das Farbschema pro Benutzer umschalten und wird dauerhaft am Konto gespeichert. Das gewählte Schema wird bereits **serverseitig** in den `<html>`-Tag geschrieben (`data-theme`), sodass die Seite ohne kurzes Aufblitzen des falschen Designs lädt. Technisch umgesetzt über die semantischen CSS-Custom-Properties: Nur die Token-Werte werden je Schema umgelegt, alle Komponenten adaptieren automatisch (Farbwerte auf WCAG-AA-Kontrast ausgelegt). Im Profil sorgt eine Live-Vorschau dafür, dass die Auswahl sofort sichtbar ist.
 - **Wo umgesetzt:**
-  - **Frontend:** Umschalter „Darstellung" im Profil [src/routes/profile/+page.svelte](src/routes/profile/+page.svelte) (mit Live-Vorschau); Design-Tokens inkl. Dark-Variante in [src/app.css](src/app.css); `data-theme`-Platzhalter in [src/app.html](src/app.html).
-  - **Backend:** Serverseitiges Setzen des Schemas in [src/hooks.server.js](src/hooks.server.js) (`transformPageChunk`, Default Dark); Validierung & Speicherung in [src/routes/profile/+page.server.js](src/routes/profile/+page.server.js); Default und Serialisierung in [src/lib/server/db.js](src/lib/server/db.js) und [src/lib/server/auth.js](src/lib/server/auth.js).
+  - **Frontend:** Umschalter „Darstellung" im Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte) (mit Live-Vorschau); Design-Tokens inkl. Dark-Variante in [src/app.css](kalorientracker/src/app.css); `data-theme`-Platzhalter in [src/app.html](kalorientracker/src/app.html).
+  - **Backend:** Serverseitiges Setzen des Schemas in [src/hooks.server.js](kalorientracker/src/hooks.server.js) (`transformPageChunk`, Default Dark); Validierung & Speicherung in [src/routes/profile/+page.server.js](kalorientracker/src/routes/profile/+page.server.js); Default und Serialisierung in [src/lib/server/db.js](kalorientracker/src/lib/server/db.js) und [src/lib/server/auth.js](kalorientracker/src/lib/server/auth.js).
   - **Datenbank:** Feld `theme` (`'dark'`/`'light'`, Default `dark`) am `users`-Dokument.
 - **Referenz:** Kap. 3.4.1 (Designentscheidungen: grünes Theming).
 
@@ -289,8 +289,8 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 4.7 KI-Coach: Tages-Feedback (OpenRouter)
 - **Beschreibung & Nutzen:** Auf dem Dashboard liefert ein **KI-Coach** auf Knopfdruck ein kurzes, motivierendes Feedback zum heutigen Tag samt einem konkreten Tipp. Die App schickt dazu die Tageswerte (Ziel + bisher gegessene Kalorien/Makros, Anzahl Einträge) an ein Sprachmodell und zeigt die Antwort an. Der Aufruf passiert **nur auf Klick** (keine Aufrufe/Kosten im Hintergrund); die Ausgabe ist ausdrücklich als Coaching/Schätzung, nicht als medizinische Beratung gekennzeichnet.
 - **Wo umgesetzt:**
-  - **Frontend:** „KI-Coach"-Karte auf dem Dashboard [src/routes/+page.svelte](src/routes/+page.svelte) (Button mit Lade- und Fehlerzustand, ruft den Endpunkt per `fetch` auf).
-  - **Backend:** Server-Endpunkt [src/routes/api/coach/+server.js](src/routes/api/coach/+server.js) (lädt die heutigen Einträge und berechnet die Summen serverseitig) und KI-Client [src/lib/server/coach.js](src/lib/server/coach.js) (Prompt-Aufbau + Aufruf der OpenRouter-API).
+  - **Frontend:** „KI-Coach"-Karte auf dem Dashboard [src/routes/+page.svelte](kalorientracker/src/routes/+page.svelte) (Button mit Lade- und Fehlerzustand, ruft den Endpunkt per `fetch` auf).
+  - **Backend:** Server-Endpunkt [src/routes/api/coach/+server.js](kalorientracker/src/routes/api/coach/+server.js) (lädt die heutigen Einträge und berechnet die Summen serverseitig) und KI-Client [src/lib/server/coach.js](kalorientracker/src/lib/server/coach.js) (Prompt-Aufbau + Aufruf der OpenRouter-API).
   - **Konfiguration:** `OPENROUTER_API_KEY` und `OPENROUTER_MODEL` in der `.env` (serverseitig über `$env/dynamic/private`, analog zu `DB_URI`).
 - **Technik:** OpenRouter wird über die **OpenAI-kompatible** Chat-Completions-API per `fetch` angesprochen – ohne zusätzliche Abhängigkeit. Fehlt der Schlüssel oder schlägt der Aufruf fehl, bleibt die App nutzbar und zeigt eine verständliche Meldung.
 - **Referenz:** Kap. 6 (KI-Deklaration – die App nutzt KI hier zur **Laufzeit**, nicht nur zur Entwicklung).
@@ -321,8 +321,8 @@ Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion
 ## 7. Anhang
 
 - **Quellen:**
-  - **Lebensmitteldaten:** [Open Food Facts](https://world.openfoodfacts.org/) – die Produktdaten stehen unter der **Open Database License (ODbL)**, einzelne Inhalte unter der Database Contents License; Bilder unter CC-BY-SA. Die Daten werden ausschliesslich abgefragt und angezeigt (Abfrage in [src/routes/api/food-search/+server.js](src/routes/api/food-search/+server.js)).
-  - **Icons:** Lucide (ISC/MIT-Lizenz), in [src/lib/components/Icon.svelte](src/lib/components/Icon.svelte) als Inline-SVG nachgebaut.
+  - **Lebensmitteldaten:** [Open Food Facts](https://world.openfoodfacts.org/) – die Produktdaten stehen unter der **Open Database License (ODbL)**, einzelne Inhalte unter der Database Contents License; Bilder unter CC-BY-SA. Die Daten werden ausschliesslich abgefragt und angezeigt (Abfrage in [src/routes/api/food-search/+server.js](kalorientracker/src/routes/api/food-search/+server.js)).
+  - **Icons:** Lucide (ISC/MIT-Lizenz), in [src/lib/components/Icon.svelte](kalorientracker/src/lib/components/Icon.svelte) als Inline-SVG nachgebaut.
   - **Berechnungsmethode:** Grundumsatz nach Mifflin-St Jeor; Aktivitätsfaktoren und Makro-Empfehlungen aus gängiger Ernährungs-/Sportwissenschaft.
   - **Doku:** SvelteKit (svelte.dev), MongoDB-Node-Treiber.
 - **Testskript & Materialien:** Usability-Evaluation – Vorbereitung unter `Usability-Evaluation/` _[nach Durchführung Testskript/Materialien verlinken]_.
@@ -332,7 +332,11 @@ Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion
 
 ## Setup & Entwicklung
 
+> Die App liegt im Unterordner [`kalorientracker/`](kalorientracker/); alle folgenden Befehle dort ausführen.
+
 ```sh
+cd kalorientracker
+
 # Abhängigkeiten installieren
 npm install
 
@@ -353,7 +357,7 @@ npm run preview
 
 ### Deployment
 
-Der Build wird lokal erzeugt und zu Cloudflare Pages hochgeladen. Das Skript [`deploy.sh`](../deploy.sh) (Repo-Root) erkennt den aktuellen Branch automatisch (`main` → Hauptseite, `prototyp-1` → Prototyp), baut und lädt hoch:
+Der Build wird lokal erzeugt und zu Cloudflare Pages hochgeladen. Das Skript [`deploy.sh`](deploy.sh) (Repo-Root) erkennt den aktuellen Branch automatisch (`main` → Hauptseite, `prototyp-1` → Prototyp), baut und lädt hoch:
 
 ```sh
 # einmalig: bei Cloudflare anmelden
