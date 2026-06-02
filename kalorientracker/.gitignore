@@ -29,3 +29,7 @@ vite.config.ts.timestamp-*
 Informationen/
 informationen/
 Usability-Evaluation/
+
+# wrangler local dev secrets
+.dev.vars
+.wrangler/
