@@ -4,11 +4,10 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit()],
 	build: {
-		// mongodb hat zirkuläre CommonJS-Abhängigkeiten. Ohne strictRequires
-		// bricht das gebündelte read_preference.js auf Cloudflares Workers-
-		// Runtime ("ReadPreference is not a constructor"), weil ein static
-		// initializer vor der Klassendefinition läuft. strictRequires erzwingt
-		// geordnetes, lazy CommonJS-Wrapping und behebt das.
+		// Cloudflares Linux-Build mangelt mit esbuild-Minify die zirkulären
+		// CommonJS-Klassen von mongodb ("ReadPreference is not a constructor").
+		// Minify aus + strictRequires = stabiles, deterministisches Bundle.
+		minify: false,
 		commonjsOptions: {
 			strictRequires: true
 		}
