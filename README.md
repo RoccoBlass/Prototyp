@@ -46,7 +46,12 @@ Das Projekt orientierte sich am Design-Sprint-Vorgehen aus dem Unterricht.
 
 ### 3.1 Understand & Define
 
-- **Zielgruppenverständnis:** Im Problemraum habe ich mir bestehende Tracking-Apps angeschaut (MyFitnessPal, Yazio, FatSecret) und Erfahrungen aus dem eigenen Umfeld einbezogen. Daraus entstanden zwei Proto-Personas: einerseits jemand sportlich Aktives im Aufbau, andererseits eine berufstätige Person mit relativ konstanten Routinegerichten.
+- **Zielgruppenverständnis:** Im Problemraum habe ich bestehende Tracking-Apps analysiert (MyFitnessPal, Yazio, FatSecret u. a.) und Erfahrungen aus dem eigenen Umfeld einbezogen. Die ausführliche **Markt-, Konkurrenz- und Datenquellen-Analyse** liegt als Artefakt unter [docs/marktanalyse.md](docs/marktanalyse.md) (über den Unterrichtsumfang hinaus, siehe Kap. 4). Daraus entstanden zwei Proto-Personas:
+
+| Persona | Profil | Ziel | Frust heute |
+| --- | --- | --- | --- |
+| **Marco, 26** | sportlich aktiv, Muskelaufbau, isst oft dasselbe | genug Protein, Tagesüberblick auf einen Blick | tippt dieselben Werte „zum hundertsten Mal" ein |
+| **Sandra, 38** | berufstätig, möchte Gewicht halten, Routinegerichte | schneller Überblick mit wenig Aufwand | bestehende Apps zu überladen, Werbung, kennt ihren Bedarf nicht |
 - **Wesentliche Erkenntnisse:**
   - Wiederholung ist riesig: Über die Woche kehren oft dieselben 5–10 Mahlzeiten wieder. Genau hier setzt das Prinzip wiederverwendbarer Mahlzeiten an.
   - Ein sichtbares Ziel motiviert mehr als reine Zahlen – ein Fortschrittsring wirkt stärker als eine reine Tabelle.
@@ -59,7 +64,11 @@ Das Projekt orientierte sich am Design-Sprint-Vorgehen aus dem Unterricht.
   - (a) klassisches Eingabeformular pro Mahlzeit
   - (b) Sammlung wiederverwendbarer Mahlzeiten mit „Tap-to-Log"
   - (c) Tagesplan mit fixen Mahlzeit-Slots
-- **Skizzen:** _[Skizzen unter `/docs/sketches/` ablegen und hier referenzieren.]_ (a) wurde verworfen wegen wiederholter Eingabearbeit, (c) weil sie unterschiedliche Esstypen (z. B. mehrere Snacks) nicht sauber abbildet.
+- **Skizzen:** Die drei Varianten als schematische Wireframes (Variante b markiert = gewählt):
+
+![Skizzen der drei Lösungsvarianten](docs/sketches/varianten.svg)
+
+(a) wurde verworfen wegen wiederholter Eingabearbeit, (c) weil sie unterschiedliche Esstypen (z. B. mehrere Snacks) nicht sauber abbildet.
 
 ### 3.3 Decide
 
@@ -72,8 +81,11 @@ Gewählt habe ich Variante (b). Entscheidkriterien waren minimaler Aufwand pro L
 4. Mahlzeitentyp wählen → Eintrag erscheint sofort auf dem Dashboard, der Kalorienring aktualisiert sich.
 5. Über „Verlauf" / „Gewicht" / „Profil" lassen sich Woche, Gewichtsverlauf und Ziel überblicken bzw. anpassen.
 
-**Mockup:** Referenz-Mockup (klickbarer Figma-Prototyp): <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>
-_(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und hier referenzieren.)_ Das Mockup bildet den ursprünglichen Kern-Workflow ab; die umgesetzte App geht in mehreren Punkten darüber hinaus (siehe Kap. 4).
+**User-Journey-Map** des Hauptworkflows (Phasen, Screens, Aktionen, Gedanken, Erleben):
+
+![User-Journey-Map des Hauptworkflows](docs/journey-map.svg)
+
+**Mockup:** Als Referenz für die Ausgestaltung diente ein selbst erstellter, klickbarer **Figma-Prototyp**: <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>. Er legte den Kern-Workflow und die Screen-Struktur fest (Dashboard mit Fortschritt, Hinzufügen-Flow, Listen-/Detailansichten). Die umgesetzte Oberfläche (Screenshots in Kap. 3.4.1) realisiert dieses Konzept und geht in mehreren Punkten darüber hinaus (siehe Kap. 4).
 
 ### 3.4 Prototype
 
@@ -189,7 +201,7 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 - **Externe Schnittstelle:** Der Server-Endpunkt [`/api/food-search`](kalorientracker/src/routes/api/food-search/+server.js) fragt Open Food Facts ab (primär die neue Such-Engine „search-a-licious", Fallback auf die ältere API), bevorzugt deutsche Produktnamen und sortiert Produkte aus DE/CH/AT nach vorne. Die Abfrage läuft serverseitig (kein CORS, kein API-Key).
 - **Externe KI-Schnittstelle:** Der Endpunkt [`/api/coach`](kalorientracker/src/routes/api/coach/+server.js) sendet die Tageswerte (Ziel + Tagessummen) an **OpenRouter** (OpenAI-kompatible API) und zeigt das zurückgegebene Coach-Feedback an. Schlüssel und Modell liegen in der `.env` (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`); der Aufruf erfolgt serverseitig und nur auf Nutzer-Klick (siehe Kap. 4.7).
 - Schreiboperationen laufen über SvelteKit-Form-Actions (progressively enhanced).
-- Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden.
+- Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden – bewusst die **dynamische** Variante statt des in der Vorlesung gezeigten `$env/static/private`, weil die Variablen auf der Cloudflare-Workers-Runtime erst zur Laufzeit (nicht zur Build-Zeit) verfügbar sind.
 
 **Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime). Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` hochgeladen (Hilfsskript [`deploy.sh`](deploy.sh) im Repo-Root); die Projekte bleiben mit dem GitHub-Repository verknüpft. Beide Seiten sind live:
 - **Hauptseite (Branch `main`):** https://kalorientracker-main.pages.dev
@@ -325,7 +337,16 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ## 5. Projektorganisation
 
 - **Repository & Struktur:** SvelteKit-Standard mit `src/routes/` (Routen + Server-Loader/Actions), `src/lib/components/` (UI), `src/lib/` (reine Hilfslogik), `src/lib/server/` (DB-Layer & Auth, nur serverseitig importierbar), `static/` (Assets). `Informationen/`, `Usability-Evaluation/`, `.claude/`, `.env`, `node_modules/`, `build/` und `.svelte-kit/` sind in `.gitignore` ausgeschlossen.
-- **Issue-Management:** _[z. B. GitHub Issues / Board – falls genutzt, hier beschreiben, sonst weglassen]_
+- **Branching:** `main` enthält die aktuelle App, `prototyp-1` den **eingefrorenen ersten Prototyp** (Stand der Usability-Evaluation). Beide Branches sind je mit einem eigenen Cloudflare-Pages-Projekt und einer eigenen, isolierten Datenbank verbunden, damit Evaluations- und Weiterentwicklungsdaten sich nicht vermischen.
+- **Issue-/Herausforderungs-Log:** In der Einzelarbeit wurden Aufgaben nicht über ein formales Board, sondern entlang konkreter technischer Herausforderungen abgearbeitet (viel davon Know-how-Beschaffung). Die wichtigsten gelösten Punkte:
+
+| Herausforderung | Lösung |
+| --- | --- |
+| **Separater Branch für den ersten Prototyp** – für die Evaluation getrennt vorhalten und einzeln deployen | Branch `prototyp-1` + eigenes Cloudflare-Projekt + isolierte DB (eigene Live-URL) |
+| **Deployment: lokaler Build vs. Cloud-Build** – Cloudflares Build-Container bündelt den nativen MongoDB-Treiber fehlerhaft (zirkuläre CommonJS-Abhängigkeiten); lokal gebaut läuft alles | Build lokal erzeugen + `wrangler pages deploy` (Skript `deploy.sh`); automatische Cloud-Builds deaktiviert, git-Verknüpfung bleibt bestehen |
+| **MongoDB auf der Workers-Runtime** – globale DB-Verbindung „hängt" beim 2. Request | Verbindung pro Request frisch öffnen (Workers-Erkennung in `kalorientracker/src/lib/server/db.js`) |
+| **Umgebungsvariablen auf Cloudflare** | `$env/dynamic/private` (Laufzeit) statt `static` (Build-Zeit); Secrets als Pages-Variablen hinterlegt |
+
 - **Commit-Praxis:** Kurze, sprechende Commits im Imperativ (z. B. „Add login and per-user accounts", „Add onboarding and weight tracker", „Add food database and ingredient-based meals", „Improve food search relevance and ranking").
 
 ## 6. KI-Deklaration
@@ -344,8 +365,19 @@ Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion
 - **Grenzen:** Bei Konzept- und Architekturfragen lieferte die KI eher Optionen als die eine Antwort – entscheiden musste ich selbst. Fachliche Korrektheit (z. B. Nährwert-Formeln) habe ich gegengeprüft.
 - **Risiken / Qualitätssicherung:** Nach jedem Schritt manuelles Lesen des Codes sowie Build- und Browser-Tests des betroffenen Bereichs. Erkenntnis: KI ist als Pair-Programmer stark, ersetzt aber weder Konzept noch Validierung.
 
+### 6.4 KI-Agenten-Workflow (über den Unterrichtsumfang hinaus)
+
+Statt reinem Chat-Prompting kam ein **agentischer Workflow** zum Einsatz – im Raster ausdrücklich als mögliche Erweiterung genannt:
+
+- **Werkzeug:** **Claude Code** (agentische CLI von Anthropic, im VS-Code-Terminal). Der Agent liest und schreibt Dateien selbst, führt den Build aus, testet im Headless-Browser und committet – nicht nur Textvorschläge.
+- **Persistenter Projektkontext / Memory:** Ein dauerhaftes Projektgedächtnis hält meine Vorgaben über Sitzungen hinweg fest – z. B. Antwortsprache, Commit-Stil, Architekturregeln („DB-Zugriffe nur im Server-Layer", „Svelte-5-Runes statt Stores") und die Regel, den **Mindestumfang stabil** zu halten. Der Agent wendet diese Konventionen konsistent an.
+- **Kontextquellen:** Codebasis, Aufgabenstellung und Bewertungsraster (PDFs), eigenes Dokument „Workflows und Designentscheide".
+- **Arbeitsweise mit Verifikationsschleife:** iterativ in kleinen Schritten (Funktion für Funktion); nach jedem Schritt automatisch **Build + Browser-/Screenshot-Test** – Screenshots z. B. gegen eine isolierte In-Memory-Datenbank, damit die Produktionsdaten unangetastet bleiben.
+- **Abgrenzung:** Produkt-/UX-Entscheide, fachliche Korrektheit und Validierung lagen bei mir; der Agent setzte auf diese Vorgaben hin um und schlug Optionen vor.
+
 ## 7. Anhang
 
+- **Artefakte (`docs/`):** Markt-/Konkurrenz- & Datenquellen-Analyse ([docs/marktanalyse.md](docs/marktanalyse.md)), Skizzen der Lösungsvarianten ([docs/sketches/varianten.svg](docs/sketches/varianten.svg)), User-Journey-Map ([docs/journey-map.svg](docs/journey-map.svg)), App-Screenshots ([docs/screenshots/](docs/screenshots/)).
 - **Quellen:**
   - **Lebensmitteldaten:** [Open Food Facts](https://world.openfoodfacts.org/) – die Produktdaten stehen unter der **Open Database License (ODbL)**, einzelne Inhalte unter der Database Contents License; Bilder unter CC-BY-SA. Die Daten werden ausschliesslich abgefragt und angezeigt (Abfrage in [src/routes/api/food-search/+server.js](kalorientracker/src/routes/api/food-search/+server.js)).
   - **Icons:** Lucide (ISC/MIT-Lizenz), in [src/lib/components/Icon.svelte](kalorientracker/src/lib/components/Icon.svelte) als Inline-SVG nachgebaut.

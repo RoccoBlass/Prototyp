@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 560" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .title { fill:#0f172a; font-size:18px; font-weight:800; }
+    .rowlbl{ fill:#16a34a; font-size:12px; font-weight:700; letter-spacing:.04em; }
+    .hdr   { fill:#16a34a; }
+    .hdrt  { fill:#ffffff; font-size:14px; font-weight:700; }
+    .cell  { fill:#f8fafc; stroke:#e2e8f0; stroke-width:1; }
+    .t     { fill:#334155; font-size:12.5px; }
+    .mono  { fill:#0f172a; font-size:12px; font-weight:700; }
+    .axis  { stroke:#e2e8f0; stroke-width:1; }
+    .emo   { fill:none; stroke:#16a34a; stroke-width:2.5; }
+    .dot   { fill:#16a34a; }
+  </style>
+
+  <text x="30" y="34" class="title">User-Journey-Map – Hauptworkflow „Ernährung im Blick behalten"</text>
+
+  <!-- Stage headers -->
+  <g>
+    <!-- 6 columns, x = 30 + i*180, width 170 -->
+    <rect class="hdr" x="190" y="56" width="170" height="34" rx="8"/>
+    <rect class="hdr" x="370" y="56" width="170" height="34" rx="8"/>
+    <rect class="hdr" x="550" y="56" width="170" height="34" rx="8"/>
+    <rect class="hdr" x="730" y="56" width="170" height="34" rx="8"/>
+    <rect class="hdr" x="910" y="56" width="170" height="34" rx="8"/>
+    <rect class="hdr" x="1090" y="56" width="40"  height="34" rx="8" opacity="0"/>
+    <text x="275" y="79" text-anchor="middle" class="hdrt">1 · Einstieg</text>
+    <text x="455" y="79" text-anchor="middle" class="hdrt">2 · Onboarding</text>
+    <text x="635" y="79" text-anchor="middle" class="hdrt">3 · Überblick</text>
+    <text x="815" y="79" text-anchor="middle" class="hdrt">4 · Erfassen</text>
+    <text x="995" y="79" text-anchor="middle" class="hdrt">5 · Fortschritt</text>
+  </g>
+
+  <!-- Row: Touchpoint -->
+  <text x="30" y="120" class="rowlbl">SCREEN</text>
+  <g>
+    <text x="275" y="120" text-anchor="middle" class="mono">/login</text>
+    <text x="455" y="120" text-anchor="middle" class="mono">/onboarding</text>
+    <text x="635" y="120" text-anchor="middle" class="mono">/ (Dashboard)</text>
+    <text x="815" y="120" text-anchor="middle" class="mono">/add</text>
+    <text x="995" y="120" text-anchor="middle" class="mono">/ · /history · /weight</text>
+  </g>
+
+  <!-- Row: Aktion -->
+  <text x="30" y="158" class="rowlbl">AKTION</text>
+  <g>
+    <rect class="cell" x="190" y="138" width="170" height="64" rx="8"/>
+    <rect class="cell" x="370" y="138" width="170" height="64" rx="8"/>
+    <rect class="cell" x="550" y="138" width="170" height="64" rx="8"/>
+    <rect class="cell" x="730" y="138" width="170" height="64" rx="8"/>
+    <rect class="cell" x="910" y="138" width="170" height="64" rx="8"/>
+    <text x="200" y="160" class="t">Konto erstellen</text><text x="200" y="178" class="t">/ anmelden</text>
+    <text x="380" y="160" class="t">Körperdaten</text><text x="380" y="178" class="t">eingeben (5 Schritte)</text>
+    <text x="560" y="160" class="t">Kalorienring &amp;</text><text x="560" y="178" class="t">Makros prüfen</text>
+    <text x="740" y="160" class="t">Mahlzeit / Foto</text><text x="740" y="178" class="t">mit 1 Tap erfassen</text>
+    <text x="920" y="160" class="t">Ring/Coach prüfen,</text><text x="920" y="178" class="t">Woche &amp; Gewicht</text>
+  </g>
+
+  <!-- Row: Gedanke / Bedürfnis -->
+  <text x="30" y="240" class="rowlbl">GEDANKE</text>
+  <g>
+    <text x="200" y="240" class="t">„Schnell rein,</text><text x="200" y="257" class="t">keine Hürde."</text>
+    <text x="380" y="240" class="t">„Was ist mein</text><text x="380" y="257" class="t">Ziel? – App rechnet."</text>
+    <text x="560" y="240" class="t">„Wie viel habe</text><text x="560" y="257" class="t">ich heute noch?"</text>
+    <text x="740" y="240" class="t">„Bloss nicht alles</text><text x="740" y="257" class="t">neu eintippen."</text>
+    <text x="920" y="240" class="t">„Bin ich auf Kurs?</text><text x="920" y="257" class="t">Bleibe ich dran?"</text>
+  </g>
+
+  <!-- Emotion curve -->
+  <text x="30" y="320" class="rowlbl">ERLEBEN</text>
+  <line class="axis" x1="190" y1="300" x2="1080" y2="300"/>
+  <line class="axis" x1="190" y1="420" x2="1080" y2="420"/>
+  <polyline class="emo" points="275,360 455,392 635,330 815,312 995,322"/>
+  <circle class="dot" cx="275" cy="360" r="5"/>
+  <circle class="dot" cx="455" cy="392" r="5"/>
+  <circle class="dot" cx="635" cy="330" r="5"/>
+  <circle class="dot" cx="815" cy="312" r="5"/>
+  <circle class="dot" cx="995" cy="322" r="5"/>
+  <text x="1086" y="304" class="t">😀</text>
+  <text x="1086" y="424" class="t">😐</text>
+
+  <!-- Insight row -->
+  <text x="30" y="470" class="rowlbl">ERKENNTNIS</text>
+  <rect class="cell" x="190" y="448" width="890" height="74" rx="10"/>
+  <text x="206" y="474" class="t">• Reibung entsteht v. a. beim einmaligen Onboarding – wird durch die automatische Bedarfsberechnung (statt selbst raten) entschärft.</text>
+  <text x="206" y="496" class="t">• Der wiederkehrende Kern (Schritt 4) muss extrem schnell sein → wiederverwendbare Mahlzeiten, Tap-to-Log und Foto-Schätzung.</text>
+  <text x="206" y="514" class="t">• Sichtbarer Fortschritt (Ring, Makros, 7-Tage-Trend) hält dran → Motivation statt reiner Zahlenpflege.</text>
+</svg>
