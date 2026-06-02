@@ -1,14 +1,20 @@
-import { getEntriesByDate, deleteEntry } from '$lib/server/db.js';
+import { getEntriesByDate, deleteEntry, getDailyCalorieTotals } from '$lib/server/db.js';
 
-function getLocalDateStr() {
+function dateStr(daysAgo) {
 	const d = new Date();
+	d.setDate(d.getDate() - daysAgo);
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export async function load({ locals }) {
-	const today = getLocalDateStr();
-	const meals = await getEntriesByDate(locals.user.id, today);
-	return { meals, today };
+	const today = dateStr(0);
+	// Letzte 7 Tage für den Mini-Trend (ältester zuerst, heute zuletzt).
+	const trendDates = Array.from({ length: 7 }, (_, i) => dateStr(6 - i));
+	const [meals, trend] = await Promise.all([
+		getEntriesByDate(locals.user.id, today),
+		getDailyCalorieTotals(locals.user.id, trendDates)
+	]);
+	return { meals, today, trend };
 }
 
 export const actions = {

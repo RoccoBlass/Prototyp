@@ -71,7 +71,7 @@
 	</div>
 
 	<div class="stats-grid">
-		<CalorieBar current={totalCalories} goal={data.user.calorieGoal} />
+		<CalorieBar current={totalCalories} goal={data.user.calorieGoal} trend={data.trend} today={data.today} />
 		<NutrientSummary
 			protein={totalProtein}
 			carbs={totalCarbs}

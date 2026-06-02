@@ -51,10 +51,14 @@
 			<div class="value-row">
 				<span class="value">{item.value}</span>
 				<span class="unit">/ {item.goal}g</span>
+				{#if item.value > item.goal}
+					<span class="over-chip">+{item.value - item.goal} g</span>
+				{/if}
 			</div>
 			<div class="track">
 				<div
 					class="track-fill"
+					class:over={item.value > item.goal}
 					style="width: {Math.min((item.value / item.goal) * 100, 100)}%"
 				></div>
 			</div>
@@ -148,6 +152,27 @@
 		background: linear-gradient(90deg, color-mix(in srgb, var(--color) 70%, var(--gray-0)), var(--color));
 		border-radius: var(--radius-full);
 		transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* „über Ziel": schraffierter Überlauf in der Makro-Farbe (volle Breite). */
+	.track-fill.over {
+		background: repeating-linear-gradient(
+			45deg,
+			var(--color) 0 5px,
+			color-mix(in srgb, var(--color) 45%, var(--surface)) 5px 10px
+		);
+	}
+
+	.over-chip {
+		margin-left: auto;
+		align-self: center;
+		font-size: var(--text-overline);
+		font-weight: var(--weight-bold);
+		color: var(--color);
+		background: var(--soft);
+		padding: 1px var(--space-2);
+		border-radius: var(--radius-full);
+		white-space: nowrap;
 	}
 
 	@media (min-width: 900px) {

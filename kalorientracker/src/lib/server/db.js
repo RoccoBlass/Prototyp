@@ -345,6 +345,25 @@ export async function deleteEntry(userId, id) {
 		.deleteOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
 }
 
+/** Summiert die Kalorien je Tag für die angegebenen Datumsstrings (eine Abfrage). */
+export async function getDailyCalorieTotals(userId, dates) {
+	try {
+		const database = await getDb();
+		const rows = await database
+			.collection('entries')
+			.aggregate([
+				{ $match: { userId: new ObjectId(userId), date: { $in: dates } } },
+				{ $group: { _id: '$date', calories: { $sum: '$calories' } } }
+			])
+			.toArray();
+		const map = new Map(rows.map((r) => [r._id, r.calories]));
+		return dates.map((d) => ({ date: d, calories: Math.round(map.get(d) || 0) }));
+	} catch (error) {
+		console.error('Fehler beim Laden der Tages-Kalorien:', error);
+		return dates.map((d) => ({ date: d, calories: 0 }));
+	}
+}
+
 // --- Profil / Einstellungen (am Benutzer-Dokument) ---
 
 export const DEFAULT_SETTINGS = {

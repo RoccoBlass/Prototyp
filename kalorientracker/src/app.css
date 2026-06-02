@@ -147,7 +147,8 @@
 :root[data-theme='dark'] {
 	color-scheme: dark;
 
-	/* Flächen & Text (Text auf --surface ≈ 14:1 / 7.5:1 / 4.9:1) */
+	/* Flächen & Text — Kontrast auf --surface: --text ≈ 14:1, --text-muted ≈ 7.6:1,
+	   --text-subtle ≈ 6.5:1 (alle deutlich über WCAG AA 4.5:1). */
 	--bg: #0e131c;
 	--surface: #181f2b;
 	--surface-2: #222a38;
@@ -155,7 +156,7 @@
 	--border-strong: #3b4658;
 	--text: #e9edf3;
 	--text-muted: #aab3c1;
-	--text-subtle: #8b94a2;
+	--text-subtle: #99a3b2;
 
 	/* Marke: Button-Grün bleibt (weisser Text), Akzent-Text wird heller */
 	--brand-strong: var(--green-400);

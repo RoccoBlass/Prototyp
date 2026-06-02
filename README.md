@@ -158,7 +158,8 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 **Designentscheidungen:**
 - **Mobile-first** mit responsivem Desktop-Layout (ab 900 px Sidebar). Das Tracken passiert typischerweise am Handy.
 - **Grünes Theming** als positives Signal („Gesundheit"); Rot ausschliesslich, wenn das Tagesziel überschritten wird.
-- **Kalorienring statt Balken** auf dem Dashboard, weil ein Ring den Fortschritt schneller erfassbar macht.
+- **Kalorienring statt Balken** auf dem Dashboard, weil ein Ring den Fortschritt schneller erfassbar macht. Die Ringmitte ist mit „kcal gegessen" beschriftet, damit die Zahl eindeutig vom „verbleibend"-Wert daneben unterscheidbar ist.
+- **Überschreitung sichtbar machen:** Makro-Balken zeigen ein Überschreiten des Ziels explizit – Chip „+Xg" und schraffierter Balken statt nur „voll". Unter dem Ring ordnet ein **7-Tage-Mini-Trend** den heutigen Wert ein.
 - **Mahlzeitentyp wird automatisch nach Tageszeit vorgeschlagen** (Frühstück bis 10, Mittag bis 14, Snack bis 17, sonst Abendessen) – spart einen Klick.
 - **Onboarding als geführter Wizard:** Statt die Nutzer:innen ein Kalorienziel raten zu lassen, wird es aus den Körperdaten berechnet (siehe Kap. 4.2).
 - **Mahlzeit als ein aufklappbarer Block** im Tagesprotokoll: übersichtlich, Zutaten bei Bedarf einsehbar.
