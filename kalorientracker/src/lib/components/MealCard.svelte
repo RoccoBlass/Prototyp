@@ -112,6 +112,9 @@
 		margin-bottom: var(--space-3);
 		box-shadow: var(--shadow-sm);
 		transition: border-color 0.15s, box-shadow 0.15s;
+		/* Layout richtet sich nach der EIGENEN Kartenbreite (nicht dem Viewport),
+		   damit Makros in schmalen 2-Spalten-Rastern nicht mit dem Text kollidieren. */
+		container-type: inline-size;
 	}
 
 	.meal-card:hover {
@@ -166,6 +169,9 @@
 		font-size: var(--text-caption);
 		color: var(--text-muted);
 		font-weight: var(--weight-medium);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.macros {
@@ -299,7 +305,9 @@
 		text-align: right;
 	}
 
-	@media (min-width: 900px) {
+	/* Einzeilige Anordnung erst, wenn die KARTE breit genug ist (~520px) –
+	   sonst bleiben die Makros in einer eigenen Zeile unter dem Text. */
+	@container (min-width: 520px) {
 		.meal-head {
 			grid-template-columns: auto 1fr auto auto auto auto;
 			grid-template-areas: 'icon details macros calories expand delete';
