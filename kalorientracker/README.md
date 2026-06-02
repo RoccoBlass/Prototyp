@@ -98,7 +98,61 @@ _(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und 
 
 Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Nav mit hervorgehobenem „+"-Button. Nicht angemeldete Nutzer:innen werden auf `/login` geleitet, angemeldete ohne abgeschlossenes Onboarding auf `/onboarding` (Zugriffsschutz in `src/hooks.server.js`).
 
-**User Interface Design:** _[Screenshots der wichtigsten Screens hier einfügen: Login, Onboarding, Dashboard, Hinzufügen (beide Tabs), Lebensmittel/Mahlzeit anlegen, Gewicht, Verlauf, Profil.]_
+**User Interface Design:** Die folgenden Screenshots zeigen die wichtigsten Screens der umgesetzten App (Dark Mode als Standard, mit Demo-Account und Beispieldaten erstellt).
+
+**Anmeldung & Registrierung**
+
+![Login-Screen](docs/screenshots/login.png)
+
+Schlanker Einstieg mit Umschalter zwischen Anmelden und Registrieren.
+
+**Onboarding (Schritt 1 von 5)**
+
+![Onboarding-Wizard](docs/screenshots/onboarding.png)
+
+Geführter Wizard, der aus den Körperdaten automatisch das Tagesziel berechnet (siehe Kap. 4.2).
+
+**Dashboard**
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+Tagesüberblick mit Kalorienring, Makro-Fortschritt, KI-Coach-Karte (Kap. 4.7) und den heutigen Einträgen.
+
+**Hinzufügen**
+
+![Hinzufügen-Hub](docs/screenshots/add.png)
+
+Mahlzeitentyp wählen, danach über die Tabs eine gespeicherte Mahlzeit oder ein einzelnes Lebensmittel erfassen.
+
+**Lebensmittel anlegen**
+
+![Lebensmittel-Formular](docs/screenshots/food-form.png)
+
+Eigenes Lebensmittel mit Nährwerten je 100 g/ml und optionalem Foto (wird im Browser verkleinert).
+
+**Mahlzeit zusammenstellen**
+
+![Mahlzeit-Builder](docs/screenshots/meal-builder.png)
+
+Mehrere Zutaten zu einer Mahlzeit kombinieren – die Gesamtnährwerte werden live berechnet (Kap. 4.4).
+
+**Gewicht**
+
+![Gewichtstracker mit Verlaufs-Chart](docs/screenshots/weight.png)
+
+Tägliche Gewichtserfassung mit SVG-Verlaufsdiagramm ohne externe Chart-Bibliothek (Kap. 4.5).
+
+**Verlauf**
+
+![Verlauf der letzten 7 Tage](docs/screenshots/history.png)
+
+Rückblick auf die letzten 7 Tage mit Tagessummen je Tag.
+
+**Profil**
+
+![Profil](docs/screenshots/profile.png)
+
+Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sowie Abmelden.
 
 **Designentscheidungen:**
 - **Mobile-first** mit responsivem Desktop-Layout (ab 900 px Sidebar). Das Tracken passiert typischerweise am Handy.
@@ -135,7 +189,7 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 - Schreiboperationen laufen über SvelteKit-Form-Actions (progressively enhanced).
 - Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden.
 
-**Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime).
+**Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime). Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` hochgeladen (Hilfsskript [`deploy.sh`](../deploy.sh) im Repo-Root); die Projekte bleiben mit dem GitHub-Repository verknüpft. Beide Seiten sind live:
 - **Hauptseite (Branch `main`):** https://kalorientracker-main.pages.dev
 - **Erster Prototyp (Branch `prototyp-1`):** https://kalorientracker-prototyp.pages.dev
 
@@ -145,6 +199,7 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 - **Passwort-Hashing mit `node:crypto` (scrypt):** keine zusätzliche Abhängigkeit, läuft auch in serverless-Umgebungen (Cloudflare Workers, Netlify); Vergleich timing-safe, generische Fehlermeldung beim Login.
 - **Fotos als verkleinertes Base64 in MongoDB:** Das Bild wird im Browser per Canvas verkleinert und direkt in der DB gespeichert – kein externer Blob-Speicher/Key nötig (passend zum schlanken Prototyp-Charakter).
 - **Open Food Facts ohne Key:** bewusst gewählt, weil sofort einsatzbereit, kostenlos und mit guter DE/CH-Abdeckung (nach Lokalisierung der Abfrage). Alternativen mit Key/OAuth (FatSecret u. a.) wurden geprüft, aber als unnötig aufwändig verworfen.
+- **Deployment über lokalen Build:** Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` (`deploy.sh`) hochgeladen, statt ihn in der Cloud-Build-Pipeline auszuführen – so wird der native MongoDB-Treiber zuverlässig gebündelt. Die automatischen Cloud-Builds sind deaktiviert, die git-Verknüpfung bleibt bestehen.
 
 ### 3.5 Validate
 
@@ -224,6 +279,11 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Backend:** Serverseitiges Setzen des Schemas in [src/hooks.server.js](src/hooks.server.js) (`transformPageChunk`, Default Dark); Validierung & Speicherung in [src/routes/profile/+page.server.js](src/routes/profile/+page.server.js); Default und Serialisierung in [src/lib/server/db.js](src/lib/server/db.js) und [src/lib/server/auth.js](src/lib/server/auth.js).
   - **Datenbank:** Feld `theme` (`'dark'`/`'light'`, Default `dark`) am `users`-Dokument.
 - **Referenz:** Kap. 3.4.1 (Designentscheidungen: grünes Theming).
+
+| Dark Mode (Standard) | Light Mode |
+| --- | --- |
+| ![Dashboard im Dark Mode](docs/screenshots/dashboard.png) | ![Dashboard im Light Mode](docs/screenshots/dashboard-light.png) |
+
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
 
 ### 4.7 KI-Coach: Tages-Feedback (OpenRouter)
@@ -289,4 +349,16 @@ npm run dev
 # Production-Build + Preview
 npm run build
 npm run preview
+```
+
+### Deployment
+
+Der Build wird lokal erzeugt und zu Cloudflare Pages hochgeladen. Das Skript [`deploy.sh`](../deploy.sh) (Repo-Root) erkennt den aktuellen Branch automatisch (`main` → Hauptseite, `prototyp-1` → Prototyp), baut und lädt hoch:
+
+```sh
+# einmalig: bei Cloudflare anmelden
+npx wrangler login
+
+# danach pro Deploy:
+./deploy.sh
 ```

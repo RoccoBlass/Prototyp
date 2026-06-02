@@ -4,6 +4,9 @@
 # Local Claude Code tooling
 .claude/
 
+# Wrangler / Cloudflare local cache
+.wrangler/
+
 # Course material / private docs — never commit
 Informationen/
 informationen/
