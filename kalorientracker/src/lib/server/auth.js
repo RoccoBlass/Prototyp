@@ -55,6 +55,9 @@ export function serializeUser(doc) {
 		weight: typeof doc.weight === 'number' ? doc.weight : null,
 		activityLevel: doc.activityLevel ?? null,
 		goal: doc.goal ?? null,
+		// Farbschema: 'dark' | 'light' – Default ist Dark (auch für Bestandsnutzer
+		// ohne gespeichertes Feld).
+		theme: doc.theme === 'light' ? 'light' : 'dark',
 		onboarded: Boolean(doc.onboardedAt)
 	};
 }

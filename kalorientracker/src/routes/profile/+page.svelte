@@ -21,6 +21,7 @@
 	let weight = $state(String(start.weight ?? ''));
 	let activityLevel = $state(start.activityLevel ?? 'moderate');
 	let goal = $state(start.goal ?? 'maintain');
+	let theme = $state(start.theme ?? 'dark');
 
 	let proteinGoal = $state(String(start.proteinGoal ?? data.user.proteinGoal));
 	let carbsGoal = $state(String(start.carbsGoal ?? data.user.carbsGoal));
@@ -61,6 +62,12 @@
 			.map((w) => w[0]?.toUpperCase() ?? '')
 			.join('')
 	);
+
+	// Live-Vorschau: Auswahl sofort am <html> anwenden. Dauerhaft gespeichert
+	// wird sie erst beim Absenden des Formulars (Button „Speichern").
+	$effect(() => {
+		document.documentElement.dataset.theme = theme;
+	});
 </script>
 
 <div class="profile-page">
@@ -109,6 +116,42 @@
 					bind:value={name}
 				/>
 			</label>
+		</section>
+
+		<section class="card">
+			<header class="card-head">
+				<span class="card-icon"><Icon name="moon" size={18} /></span>
+				<div>
+					<h2>Darstellung</h2>
+					<p>Wähle zwischen dunklem und hellem Design.</p>
+				</div>
+			</header>
+
+			<input type="hidden" name="theme" value={theme} />
+			<div class="theme-toggle" role="radiogroup" aria-label="Farbschema">
+				<button
+					type="button"
+					class="theme-option"
+					class:selected={theme === 'dark'}
+					role="radio"
+					aria-checked={theme === 'dark'}
+					onclick={() => (theme = 'dark')}
+				>
+					<Icon name="moon" size={20} />
+					<span>Dunkel</span>
+				</button>
+				<button
+					type="button"
+					class="theme-option"
+					class:selected={theme === 'light'}
+					role="radio"
+					aria-checked={theme === 'light'}
+					onclick={() => (theme = 'light')}
+				>
+					<Icon name="sun" size={20} />
+					<span>Hell</span>
+				</button>
+			</div>
 		</section>
 
 		<section class="card">
@@ -445,6 +488,50 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--space-4);
+	}
+
+	/* Farbschema-Umschalter (Dunkel / Hell) */
+	.theme-toggle {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
+	}
+
+	.theme-option {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		padding: var(--space-4);
+		background: var(--surface-2);
+		border: 1.5px solid var(--border);
+		border-radius: var(--radius-md);
+		color: var(--text-muted);
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-bold);
+		font-family: inherit;
+		cursor: pointer;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease,
+			color 0.15s ease,
+			transform 0.12s ease;
+	}
+
+	.theme-option:hover {
+		border-color: var(--border-strong);
+		color: var(--text);
+	}
+
+	.theme-option.selected {
+		background: var(--brand-soft);
+		border-color: var(--brand);
+		color: var(--brand-strong);
+	}
+
+	.theme-option:active {
+		transform: translateY(1px);
 	}
 
 	.input-wrap {

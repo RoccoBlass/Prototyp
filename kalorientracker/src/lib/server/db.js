@@ -328,7 +328,8 @@ export const DEFAULT_SETTINGS = {
 	calorieGoal: 2000,
 	proteinGoal: 150,
 	carbsGoal: 250,
-	fatGoal: 70
+	fatGoal: 70,
+	theme: 'dark'
 };
 
 export async function saveProfile(userId, fields) {

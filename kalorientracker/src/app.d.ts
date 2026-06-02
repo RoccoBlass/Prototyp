@@ -16,6 +16,7 @@ declare global {
 				weight: number | null;
 				activityLevel: string | null;
 				goal: string | null;
+				theme: 'light' | 'dark';
 				onboarded: boolean;
 			} | null;
 		}

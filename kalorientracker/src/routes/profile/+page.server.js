@@ -34,8 +34,9 @@ export const actions = {
 		const proteinGoal = Number(data.get('proteinGoal'));
 		const carbsGoal = Number(data.get('carbsGoal'));
 		const fatGoal = Number(data.get('fatGoal'));
+		const theme = data.get('theme') === 'light' ? 'light' : 'dark';
 
-		const values = { name, sex, age, height, weight, activityLevel, goal, proteinGoal, carbsGoal, fatGoal };
+		const values = { name, sex, age, height, weight, activityLevel, goal, proteinGoal, carbsGoal, fatGoal, theme };
 
 		if (!SEX_KEYS.includes(sex)) {
 			return fail(400, { error: 'Bitte ein Geschlecht wählen.', values });
@@ -79,6 +80,7 @@ export const actions = {
 				weight: Math.round(weight * 10) / 10,
 				activityLevel,
 				goal,
+				theme,
 				...macros,
 				calorieGoal: caloriesFromMacros(macros)
 			});

@@ -5,7 +5,7 @@
    ===================================================================== */
 
 :root {
-	color-scheme: light dark;
+	color-scheme: light;
 
 	/* --- Primärfarbe: Grün 50–900 --- */
 	--green-50: #f0fdf4;
@@ -139,58 +139,58 @@
 }
 
 /* =====================================================================
-   Dark Mode – nur die semantischen Tokens werden umgelegt, alle Komponenten
-   adaptieren automatisch. Werte auf WCAG-AA-Kontrast ausgelegt.
+   Dark Mode – per Benutzer im Profil wählbar (data-theme am <html>, vom
+   Server gesetzt → kein Flackern). Default ist Dark. Nur die semantischen
+   Tokens werden umgelegt, alle Komponenten adaptieren automatisch.
+   Werte auf WCAG-AA-Kontrast ausgelegt.
    ===================================================================== */
-@media (prefers-color-scheme: dark) {
-	:root {
-		color-scheme: dark;
+:root[data-theme='dark'] {
+	color-scheme: dark;
 
-		/* Flächen & Text (Text auf --surface ≈ 14:1 / 7.5:1 / 4.9:1) */
-		--bg: #0e131c;
-		--surface: #181f2b;
-		--surface-2: #222a38;
-		--border: #2c3543;
-		--border-strong: #3b4658;
-		--text: #e9edf3;
-		--text-muted: #aab3c1;
-		--text-subtle: #8b94a2;
+	/* Flächen & Text (Text auf --surface ≈ 14:1 / 7.5:1 / 4.9:1) */
+	--bg: #0e131c;
+	--surface: #181f2b;
+	--surface-2: #222a38;
+	--border: #2c3543;
+	--border-strong: #3b4658;
+	--text: #e9edf3;
+	--text-muted: #aab3c1;
+	--text-subtle: #8b94a2;
 
-		/* Marke: Button-Grün bleibt (weisser Text), Akzent-Text wird heller */
-		--brand-strong: var(--green-400);
-		--brand-soft: rgb(var(--green-600-rgb) / 0.22);
-		--brand-soft-2: rgb(var(--green-600-rgb) / 0.12);
+	/* Marke: Button-Grün bleibt (weisser Text), Akzent-Text wird heller */
+	--brand-strong: var(--green-400);
+	--brand-soft: rgb(var(--green-600-rgb) / 0.22);
+	--brand-soft-2: rgb(var(--green-600-rgb) / 0.12);
 
-		/* Akzente heller für Text/Icons + dezente Tints als Flächen */
-		--protein: #60a5fa;
-		--protein-soft: rgb(59 130 246 / 0.2);
-		--carbs: #fbbf24;
-		--carbs-soft: rgb(245 158 11 / 0.18);
-		--fat: #fb923c;
-		--fat-soft: rgb(249 115 22 / 0.18);
-		--danger: #f87171;
-		--danger-soft: rgb(239 68 68 / 0.18);
+	/* Akzente heller für Text/Icons + dezente Tints als Flächen */
+	--protein: #60a5fa;
+	--protein-soft: rgb(59 130 246 / 0.2);
+	--carbs: #fbbf24;
+	--carbs-soft: rgb(245 158 11 / 0.18);
+	--fat: #fb923c;
+	--fat-soft: rgb(249 115 22 / 0.18);
+	--danger: #f87171;
+	--danger-soft: rgb(239 68 68 / 0.18);
 
-		/* Primitive, die in den Komponenten als Akzent-Text/-Border dienen */
-		--green-200: rgb(var(--green-600-rgb) / 0.4);
-		--red-200: rgb(239 68 68 / 0.42);
-		--red-700: #fca5a5;
-		--amber-700: #fcd34d;
+	/* Primitive, die in den Komponenten als Akzent-Text/-Border dienen */
+	--green-200: rgb(var(--green-600-rgb) / 0.4);
+	--red-200: rgb(239 68 68 / 0.42);
+	--red-700: #fca5a5;
+	--amber-700: #fcd34d;
 
-		/* Mahlzeitentyp-Flächen als dezente Tints */
-		--type-breakfast-soft: rgb(245 158 11 / 0.18);
-		--type-lunch-soft: rgb(249 115 22 / 0.18);
-		--type-dinner-soft: rgb(99 102 241 / 0.24);
-		--type-snack-soft: rgb(236 72 153 / 0.22);
+	/* Mahlzeitentyp-Flächen als dezente Tints */
+	--type-breakfast-soft: rgb(245 158 11 / 0.18);
+	--type-lunch-soft: rgb(249 115 22 / 0.18);
+	--type-dinner-soft: rgb(99 102 241 / 0.24);
+	--type-snack-soft: rgb(236 72 153 / 0.22);
 
-		/* Glas-Leisten dunkel */
-		--glass: rgb(20 26 37 / 0.82);
+	/* Glas-Leisten dunkel */
+	--glass: rgb(20 26 37 / 0.82);
 
-		/* Schatten kräftiger, sonst auf Dunkel unsichtbar */
-		--shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px rgb(0 0 0 / 0.25);
-		--shadow-md: 0 6px 18px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.3);
-		--shadow-lg: 0 18px 50px rgb(0 0 0 / 0.55);
-	}
+	/* Schatten kräftiger, sonst auf Dunkel unsichtbar */
+	--shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px rgb(0 0 0 / 0.25);
+	--shadow-md: 0 6px 18px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.3);
+	--shadow-lg: 0 18px 50px rgb(0 0 0 / 0.55);
 }
 
 /* =====================================================================

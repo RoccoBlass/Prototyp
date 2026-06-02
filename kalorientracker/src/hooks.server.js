@@ -43,5 +43,10 @@ export async function handle({ event, resolve }) {
 		}
 	}
 
-	return resolve(event);
+	// Farbschema serverseitig in den <html>-Tag schreiben (Default: Dark),
+	// damit die Seite ohne Flackern direkt im richtigen Modus rendert.
+	const theme = user?.theme === 'light' ? 'light' : 'dark';
+	return resolve(event, {
+		transformPageChunk: ({ html }) => html.replace('%theme%', theme)
+	});
 }

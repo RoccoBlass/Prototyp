@@ -34,7 +34,7 @@ Der Kalorientracker ist ein persönlicher, schlanker Ernährungstracker mit Benu
   - **Lebensmittel** mit Nährwerten je 100 g/ml – entweder über eine **öffentliche Lebensmittel-Datenbank** (Open Food Facts) gesucht oder selbst angelegt (inkl. Foto).
   - **Mahlzeiten** als Kombination mehrerer Lebensmittel mit Mengen; Gesamtnährwerte werden automatisch berechnet.
   - **Tageseinträge:** eine ganze Mahlzeit *oder* ein einzelnes Lebensmittel (mit Gramm/Milliliter) zu einem Tag hinzufügen, jeweils mit Mahlzeitentyp (Frühstück, Mittag, Abendessen, Snack).
-  - **Dashboard** mit Kalorienring und Makro-Übersicht, **Verlauf** der letzten 7 Tage, **Gewichtstracker** mit Verlaufs-Chart, **Profil** mit anpassbarem Ziel.
+  - **Dashboard** mit Kalorienring und Makro-Übersicht, **Verlauf** der letzten 7 Tage, **Gewichtstracker** mit Verlaufs-Chart, **Profil** mit anpassbarem Ziel und wählbarem Farbschema (Dark/Light).
 - **Annahmen:** Nutzer:innen wollen wenig Aufwand pro Logging-Vorgang und ein nachvollziehbares Tagesziel, das sie nicht selbst ausrechnen müssen.
 - **Abgrenzung:** Kein Barcode-Scan; keine sozialen Funktionen (Teilen, Freunde); keine Offline-Nutzung; kein Auswertungszeitraum > 7 Tage im Verlauf; die Datenqualität der externen Lebensmittel-Datenbank wird nicht kuratiert.
 
@@ -91,7 +91,7 @@ _(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und 
 | `/add/meal/new`, `/add/meal/[id]` | Mahlzeit aus Lebensmitteln zusammenstellen / bearbeiten |
 | `/weight` | Gewichtstracker mit Verlaufs-Chart |
 | `/history` | Verlauf der letzten 7 Tage |
-| `/profile` | Profil, Körperdaten, Ziel, Abmelden |
+| `/profile` | Profil, Körperdaten, Ziel, Farbschema (Dark/Light), Abmelden |
 | `/api/food-search` | Server-Endpunkt für die Open-Food-Facts-Suche |
 | `/logout` | Abmelden (POST-Endpunkt) |
 
@@ -122,7 +122,7 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 
 **Daten & Schnittstellen:**
 - Datenbank `KalorienTrackerDB` mit sechs Collections, alle Nutzdaten pro Benutzer (`userId`):
-  - `users` – Konto: E-Mail (eindeutig), Passwort-Hash (scrypt), Name, Körperdaten (Geschlecht/Alter/Grösse/Gewicht/Aktivität/Ziel), berechnetes Kalorien-/Makroziel, `onboardedAt`.
+  - `users` – Konto: E-Mail (eindeutig), Passwort-Hash (scrypt), Name, Körperdaten (Geschlecht/Alter/Grösse/Gewicht/Aktivität/Ziel), berechnetes Kalorien-/Makroziel, Farbschema (`theme`, Default `dark`), `onboardedAt`.
   - `sessions` – Anmelde-Sessions mit Token und Ablaufdatum (TTL-Index → automatische Bereinigung).
   - `foods` – eigene Lebensmittel (Nährwerte je 100 g/ml, Einheit, optionales Foto als Base64).
   - `meals` – Mahlzeiten mit Zutaten-Liste (Snapshot je Zutat) und berechneten Gesamtnährwerten.
@@ -211,6 +211,15 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Backend:** [src/routes/weight/+page.server.js](src/routes/weight/+page.server.js) (Erfassen/Löschen, „neu berechnen"-Action).
   - **Datenbank:** Collection `weightEntries` (ein Eintrag pro Tag, eindeutiger Index).
 - **Referenz:** Kap. 3.4.1.
+- **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
+
+### 4.6 Wählbares Farbschema (Dark/Light Mode)
+- **Beschreibung & Nutzen:** Die App bietet ein dunkles und ein helles Design. Standard ist **Dark Mode**; im Profil lässt sich das Farbschema pro Benutzer umschalten und wird dauerhaft am Konto gespeichert. Das gewählte Schema wird bereits **serverseitig** in den `<html>`-Tag geschrieben (`data-theme`), sodass die Seite ohne kurzes Aufblitzen des falschen Designs lädt. Technisch umgesetzt über die semantischen CSS-Custom-Properties: Nur die Token-Werte werden je Schema umgelegt, alle Komponenten adaptieren automatisch (Farbwerte auf WCAG-AA-Kontrast ausgelegt). Im Profil sorgt eine Live-Vorschau dafür, dass die Auswahl sofort sichtbar ist.
+- **Wo umgesetzt:**
+  - **Frontend:** Umschalter „Darstellung" im Profil [src/routes/profile/+page.svelte](src/routes/profile/+page.svelte) (mit Live-Vorschau); Design-Tokens inkl. Dark-Variante in [src/app.css](src/app.css); `data-theme`-Platzhalter in [src/app.html](src/app.html).
+  - **Backend:** Serverseitiges Setzen des Schemas in [src/hooks.server.js](src/hooks.server.js) (`transformPageChunk`, Default Dark); Validierung & Speicherung in [src/routes/profile/+page.server.js](src/routes/profile/+page.server.js); Default und Serialisierung in [src/lib/server/db.js](src/lib/server/db.js) und [src/lib/server/auth.js](src/lib/server/auth.js).
+  - **Datenbank:** Feld `theme` (`'dark'`/`'light'`, Default `dark`) am `users`-Dokument.
+- **Referenz:** Kap. 3.4.1 (Designentscheidungen: grünes Theming).
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
 
 ## 5. Projektorganisation
