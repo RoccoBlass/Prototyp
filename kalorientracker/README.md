@@ -110,9 +110,9 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 
 #### 3.4.2 Umsetzung (Technik)
 
-**Technologie-Stack:** SvelteKit (Svelte 5 mit Runes-Syntax, JavaScript ohne TypeScript), MongoDB Atlas über den offiziellen `mongodb`-Treiber, Plain CSS mit Custom Properties (kein UI-Framework). Vite als Build-Tool, Netlify-Adapter für das Deployment. Passwort-Hashing mit dem Node-Kern (`node:crypto`, scrypt) ohne externe Auth-Bibliothek. Anbindung an die öffentliche **Open-Food-Facts**-Datenbank (ohne API-Key).
+**Technologie-Stack:** SvelteKit (Svelte 5 mit Runes-Syntax, JavaScript ohne TypeScript), MongoDB Atlas über den offiziellen `mongodb`-Treiber, Plain CSS mit Custom Properties (kein UI-Framework). Vite als Build-Tool, Cloudflare-Adapter (`adapter-cloudflare`) für das Deployment auf Cloudflare Pages. Passwort-Hashing mit dem Node-Kern (`node:crypto`, scrypt) ohne externe Auth-Bibliothek. Anbindung an die öffentliche **Open-Food-Facts**-Datenbank (ohne API-Key).
 
-**Tooling:** VS Code mit Svelte-Erweiterung, Node.js + npm lokal, MongoDB Atlas in der Cloud, Netlify als Hosting (siehe [netlify.toml](netlify.toml)). Der Einsatz von KI ist in **Kapitel 6 (KI-Deklaration)** beschrieben.
+**Tooling:** VS Code mit Svelte-Erweiterung, Node.js + npm lokal, MongoDB Atlas in der Cloud, Cloudflare Pages als Hosting (siehe [wrangler.toml](wrangler.toml)). Der Einsatz von KI ist in **Kapitel 6 (KI-Deklaration)** beschrieben.
 
 **Struktur & Komponenten:**
 - Routen unter [src/routes/](src/routes/): `+layout.svelte` (Navigation, nur für angemeldete & eingerichtete Nutzer:innen), je Bereich `+page.svelte` (UI) und `+page.server.js` (Loader / Form-Actions). `src/hooks.server.js` löst die Session auf und schützt die Routen.
@@ -135,12 +135,14 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 - Schreiboperationen laufen über SvelteKit-Form-Actions (progressively enhanced).
 - Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden.
 
-**Deployment:** _[Netlify-URL einfügen, z. B. https://kalorientracker.netlify.app – und prüfen, dass die App dort online erreichbar ist.]_
+**Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime).
+- **Hauptseite (Branch `main`):** https://kalorientracker-main.pages.dev
+- **Erster Prototyp (Branch `prototyp-1`):** https://kalorientracker-prototyp.pages.dev
 
 **Besondere Entscheidungen:**
 - **Snapshot-Prinzip:** Beim Protokollieren werden die Nährwerte in den Tageseintrag *kopiert* (statt nur referenziert). So verfälscht eine spätere Änderung an einem Lebensmittel/einer Mahlzeit keine bereits erfassten Tage. Dasselbe gilt für die Zutaten einer Mahlzeit.
 - **Kalorienziel = Summe der Makros:** Das angezeigte Kalorienziel entspricht immer `4·Protein + 4·KH + 9·Fett`, damit Ring und Makro-Anzeige konsistent zusammenpassen.
-- **Passwort-Hashing mit `node:crypto` (scrypt):** keine zusätzliche Abhängigkeit, läuft auch in der Serverless-Umgebung von Netlify; Vergleich timing-safe, generische Fehlermeldung beim Login.
+- **Passwort-Hashing mit `node:crypto` (scrypt):** keine zusätzliche Abhängigkeit, läuft auch in serverless-Umgebungen (Cloudflare Workers, Netlify); Vergleich timing-safe, generische Fehlermeldung beim Login.
 - **Fotos als verkleinertes Base64 in MongoDB:** Das Bild wird im Browser per Canvas verkleinert und direkt in der DB gespeichert – kein externer Blob-Speicher/Key nötig (passend zum schlanken Prototyp-Charakter).
 - **Open Food Facts ohne Key:** bewusst gewählt, weil sofort einsatzbereit, kostenlos und mit guter DE/CH-Abdeckung (nach Lokalisierung der Abfrage). Alternativen mit Key/OAuth (FatSecret u. a.) wurden geprüft, aber als unnötig aufwändig verworfen.
 
@@ -148,7 +150,7 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
 
 > Die Usability-Evaluation ist vorbereitet (siehe `Usability-Evaluation/`) und wird mit Nutzer:innen durchgeführt; die Ergebnisse werden hier ergänzt.
 
-- **URL der getesteten Version:** _[separat deployte Test-URL einfügen]_
+- **URL der getesteten Version:** https://kalorientracker-prototyp.pages.dev (erster Prototyp, Branch `prototyp-1`)
 - **Ziele der Prüfung:**
   - Wird das Onboarding (Körperdaten → berechnetes Ziel) verstanden und als hilfreich empfunden?
   - Klappt der erste Logging-Vorgang (Lebensmittel suchen/anlegen und mit Menge erfassen) ohne Erklärung?

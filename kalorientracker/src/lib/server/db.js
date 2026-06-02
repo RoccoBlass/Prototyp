@@ -2,40 +2,64 @@ import { MongoClient, ObjectId } from 'mongodb';
 import { env } from '$env/dynamic/private';
 import { scaleNutrition, mealTotals } from '$lib/food.js';
 
-let client;
 let db;
 let connectPromise;
+let indexesEnsured = false;
 
-/** Verbindung herstellen (gecacht) und Indizes anlegen. */
+// Cloudflare Workers: eine DB-Verbindung darf NICHT über Requests hinweg
+// wiederverwendet werden – sonst hängt sich der nächste Request auf ("Worker
+// hung"). Dort deshalb pro Aufruf frisch verbinden; auf Node (Netlify) bleibt
+// die Verbindung global gecacht (performant).
+const IS_WORKERS =
+	typeof globalThis.WebSocketPair !== 'undefined' ||
+	globalThis.navigator?.userAgent === 'Cloudflare-Workers';
+
+async function ensureIndexes(database) {
+	if (indexesEnsured) return;
+	try {
+		await Promise.all([
+			database.collection('users').createIndex({ email: 1 }, { unique: true }),
+			database.collection('sessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+			database.collection('foods').createIndex({ userId: 1, updatedAt: -1 }),
+			database.collection('foods').createIndex({ userId: 1, name: 1 }),
+			database.collection('meals').createIndex({ userId: 1, updatedAt: -1 }),
+			database.collection('meals').createIndex({ userId: 1, name: 1 }),
+			database.collection('entries').createIndex({ userId: 1, date: 1 }),
+			database.collection('entries').createIndex({ userId: 1, createdAt: -1 }),
+			database.collection('weightEntries').createIndex({ userId: 1, date: 1 }, { unique: true })
+		]);
+		indexesEnsured = true;
+	} catch (error) {
+		console.error('Index-Erstellung fehlgeschlagen:', error);
+	}
+}
+
+async function openDb() {
+	const uri = env.DB_URI;
+	if (!uri) {
+		throw new Error('DB_URI ist nicht gesetzt. Bitte die Umgebungsvariable im Hosting hinterlegen.');
+	}
+	const mongo = new MongoClient(uri);
+	await mongo.connect();
+	const database = mongo.db('KalorienTrackerDB');
+	await ensureIndexes(database);
+	return database;
+}
+
+/** Verbindung herstellen. Auf Cloudflare pro Request neu, auf Node gecacht. */
 export async function getDb() {
+	if (IS_WORKERS) return openDb();
 	if (db) return db;
 	if (!connectPromise) {
-		connectPromise = (async () => {
-			const uri = env.DB_URI;
-			if (!uri) {
-				throw new Error(
-					'DB_URI ist nicht gesetzt. Bitte die Umgebungsvariable in Netlify (Site configuration → Environment variables) hinterlegen.'
-				);
-			}
-			client = new MongoClient(uri);
-			await client.connect();
-			db = client.db('KalorienTrackerDB');
-			await Promise.all([
-				db.collection('users').createIndex({ email: 1 }, { unique: true }),
-				db.collection('sessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-				db.collection('foods').createIndex({ userId: 1, updatedAt: -1 }),
-				db.collection('foods').createIndex({ userId: 1, name: 1 }),
-				db.collection('meals').createIndex({ userId: 1, updatedAt: -1 }),
-				db.collection('meals').createIndex({ userId: 1, name: 1 }),
-				db.collection('entries').createIndex({ userId: 1, date: 1 }),
-				db.collection('entries').createIndex({ userId: 1, createdAt: -1 }),
-				db.collection('weightEntries').createIndex({ userId: 1, date: 1 }, { unique: true })
-			]);
-			return db;
-		})().catch((error) => {
-			connectPromise = undefined;
-			throw error;
-		});
+		connectPromise = openDb()
+			.then((d) => {
+				db = d;
+				return d;
+			})
+			.catch((error) => {
+				connectPromise = undefined;
+				throw error;
+			});
 	}
 	return connectPromise;
 }
