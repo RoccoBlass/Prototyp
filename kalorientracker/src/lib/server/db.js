@@ -11,7 +11,9 @@ async function connect() {
 		connectPromise = (async () => {
 			client = new MongoClient(DB_URI);
 			await client.connect();
-			db = client.db('KalorienTrackerDB');
+			// Eigene DB für den Prototyp-Deploy – trennt die Demo-Daten von der
+			// Produktiv-App (gleicher Connection-String, anderer DB-Name).
+			db = client.db('KalorienTrackerProto');
 			await Promise.all([
 				db.collection('mealTemplates').createIndex({ name: 1 }),
 				db.collection('mealTemplates').createIndex({ updatedAt: -1 }),
