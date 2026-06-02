@@ -23,6 +23,27 @@
 			month: 'long'
 		});
 	}
+
+	// KI-Coach: holt auf Klick ein kurzes Feedback zum heutigen Tag (/api/coach).
+	let feedback = $state('');
+	let coachLoading = $state(false);
+	let coachError = $state('');
+
+	async function askCoach() {
+		coachLoading = true;
+		coachError = '';
+		feedback = '';
+		try {
+			const res = await fetch('/api/coach', { method: 'POST' });
+			const result = await res.json();
+			if (!res.ok) throw new Error(result.error || 'Feedback konnte nicht geladen werden.');
+			feedback = result.feedback;
+		} catch (e) {
+			coachError = e.message;
+		} finally {
+			coachLoading = false;
+		}
+	}
 </script>
 
 <div class="dashboard">
@@ -60,6 +81,34 @@
 			fatGoal={data.user.fatGoal}
 		/>
 	</div>
+
+	<section class="coach">
+		<div class="coach-head">
+			<span class="coach-icon"><Icon name="sparkles" size={18} /></span>
+			<div class="coach-headtext">
+				<h2>KI-Coach</h2>
+				<p>Kurzes Feedback zu deinem heutigen Tag.</p>
+			</div>
+		</div>
+
+		{#if feedback}
+			<p class="coach-text">{feedback}</p>
+		{:else if coachError}
+			<p class="coach-error" role="alert">{coachError}</p>
+		{/if}
+
+		<button class="coach-btn" onclick={askCoach} disabled={coachLoading}>
+			{#if coachLoading}
+				<span class="spinner" aria-hidden="true"></span>
+				<span>Analysiere…</span>
+			{:else}
+				<Icon name="sparkles" size={16} />
+				<span>{feedback ? 'Neues Feedback' : 'KI-Feedback holen'}</span>
+			{/if}
+		</button>
+
+		<p class="coach-disclaimer">KI-Schätzung – keine medizinische Beratung.</p>
+	</section>
 
 	<div class="section-header">
 		<h2 class="section-title">Heutige Mahlzeiten</h2>
@@ -159,6 +208,121 @@
 		flex-direction: column;
 		gap: 0;
 		margin-bottom: var(--space-6);
+	}
+
+	/* KI-Coach-Karte */
+	.coach {
+		background: linear-gradient(180deg, var(--brand-soft-2), var(--surface) 70%);
+		border: 1px solid var(--green-200);
+		border-radius: var(--radius-lg);
+		padding: var(--space-6);
+		box-shadow: var(--shadow-sm);
+		margin-bottom: var(--space-6);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.coach-head {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+
+	.coach-icon {
+		width: 38px;
+		height: 38px;
+		border-radius: var(--radius-md);
+		background: var(--brand-soft);
+		color: var(--brand-strong);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.coach-headtext h2 {
+		font-size: var(--text-h2);
+		font-weight: var(--weight-extrabold);
+		color: var(--text);
+		margin: 0;
+		letter-spacing: -0.01em;
+	}
+
+	.coach-headtext p {
+		font-size: var(--text-caption);
+		color: var(--text-subtle);
+		margin: var(--space-1) 0 0;
+	}
+
+	.coach-text {
+		font-size: var(--text-body);
+		color: var(--text);
+		line-height: var(--leading-normal);
+		margin: 0;
+		white-space: pre-wrap;
+	}
+
+	.coach-error {
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-semibold);
+		color: var(--danger);
+		margin: 0;
+	}
+
+	.coach-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		align-self: flex-start;
+		background: var(--brand);
+		color: var(--gray-0);
+		border: none;
+		padding: var(--space-3) var(--space-6);
+		border-radius: var(--radius-md);
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-bold);
+		font-family: inherit;
+		cursor: pointer;
+		transition:
+			background 0.15s ease,
+			transform 0.12s ease,
+			opacity 0.15s ease;
+	}
+
+	.coach-btn:hover:not(:disabled) {
+		background: var(--brand-strong);
+	}
+
+	.coach-btn:active:not(:disabled) {
+		transform: translateY(1px);
+	}
+
+	.coach-btn:disabled {
+		opacity: 0.7;
+		cursor: progress;
+	}
+
+	.spinner {
+		width: 15px;
+		height: 15px;
+		border: 2px solid rgba(255, 255, 255, 0.45);
+		border-top-color: var(--gray-0);
+		border-radius: var(--radius-full);
+		animation: coach-spin 0.7s linear infinite;
+	}
+
+	@keyframes coach-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.coach-disclaimer {
+		font-size: var(--text-overline);
+		color: var(--text-subtle);
+		margin: 0;
 	}
 
 	.section-header {

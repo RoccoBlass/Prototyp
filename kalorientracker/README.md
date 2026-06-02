@@ -93,6 +93,7 @@ _(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und 
 | `/history` | Verlauf der letzten 7 Tage |
 | `/profile` | Profil, Körperdaten, Ziel, Farbschema (Dark/Light), Abmelden |
 | `/api/food-search` | Server-Endpunkt für die Open-Food-Facts-Suche |
+| `/api/coach` | Server-Endpunkt für das KI-Coach-Feedback (OpenRouter) |
 | `/logout` | Abmelden (POST-Endpunkt) |
 
 Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Nav mit hervorgehobenem „+"-Button. Nicht angemeldete Nutzer:innen werden auf `/login` geleitet, angemeldete ohne abgeschlossenes Onboarding auf `/onboarding` (Zugriffsschutz in `src/hooks.server.js`).
@@ -130,6 +131,7 @@ Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Na
   - `weightEntries` – Gewicht pro Tag (ein Eintrag je Benutzer und Tag, eindeutiger Index).
 - Indizes u. a.: `users.email` (unique), `sessions.expiresAt` (TTL), `foods/meals/entries` je `userId`, `weightEntries` je `userId+date` (unique).
 - **Externe Schnittstelle:** Der Server-Endpunkt [`/api/food-search`](src/routes/api/food-search/+server.js) fragt Open Food Facts ab (primär die neue Such-Engine „search-a-licious", Fallback auf die ältere API), bevorzugt deutsche Produktnamen und sortiert Produkte aus DE/CH/AT nach vorne. Die Abfrage läuft serverseitig (kein CORS, kein API-Key).
+- **Externe KI-Schnittstelle:** Der Endpunkt [`/api/coach`](src/routes/api/coach/+server.js) sendet die Tageswerte (Ziel + Tagessummen) an **OpenRouter** (OpenAI-kompatible API) und zeigt das zurückgegebene Coach-Feedback an. Schlüssel und Modell liegen in der `.env` (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`); der Aufruf erfolgt serverseitig und nur auf Nutzer-Klick (siehe Kap. 4.7).
 - Schreiboperationen laufen über SvelteKit-Form-Actions (progressively enhanced).
 - Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden.
 
@@ -222,6 +224,16 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 - **Referenz:** Kap. 3.4.1 (Designentscheidungen: grünes Theming).
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
 
+### 4.7 KI-Coach: Tages-Feedback (OpenRouter)
+- **Beschreibung & Nutzen:** Auf dem Dashboard liefert ein **KI-Coach** auf Knopfdruck ein kurzes, motivierendes Feedback zum heutigen Tag samt einem konkreten Tipp. Die App schickt dazu die Tageswerte (Ziel + bisher gegessene Kalorien/Makros, Anzahl Einträge) an ein Sprachmodell und zeigt die Antwort an. Der Aufruf passiert **nur auf Klick** (keine Aufrufe/Kosten im Hintergrund); die Ausgabe ist ausdrücklich als Coaching/Schätzung, nicht als medizinische Beratung gekennzeichnet.
+- **Wo umgesetzt:**
+  - **Frontend:** „KI-Coach"-Karte auf dem Dashboard [src/routes/+page.svelte](src/routes/+page.svelte) (Button mit Lade- und Fehlerzustand, ruft den Endpunkt per `fetch` auf).
+  - **Backend:** Server-Endpunkt [src/routes/api/coach/+server.js](src/routes/api/coach/+server.js) (lädt die heutigen Einträge und berechnet die Summen serverseitig) und KI-Client [src/lib/server/coach.js](src/lib/server/coach.js) (Prompt-Aufbau + Aufruf der OpenRouter-API).
+  - **Konfiguration:** `OPENROUTER_API_KEY` und `OPENROUTER_MODEL` in der `.env` (serverseitig über `$env/dynamic/private`, analog zu `DB_URI`).
+- **Technik:** OpenRouter wird über die **OpenAI-kompatible** Chat-Completions-API per `fetch` angesprochen – ohne zusätzliche Abhängigkeit. Fehlt der Schlüssel oder schlägt der Aufruf fehl, bleibt die App nutzbar und zeigt eine verständliche Meldung.
+- **Referenz:** Kap. 6 (KI-Deklaration – die App nutzt KI hier zur **Laufzeit**, nicht nur zur Entwicklung).
+- **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
+
 ## 5. Projektorganisation
 
 - **Repository & Struktur:** SvelteKit-Standard mit `src/routes/` (Routen + Server-Loader/Actions), `src/lib/components/` (UI), `src/lib/` (reine Hilfslogik), `src/lib/server/` (DB-Layer & Auth, nur serverseitig importierbar), `static/` (Assets). `Informationen/`, `Usability-Evaluation/`, `.claude/`, `.env`, `node_modules/`, `build/` und `.svelte-kit/` sind in `.gitignore` ausgeschlossen.
@@ -234,6 +246,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 - **Eingesetzte Tools:** **Claude Code** (Anthropic) mit dem Modell **Claude Opus 4.x** als zentrales Werkzeug für die Implementierung. _[Falls weitere Tools genutzt wurden (z. B. ChatGPT, Copilot), hier ergänzen.]_
 - **Zweck & Umfang:** KI wurde umfassend für die **technische Umsetzung** eingesetzt: Erstellen und Refactoring des SvelteKit-Codes (Routen, Komponenten, Datenbank-Layer, Authentifizierung, Anbindung der Lebensmittel-API), CSS/Design-Feinschliff, Verifikation per Build- und Browser-Tests sowie Textentwürfe (u. a. diese README). Das **Produkt- und UX-Konzept, die Feature-Entscheide, die Auswahl zwischen Optionen** (z. B. Berechnungsmethode für den Kalorienbedarf, Foto-Speicherung in der DB, Wahl der Lebensmittel-Datenbank) sowie das **Testen** habe ich vorgegeben bzw. selbst durchgeführt; die KI hat auf diese Vorgaben hin umgesetzt und Optionen vorgeschlagen.
 - **Eigene Leistung (Abgrenzung):** Problemraumanalyse und App-Konzept, das Figma-Mockup und das Dokument „Workflows und Designentscheide", die Festlegung des Funktionsumfangs, sämtliche Produkt- und Designentscheidungen, das Abnehmen/Testen der Ergebnisse sowie die Vorbereitung und Durchführung der Usability-Evaluation.
+- **KI als Produkt-Feature (Laufzeit):** Über die in Kap. 4.7 beschriebene Funktion nutzt die App **zur Laufzeit selbst** ein Sprachmodell (über OpenRouter). Dabei werden die Tageswerte (Ziel und Tagessummen, keine Klarnamen oder Kontaktdaten) an den Anbieter übermittelt. Das ist von der KI-Nutzung zur *Entwicklung* (oben) zu unterscheiden.
 
 ### 6.2 Prompt-Vorgehen
 Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion statt einer einzigen „bau mir die App"-Anfrage. Pro Schritt habe ich den Kontext und die gewünschte Konvention vorgegeben (z. B. Svelte-5-Runes statt Stores, DB-Zugriffe nur im Server-Layer) und bei grösseren Entscheidungen bewusst Rückfragen bzw. Optionen abgewogen, bevor umgesetzt wurde. Vorschläge habe ich vor der Übernahme gelesen, im Browser getestet und bei Bedarf angepasst. Beispiel-Prompt: _„Baue ein Onboarding, das Geschlecht/Alter/Grösse/Gewicht/Aktivität/Ziel abfragt und daraus mit Mifflin-St Jeor ein Kalorien- und Makroziel berechnet und im Profil speichert."_
@@ -261,8 +274,12 @@ Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion
 # Abhängigkeiten installieren
 npm install
 
-# .env mit MongoDB-URI anlegen
-echo 'DB_URI="<mongodb-connection-string>"' > .env
+# .env anlegen (MongoDB-URI; OpenRouter optional – nur für den KI-Coach, Kap. 4.7)
+cat > .env <<'EOF'
+DB_URI="<mongodb-connection-string>"
+OPENROUTER_API_KEY="<dein-openrouter-token>"
+OPENROUTER_MODEL="openai/gpt-4o-mini"
+EOF
 
 # Dev-Server
 npm run dev
