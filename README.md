@@ -86,7 +86,7 @@ _(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und 
 | `/login` | Registrierung & Anmeldung |
 | `/onboarding` | Ersteinrichtung: Körperdaten → automatisch berechnetes Ziel |
 | `/` | Dashboard (Tagesüberblick: Kalorienring, Makros, Einträge) |
-| `/add` | Hinzufügen-Hub mit Tabs „Mahlzeiten" und „Lebensmittel" |
+| `/add` | Hinzufügen-Hub mit Tabs „Mahlzeiten", „Lebensmittel" und „Foto" (KI-Schätzung) |
 | `/add/food/new`, `/add/food/[id]` | Eigenes Lebensmittel anlegen / bearbeiten |
 | `/add/meal/new`, `/add/meal/[id]` | Mahlzeit aus Lebensmitteln zusammenstellen / bearbeiten |
 | `/weight` | Gewichtstracker mit Verlaufs-Chart |
@@ -94,6 +94,7 @@ _(Screenshots der wichtigsten Mockup-Screens unter `/docs/mockups/` ablegen und 
 | `/profile` | Profil, Körperdaten, Ziel, Farbschema (Dark/Light), Abmelden |
 | `/api/food-search` | Server-Endpunkt für die Open-Food-Facts-Suche |
 | `/api/coach` | Server-Endpunkt für das KI-Coach-Feedback (OpenRouter) |
+| `/api/estimate-nutrition` | Server-Endpunkt für die KI-Nährwertschätzung aus einem Foto (OpenRouter, Vision) |
 | `/logout` | Abmelden (POST-Endpunkt) |
 
 Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Nav mit hervorgehobenem „+"-Button. Nicht angemeldete Nutzer:innen werden auf `/login` geleitet, angemeldete ohne abgeschlossenes Onboarding auf `/onboarding` (Zugriffsschutz in `src/hooks.server.js`).
@@ -307,6 +308,19 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 - **Referenz:** Kap. 6 (KI-Deklaration – die App nutzt KI hier zur **Laufzeit**, nicht nur zur Entwicklung).
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
 
+### 4.8 KI-Nährwertschätzung aus Foto
+
+- **Beschreibung & Nutzen:** Auf der „Hinzufügen"-Seite gibt es neben *Mahlzeiten* und *Lebensmittel* eine dritte Kategorie **„Foto"**. Man nimmt ein Foto eines Lebensmittels oder Gerichts auf (oder wählt eines aus), und ein **multimodales Sprachmodell schätzt daraus die Nährwerte je 100 g/ml** (Kalorien, Protein, Kohlenhydrate, Fett). Die Werte erscheinen in einem editierbaren Formular – man prüft/korrigiert sie und kann den Eintrag **direkt für heute erfassen** oder **als wiederverwendbares Lebensmittel speichern**. Das senkt genau die in der Evaluation kritisierte Hürde der manuellen Nährwerteingabe.
+- **Wo umgesetzt:**
+  - **Frontend:** dritter Tab „Foto" in [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) mit der Komponente [src/lib/components/PhotoScan.svelte](kalorientracker/src/lib/components/PhotoScan.svelte) – Foto wird im Browser verkleinert, der Schätz-Endpunkt per `fetch` aufgerufen, die Felder sind editierbar mit Live-Vorschau der Portion.
+  - **Backend:** Server-Endpunkt [src/routes/api/estimate-nutrition/+server.js](kalorientracker/src/routes/api/estimate-nutrition/+server.js) und KI-Client [src/lib/server/vision.js](kalorientracker/src/lib/server/vision.js) (Vision-Prompt, Aufruf der OpenRouter-API, robustes JSON-Parsing, Validierung/Begrenzung der Werte). Speichern/Eintragen über die Actions `saveScannedFood` bzw. `logFood` in [src/routes/add/+page.server.js](kalorientracker/src/routes/add/+page.server.js).
+  - **Konfiguration:** dasselbe `OPENROUTER_API_KEY`/`OPENROUTER_MODEL` wie der KI-Coach; das Modell muss Bildeingabe (Vision) unterstützen (getestet mit `google/gemini-3.1-flash-lite`).
+- **Technik:** OpenRouter wird über die OpenAI-kompatible Chat-Completions-API mit einer **Bild-Nachricht** (Foto als data-URL) angesprochen. Die Antwort ist striktes JSON, das serverseitig validiert wird. Schlägt der Aufruf fehl oder wird kein Lebensmittel erkannt, bleibt die App nutzbar und zeigt eine verständliche Meldung.
+- **Referenz:** Screenshot unten; KI-Nutzung zur Laufzeit siehe Kap. 6.
+- **Aus Evaluation abgeleitet?:** **Teilweise** – adressiert die in der Evaluation als mühsam empfundene manuelle Nährwerteingabe (Kap. 3.5, Problem 2).
+
+![Foto-Schätzung: KI füllt die Nährwerte aus einem Foto](docs/screenshots/scan-result.png)
+
 ## 5. Projektorganisation
 
 - **Repository & Struktur:** SvelteKit-Standard mit `src/routes/` (Routen + Server-Loader/Actions), `src/lib/components/` (UI), `src/lib/` (reine Hilfslogik), `src/lib/server/` (DB-Layer & Auth, nur serverseitig importierbar), `static/` (Assets). `Informationen/`, `Usability-Evaluation/`, `.claude/`, `.env`, `node_modules/`, `build/` und `.svelte-kit/` sind in `.gitignore` ausgeschlossen.
@@ -319,7 +333,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 - **Eingesetzte Tools:** **Claude Code** (Anthropic) mit dem Modell **Claude Opus 4.x** als zentrales Werkzeug für die Implementierung. _[Falls weitere Tools genutzt wurden (z. B. ChatGPT, Copilot), hier ergänzen.]_
 - **Zweck & Umfang:** KI wurde umfassend für die **technische Umsetzung** eingesetzt: Erstellen und Refactoring des SvelteKit-Codes (Routen, Komponenten, Datenbank-Layer, Authentifizierung, Anbindung der Lebensmittel-API), CSS/Design-Feinschliff, Verifikation per Build- und Browser-Tests sowie Textentwürfe (u. a. diese README). Das **Produkt- und UX-Konzept, die Feature-Entscheide, die Auswahl zwischen Optionen** (z. B. Berechnungsmethode für den Kalorienbedarf, Foto-Speicherung in der DB, Wahl der Lebensmittel-Datenbank) sowie das **Testen** habe ich vorgegeben bzw. selbst durchgeführt; die KI hat auf diese Vorgaben hin umgesetzt und Optionen vorgeschlagen.
 - **Eigene Leistung (Abgrenzung):** Problemraumanalyse und App-Konzept, das Figma-Mockup und das Dokument „Workflows und Designentscheide", die Festlegung des Funktionsumfangs, sämtliche Produkt- und Designentscheidungen, das Abnehmen/Testen der Ergebnisse sowie die Vorbereitung und Durchführung der Usability-Evaluation.
-- **KI als Produkt-Feature (Laufzeit):** Über die in Kap. 4.7 beschriebene Funktion nutzt die App **zur Laufzeit selbst** ein Sprachmodell (über OpenRouter). Dabei werden die Tageswerte (Ziel und Tagessummen, keine Klarnamen oder Kontaktdaten) an den Anbieter übermittelt. Das ist von der KI-Nutzung zur *Entwicklung* (oben) zu unterscheiden.
+- **KI als Produkt-Feature (Laufzeit):** Über die in Kap. 4.7 und 4.8 beschriebenen Funktionen nutzt die App **zur Laufzeit selbst** ein (multimodales) Sprachmodell über OpenRouter: der **KI-Coach** übermittelt die Tageswerte (Ziel und Tagessummen, keine Klarnamen oder Kontaktdaten), die **Foto-Nährwertschätzung** übermittelt das vom Nutzer aufgenommene **Bild** an den Anbieter. Beides ist von der KI-Nutzung zur *Entwicklung* (oben) zu unterscheiden.
 
 ### 6.2 Prompt-Vorgehen
 Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion statt einer einzigen „bau mir die App"-Anfrage. Pro Schritt habe ich den Kontext und die gewünschte Konvention vorgegeben (z. B. Svelte-5-Runes statt Stores, DB-Zugriffe nur im Server-Layer) und bei grösseren Entscheidungen bewusst Rückfragen bzw. Optionen abgewogen, bevor umgesetzt wurde. Vorschläge habe ich vor der Übernahme gelesen, im Browser getestet und bei Bedarf angepasst. Beispiel-Prompt: _„Baue ein Onboarding, das Geschlecht/Alter/Grösse/Gewicht/Aktivität/Ziel abfragt und daraus mit Mifflin-St Jeor ein Kalorien- und Makroziel berechnet und im Profil speichert."_

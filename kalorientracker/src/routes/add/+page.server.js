@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { getMeals, getFoods, addMealEntry, addFoodEntry } from '$lib/server/db.js';
+import { getMeals, getFoods, addMealEntry, addFoodEntry, addFood } from '$lib/server/db.js';
 import { MEAL_TYPE_VALUES } from '$lib/food.js';
 
 function getLocalDateStr() {
@@ -82,5 +82,43 @@ export const actions = {
 			return fail(500, { error: 'Fehler beim Erfassen. Bitte erneut versuchen.' });
 		}
 		redirect(303, '/?success=1');
+	},
+
+	// Eine per Foto geschätzte (und ggf. korrigierte) Angabe als eigenes
+	// Lebensmittel speichern – inkl. des aufgenommenen Fotos.
+	saveScannedFood: async ({ request, locals }) => {
+		const data = await request.formData();
+		const name = String(data.get('name') ?? '')
+			.trim()
+			.slice(0, 120);
+		const unit = data.get('unit') === 'ml' ? 'ml' : 'g';
+		const photo = data.get('photo');
+		const caloriesPer100 = Number(data.get('caloriesPer100'));
+		const proteinPer100 = Number(data.get('proteinPer100'));
+		const carbsPer100 = Number(data.get('carbsPer100'));
+		const fatPer100 = Number(data.get('fatPer100'));
+
+		if (!name) {
+			return fail(400, { error: 'Bitte einen Namen angeben.' });
+		}
+		if (![caloriesPer100, proteinPer100, carbsPer100, fatPer100].every(Number.isFinite)) {
+			return fail(400, { error: 'Nährwerte fehlen.' });
+		}
+
+		try {
+			await addFood(locals.user.id, {
+				name,
+				unit,
+				caloriesPer100,
+				proteinPer100,
+				carbsPer100,
+				fatPer100,
+				photo: typeof photo === 'string' && photo.startsWith('data:image/') ? photo : null
+			});
+		} catch (err) {
+			console.error('Lebensmittel speichern fehlgeschlagen:', err);
+			return fail(500, { error: 'Speichern fehlgeschlagen. Bitte erneut versuchen.' });
+		}
+		redirect(303, '/add?tab=foods');
 	}
 };

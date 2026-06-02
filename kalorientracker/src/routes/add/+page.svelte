@@ -1,12 +1,14 @@
 <script>
 	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
+	import PhotoScan from '$lib/components/PhotoScan.svelte';
 	import { MEAL_TYPES, defaultMealType } from '$lib/food.js';
 
 	let { data, form } = $props();
 
 	let selectedType = $state(defaultMealType(new Date().getHours()));
-	let tab = $state(page.url.searchParams.get('tab') === 'foods' ? 'foods' : 'meals');
+	const initialTab = page.url.searchParams.get('tab');
+	let tab = $state(initialTab === 'foods' ? 'foods' : initialTab === 'scan' ? 'scan' : 'meals');
 
 	let mealQuery = $state('');
 	let foodQuery = $state('');
@@ -123,6 +125,10 @@
 		<button type="button" class="tab" class:active={tab === 'foods'} onclick={() => (tab = 'foods')}>
 			Lebensmittel
 		</button>
+		<button type="button" class="tab tab-foto" class:active={tab === 'scan'} onclick={() => (tab = 'scan')}>
+			<Icon name="camera" size={15} />
+			<span>Foto</span>
+		</button>
 	</div>
 
 	{#if tab === 'meals'}
@@ -177,7 +183,7 @@
 				</ul>
 			{/if}
 		</section>
-	{:else}
+	{:else if tab === 'foods'}
 		<section class="panel">
 			<header class="panel-head">
 				<h2>Lebensmittel suchen</h2>
@@ -225,6 +231,10 @@
 					{/each}
 				</ul>
 			{/if}
+		</section>
+	{:else}
+		<section class="panel">
+			<PhotoScan {selectedType} />
 		</section>
 	{/if}
 </div>
@@ -348,6 +358,13 @@
 		background: var(--surface);
 		color: var(--brand-strong);
 		box-shadow: var(--shadow-sm);
+	}
+
+	.tab-foto {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-1);
 	}
 
 	.panel {
