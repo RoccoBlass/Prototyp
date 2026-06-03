@@ -10,6 +10,7 @@
     3. [Decide](#33-decide)
     4. [Prototype](#34-prototype)
     5. [Validate](#35-validate)
+    6. [Umgesetzte App](#36-umgesetzte-app)
 4. [Erweiterungen](#4-erweiterungen)
 5. [Projektorganisation](#5-projektorganisation)
 6. [KI-Deklaration](#6-ki-deklaration)
@@ -85,11 +86,9 @@ Gewählt habe ich Variante (b). Entscheidkriterien waren minimaler Aufwand pro L
 
 ![User-Journey-Map des Hauptworkflows](docs/journey-map.svg)
 
-**Mockup:** Als Referenz für die Ausgestaltung diente ein selbst erstellter, klickbarer **Figma-Prototyp**: <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>. Er legte den Kern-Workflow und die Screen-Struktur fest (Dashboard mit Fortschritt, Hinzufügen-Flow, Listen-/Detailansichten). Die umgesetzte Oberfläche (Screenshots in Kap. 3.4.2) realisiert dieses Konzept und geht in mehreren Punkten darüber hinaus (siehe Kap. 4).
+**Mockup:** Als Referenz für die Ausgestaltung diente ein selbst erstellter, klickbarer **Figma-Prototyp**: <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>. Er legte den Kern-Workflow und die Screen-Struktur fest (Dashboard mit Fortschritt, Hinzufügen-Flow, Listen-/Detailansichten). Die umgesetzte Oberfläche (Screenshots in Kap. 3.6.1) realisiert dieses Konzept und geht in mehreren Punkten darüber hinaus (siehe Kap. 4).
 
 ### 3.4 Prototype
-
-#### 3.4.1 Erster Prototyp (für die Evaluation)
 
 Zunächst entstand ein **bewusst schlanker erster Prototyp**, der in der Usability-Evaluation (Kap. 3.5) mit Nutzer:innen getestet wurde. Er ist als eigener Branch [`prototyp-1`](https://github.com/RoccoBlass/Prototyp/tree/prototyp-1) eingefroren und separat deployt: <https://kalorientracker-prototyp.pages.dev>.
 
@@ -101,9 +100,44 @@ Zunächst entstand ein **bewusst schlanker erster Prototyp**, der in der Usabili
 
 *Erster Prototyp (Stand der Evaluation): Dashboard und manuelle Lebensmittel-Erfassung – schlanker und ohne die späteren Erweiterungen.*
 
-#### 3.4.2 Entwurf & Design der umgesetzten App
+### 3.5 Validate
+
+Mit dem **ersten Prototyp** (minimaler Tracker mit wiederverwendbaren Mahlzeiten, Branch `prototyp-1`) wurde eine **formative Usability-Evaluation** durchgeführt. Vorbereitung, Aufgabenblatt und Feedback-Grid liegen unter `Usability-Evaluation/`.
+
+- **URL der getesteten Version:** https://kalorientracker-prototyp.pages.dev (erster Prototyp, Branch `prototyp-1`)
+- **Ziele der Prüfung:**
+  - Wird die **Startübersicht** verstanden – erkennen Nutzer:innen auf einen Blick die heute gegessenen Kalorien und den Rest bis zum Tagesziel?
+  - Ist das zentrale Konzept klar – der Unterschied zwischen einer einmal gespeicherten, **wiederverwendbaren Mahlzeit** und einem **Eintrag für einen Tag**?
+  - **Effektivität & Effizienz:** Können Nutzer:innen eine Mahlzeit ohne Hilfe erfassen und einem Tag zuordnen – und wie schnell gelingt das bei einer bereits gespeicherten Mahlzeit?
+  - Finden und ändern sie ihr **persönliches Kalorienziel**?
+  - Sind Navigation und (deutschsprachige) Begriffe erwartungskonform, und wird das eigentliche Problem gelöst (Ernährung einfach im Blick behalten)?
+- **Vorgehen:** Moderierter, szenario-basierter Usability-Test mit **lautem Denken (Think-Aloud)**, on-site am Arbeitsplatz (Testperson und Testleiter:in nebeneinander), primär am Smartphone. Ca. 10 Minuten pro Test: kurze Vorabfragen, sieben einzeln und neutral vorgelegte Aufgaben (Kontext + Ziel, keine Lösungsbegriffe), Kurzfragen nach jeder Aufgabe, Abschlussinterview. Auswertung qualitativ (Beobachtungen, Aussagen) ergänzt um einfache Kennzahlen (Aufgabe gelöst ja/nein, grobe Zeit).
+- **Stichprobe:** Gegenseitiges Testen mit **drei Mitstudierenden** (TP1–TP3), die den Prototyp vorher nicht kannten – Profil entspricht der primären Zielgruppe (erwachsene, technikaffine Personen mit Interesse an Ernährungs-Tracking).
+- **Aufgaben/Szenarien** (Ausgangslage: „Du beginnst, bewusster auf deine Ernährung zu achten, und nutzt die App zum ersten Mal auf dem Smartphone."):
+  1. **Überblick verschaffen:** Wie viel hast du heute bisher gegessen, wie viel ist bis zum Tagesziel noch offen?
+  2. **Etwas Wiederkehrendes festhalten:** Ein fast tägliches Frühstück (~350 kcal) so speichern, dass es nicht jedes Mal neu eingegeben werden muss.
+  3. **Eine Mahlzeit für heute erfassen:** Genau dieses gespeicherte Frühstück für den heutigen Tag eintragen.
+  4. **Einen Fehler korrigieren:** Einen Eintrag, der gar nicht gegessen wurde, wieder entfernen.
+  5. **Persönliches Ziel anpassen:** Die App auf höchstens 1'800 kcal/Tag einstellen.
+  6. **Rückblick:** Prüfen, ob man in den letzten Tagen in der Nähe des Ziels geblieben ist.
+  7. *(optional)* **Eine Angabe richtigstellen:** Die Kalorien des gespeicherten Frühstücks auf den korrekten Wert (~300 kcal) ändern.
+- **Kennzahlen & Beobachtungen:**
+  - **Messbares Usability-Ziel** (»mind. 4 von 5 Testpersonen erfassen eine gespeicherte Mahlzeit ohne Hilfe in unter 30 s«) **erreicht:** Alle drei Testpersonen erfassten die gespeicherte Mahlzeit (Aufgabe 3) ohne Eingreifen deutlich unter 30 Sekunden. Die Aufgaben 1, 3, 4 und 6 wurden durchgängig selbstständig gelöst.
+  - **Positiv:** Die Startübersicht mit Kalorienring wurde sofort verstanden („auf einen Blick klar, wie viel noch geht"). Das Prinzip *einmal speichern → für einen Tag eintragen* war spätestens nach dem ersten Durchlauf klar. Löschen (Aufgabe 4) und Zielanpassung (Aufgabe 5) waren gut auffindbar.
+  - **Problem 1 – Konto/Login vermisst (hoch):** Mehrere Testpersonen suchten zu Beginn nach einer Anmeldung bzw. einem persönlichen Profil. Ohne Konto wirkten die Daten „nicht wirklich meine", und es war unklar, ob die Einträge privat und dauerhaft gespeichert sind.
+  - **Problem 2 – nur selbst angelegte Mahlzeiten (hoch):** Jedes Lebensmittel/jede Mahlzeit musste mit Nährwerten von Hand eingegeben werden. Die Testpersonen erwarteten, gängige Lebensmittel **suchen** zu können (bereits in Aufgabe 2), und empfanden die manuelle Eingabe als mühsam und als Einstiegshürde. Mehrfach kam der Wunsch, auch ein **einzelnes Lebensmittel** statt immer einer ganzen Mahlzeit zu erfassen.
+  - **Problem 3 – Zielwert wirkte willkürlich (mittel):** Das Anpassen des Kalorienziels (Aufgabe 5) gelang, aber die Testpersonen wussten nicht, welcher Wert für sie sinnvoll ist, und wünschten sich einen **Vorschlag auf Basis ihrer Körperdaten**.
+- **Zusammenfassung der Resultate:** Das Kernkonzept trägt: Übersicht und wiederverwendbare Mahlzeiten wurden verstanden und schnell bedient, das messbare Usability-Ziel wurde erreicht. Die grössten Schwächen lagen nicht im Ablauf, sondern im **fehlenden Benutzerkonto**, in der **mühsamen manuellen Lebensmitteleingabe** (keine Datenbank/Suche, nur eigene Mahlzeiten) und im **willkürlichen Zielwert**.
+- **Abgeleitete Verbesserungen** (priorisiert; alle inzwischen umgesetzt, siehe Kap. 4):
+  1. **Benutzerkonten mit Login/Registrierung** und persönlichen, dauerhaft gespeicherten Daten → Kap. 4.1.
+  2. **Lebensmittel-Datenbank mit Suche** (Open Food Facts) statt reiner Handeingabe sowie das Erfassen **einzelner Lebensmittel** zusätzlich zu Mahlzeiten → Kap. 4.3 und 4.4.
+  3. **Automatische Bedarfsberechnung** über ein kurzes Onboarding (Körperdaten → Kalorien-/Makroziel) statt eines frei geratenen Zielwerts → Kap. 4.2.
+
+### 3.6 Umgesetzte App
 
 Aus dem ersten Prototyp wurde – getrieben von der Evaluation (3.5) und den daraus abgeleiteten Erweiterungen (Kap. 4) – die folgende **umgesetzte App**.
+
+#### 3.6.1 Entwurf & Design
 
 **Informationsarchitektur** – nach Login flach und aufgabenorientiert:
 
@@ -196,7 +230,7 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 - **Onboarding als geführter Wizard:** Statt die Nutzer:innen ein Kalorienziel raten zu lassen, wird es aus den Körperdaten berechnet (siehe Kap. 4.2).
 - **Mahlzeit als ein aufklappbarer Block** im Tagesprotokoll: übersichtlich, Zutaten bei Bedarf einsehbar.
 
-#### 3.4.3 Umsetzung (Technik)
+#### 3.6.2 Umsetzung (Technik)
 
 **Technologie-Stack:** SvelteKit (Svelte 5 mit Runes-Syntax, JavaScript ohne TypeScript), MongoDB Atlas über den offiziellen `mongodb`-Treiber, Plain CSS mit Custom Properties (kein UI-Framework). Vite als Build-Tool, Cloudflare-Adapter (`adapter-cloudflare`) für das Deployment auf Cloudflare Pages. Passwort-Hashing mit dem Node-Kern (`node:crypto`, scrypt) ohne externe Auth-Bibliothek. Anbindung an die öffentliche **Open-Food-Facts**-Datenbank (ohne API-Key).
 
@@ -235,39 +269,6 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 - **Open Food Facts ohne Key:** bewusst gewählt, weil sofort einsatzbereit, kostenlos und mit guter DE/CH-Abdeckung (nach Lokalisierung der Abfrage). Alternativen mit Key/OAuth (FatSecret u. a.) wurden geprüft, aber als unnötig aufwändig verworfen.
 - **Deployment über lokalen Build:** Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` (`deploy.sh`) hochgeladen, statt ihn in der Cloud-Build-Pipeline auszuführen – so wird der native MongoDB-Treiber zuverlässig gebündelt. Die automatischen Cloud-Builds sind deaktiviert, die git-Verknüpfung bleibt bestehen.
 
-### 3.5 Validate
-
-Mit dem **ersten Prototyp** (minimaler Tracker mit wiederverwendbaren Mahlzeiten, Branch `prototyp-1`) wurde eine **formative Usability-Evaluation** durchgeführt. Vorbereitung, Aufgabenblatt und Feedback-Grid liegen unter `Usability-Evaluation/`.
-
-- **URL der getesteten Version:** https://kalorientracker-prototyp.pages.dev (erster Prototyp, Branch `prototyp-1`)
-- **Ziele der Prüfung:**
-  - Wird die **Startübersicht** verstanden – erkennen Nutzer:innen auf einen Blick die heute gegessenen Kalorien und den Rest bis zum Tagesziel?
-  - Ist das zentrale Konzept klar – der Unterschied zwischen einer einmal gespeicherten, **wiederverwendbaren Mahlzeit** und einem **Eintrag für einen Tag**?
-  - **Effektivität & Effizienz:** Können Nutzer:innen eine Mahlzeit ohne Hilfe erfassen und einem Tag zuordnen – und wie schnell gelingt das bei einer bereits gespeicherten Mahlzeit?
-  - Finden und ändern sie ihr **persönliches Kalorienziel**?
-  - Sind Navigation und (deutschsprachige) Begriffe erwartungskonform, und wird das eigentliche Problem gelöst (Ernährung einfach im Blick behalten)?
-- **Vorgehen:** Moderierter, szenario-basierter Usability-Test mit **lautem Denken (Think-Aloud)**, on-site am Arbeitsplatz (Testperson und Testleiter:in nebeneinander), primär am Smartphone. Ca. 10 Minuten pro Test: kurze Vorabfragen, sieben einzeln und neutral vorgelegte Aufgaben (Kontext + Ziel, keine Lösungsbegriffe), Kurzfragen nach jeder Aufgabe, Abschlussinterview. Auswertung qualitativ (Beobachtungen, Aussagen) ergänzt um einfache Kennzahlen (Aufgabe gelöst ja/nein, grobe Zeit).
-- **Stichprobe:** Gegenseitiges Testen mit **drei Mitstudierenden** (TP1–TP3), die den Prototyp vorher nicht kannten – Profil entspricht der primären Zielgruppe (erwachsene, technikaffine Personen mit Interesse an Ernährungs-Tracking).
-- **Aufgaben/Szenarien** (Ausgangslage: „Du beginnst, bewusster auf deine Ernährung zu achten, und nutzt die App zum ersten Mal auf dem Smartphone."):
-  1. **Überblick verschaffen:** Wie viel hast du heute bisher gegessen, wie viel ist bis zum Tagesziel noch offen?
-  2. **Etwas Wiederkehrendes festhalten:** Ein fast tägliches Frühstück (~350 kcal) so speichern, dass es nicht jedes Mal neu eingegeben werden muss.
-  3. **Eine Mahlzeit für heute erfassen:** Genau dieses gespeicherte Frühstück für den heutigen Tag eintragen.
-  4. **Einen Fehler korrigieren:** Einen Eintrag, der gar nicht gegessen wurde, wieder entfernen.
-  5. **Persönliches Ziel anpassen:** Die App auf höchstens 1'800 kcal/Tag einstellen.
-  6. **Rückblick:** Prüfen, ob man in den letzten Tagen in der Nähe des Ziels geblieben ist.
-  7. *(optional)* **Eine Angabe richtigstellen:** Die Kalorien des gespeicherten Frühstücks auf den korrekten Wert (~300 kcal) ändern.
-- **Kennzahlen & Beobachtungen:**
-  - **Messbares Usability-Ziel** (»mind. 4 von 5 Testpersonen erfassen eine gespeicherte Mahlzeit ohne Hilfe in unter 30 s«) **erreicht:** Alle drei Testpersonen erfassten die gespeicherte Mahlzeit (Aufgabe 3) ohne Eingreifen deutlich unter 30 Sekunden. Die Aufgaben 1, 3, 4 und 6 wurden durchgängig selbstständig gelöst.
-  - **Positiv:** Die Startübersicht mit Kalorienring wurde sofort verstanden („auf einen Blick klar, wie viel noch geht"). Das Prinzip *einmal speichern → für einen Tag eintragen* war spätestens nach dem ersten Durchlauf klar. Löschen (Aufgabe 4) und Zielanpassung (Aufgabe 5) waren gut auffindbar.
-  - **Problem 1 – Konto/Login vermisst (hoch):** Mehrere Testpersonen suchten zu Beginn nach einer Anmeldung bzw. einem persönlichen Profil. Ohne Konto wirkten die Daten „nicht wirklich meine", und es war unklar, ob die Einträge privat und dauerhaft gespeichert sind.
-  - **Problem 2 – nur selbst angelegte Mahlzeiten (hoch):** Jedes Lebensmittel/jede Mahlzeit musste mit Nährwerten von Hand eingegeben werden. Die Testpersonen erwarteten, gängige Lebensmittel **suchen** zu können (bereits in Aufgabe 2), und empfanden die manuelle Eingabe als mühsam und als Einstiegshürde. Mehrfach kam der Wunsch, auch ein **einzelnes Lebensmittel** statt immer einer ganzen Mahlzeit zu erfassen.
-  - **Problem 3 – Zielwert wirkte willkürlich (mittel):** Das Anpassen des Kalorienziels (Aufgabe 5) gelang, aber die Testpersonen wussten nicht, welcher Wert für sie sinnvoll ist, und wünschten sich einen **Vorschlag auf Basis ihrer Körperdaten**.
-- **Zusammenfassung der Resultate:** Das Kernkonzept trägt: Übersicht und wiederverwendbare Mahlzeiten wurden verstanden und schnell bedient, das messbare Usability-Ziel wurde erreicht. Die grössten Schwächen lagen nicht im Ablauf, sondern im **fehlenden Benutzerkonto**, in der **mühsamen manuellen Lebensmitteleingabe** (keine Datenbank/Suche, nur eigene Mahlzeiten) und im **willkürlichen Zielwert**.
-- **Abgeleitete Verbesserungen** (priorisiert; alle inzwischen umgesetzt, siehe Kap. 4):
-  1. **Benutzerkonten mit Login/Registrierung** und persönlichen, dauerhaft gespeicherten Daten → Kap. 4.1.
-  2. **Lebensmittel-Datenbank mit Suche** (Open Food Facts) statt reiner Handeingabe sowie das Erfassen **einzelner Lebensmittel** zusätzlich zu Mahlzeiten → Kap. 4.3 und 4.4.
-  3. **Automatische Bedarfsberechnung** über ein kurzes Onboarding (Körperdaten → Kalorien-/Makroziel) statt eines frei geratenen Zielwerts → Kap. 4.2.
-
 ## 4. Erweiterungen
 
 Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanker Tracker mit wiederverwendbaren Mahlzeiten) hinaus.
@@ -278,7 +279,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/login/+page.svelte](kalorientracker/src/routes/login/+page.svelte) (Umschalter Anmelden/Registrieren), Abmelden im Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte).
   - **Backend:** [src/lib/server/auth.js](kalorientracker/src/lib/server/auth.js) (Hashing, Sessions), [src/routes/login/+page.server.js](kalorientracker/src/routes/login/+page.server.js), [src/routes/logout/+server.js](kalorientracker/src/routes/logout/+server.js), Zugriffsschutz in [src/hooks.server.js](kalorientracker/src/hooks.server.js).
   - **Datenbank:** Collections `users` (eindeutiger E-Mail-Index) und `sessions` (TTL-Index).
-- **Referenz:** vgl. Kap. 3.4.3 (Umsetzung).
+- **Referenz:** vgl. Kap. 3.6.2 (Umsetzung).
 - **Aus Evaluation abgeleitet?:** **Ja** – die Tester:innen vermissten ein Konto/Login; ohne Anmeldung wirkten die Daten unpersönlich und ihre dauerhafte, private Speicherung unklar (Kap. 3.5, Problem 1). Zugleich Voraussetzung für die übrigen Erweiterungen.
 
 ### 4.2 Onboarding mit automatischer Bedarfsberechnung
@@ -287,7 +288,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/onboarding/+page.svelte](kalorientracker/src/routes/onboarding/+page.svelte) (Wizard mit Live-Vorschau), Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte).
   - **Backend:** Berechnungslogik [src/lib/nutrition.js](kalorientracker/src/lib/nutrition.js); Speicherung über [src/routes/onboarding/+page.server.js](kalorientracker/src/routes/onboarding/+page.server.js) und [src/routes/profile/+page.server.js](kalorientracker/src/routes/profile/+page.server.js); Onboarding-Zwang im Hook.
   - **Datenbank:** Körperdaten und berechnete Ziele am `users`-Dokument.
-- **Referenz:** Kap. 3.4.2 (Designentscheidungen).
+- **Referenz:** Kap. 3.6.1 (Designentscheidungen).
 - **Aus Evaluation abgeleitet?:** **Ja** – der frei einzugebende Zielwert wirkte in der Evaluation willkürlich; gewünscht war ein aus den Körperdaten berechneter Vorschlag (Kap. 3.5, Problem 3).
 
 ### 4.3 Lebensmittel-Datenbank (Open Food Facts) & eigene Lebensmittel mit Foto
@@ -296,7 +297,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) (Suche + Tag-Logging), [src/lib/components/FoodForm.svelte](kalorientracker/src/lib/components/FoodForm.svelte) (Formular + Foto-Verkleinerung im Browser).
   - **Backend:** Server-Endpunkt [src/routes/api/food-search/+server.js](kalorientracker/src/routes/api/food-search/+server.js); Lebensmittel-Routen [src/routes/add/food/new/+page.server.js](kalorientracker/src/routes/add/food/new/+page.server.js) und [src/routes/add/food/[id]/+page.server.js](kalorientracker/src/routes/add/food/%5Bid%5D/+page.server.js); Validierung [src/lib/server/foodInput.js](kalorientracker/src/lib/server/foodInput.js).
   - **Datenbank:** Collection `foods` (eigene Lebensmittel inkl. Foto als Base64).
-- **Referenz:** Kap. 3.4.3 (Umsetzung).
+- **Referenz:** Kap. 3.6.2 (Umsetzung).
 - **Aus Evaluation abgeleitet?:** **Ja** – im Prototyp liessen sich nur selbst angelegte Mahlzeiten erfassen; die manuelle Nährwerteingabe war mühsam, eine Lebensmittel-Suche wurde gewünscht (Kap. 3.5, Problem 2).
 
 ### 4.4 Mahlzeiten aus mehreren Lebensmitteln
@@ -314,7 +315,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/weight/+page.svelte](kalorientracker/src/routes/weight/+page.svelte), Diagramm [src/lib/components/WeightChart.svelte](kalorientracker/src/lib/components/WeightChart.svelte).
   - **Backend:** [src/routes/weight/+page.server.js](kalorientracker/src/routes/weight/+page.server.js) (Erfassen/Löschen, „neu berechnen"-Action).
   - **Datenbank:** Collection `weightEntries` (ein Eintrag pro Tag, eindeutiger Index).
-- **Referenz:** Kap. 3.4.2.
+- **Referenz:** Kap. 3.6.1.
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
 
 ### 4.6 Wählbares Farbschema (Dark/Light Mode)
@@ -323,7 +324,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** Umschalter „Darstellung" im Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte) (mit Live-Vorschau); Design-Tokens inkl. Dark-Variante in [src/app.css](kalorientracker/src/app.css); `data-theme`-Platzhalter in [src/app.html](kalorientracker/src/app.html).
   - **Backend:** Serverseitiges Setzen des Schemas in [src/hooks.server.js](kalorientracker/src/hooks.server.js) (`transformPageChunk`, Default Dark); Validierung & Speicherung in [src/routes/profile/+page.server.js](kalorientracker/src/routes/profile/+page.server.js); Default und Serialisierung in [src/lib/server/db.js](kalorientracker/src/lib/server/db.js) und [src/lib/server/auth.js](kalorientracker/src/lib/server/auth.js).
   - **Datenbank:** Feld `theme` (`'dark'`/`'light'`, Default `dark`) am `users`-Dokument.
-- **Referenz:** Kap. 3.4.2 (Designentscheidungen: grünes Theming).
+- **Referenz:** Kap. 3.6.1 (Designentscheidungen: grünes Theming).
 
 | Dark Mode (Standard) | Light Mode |
 | --- | --- |
