@@ -1,7 +1,9 @@
 import { json, error } from '@sveltejs/kit';
 
-// Open Food Facts: Produkt direkt über den Barcode (keine API-Key nötig).
-const OFF_PRODUCT_URL = 'https://world.openfoodfacts.org/api/v2/product';
+// Open Food Facts: Produkt direkt über den Barcode (kein API-Key nötig).
+// Primär der `ch.`-Host (von der Cloudflare-Runtime aus erreichbar – wie die
+// Lebensmittelsuche); `world.` als Fallback (klappt lokal/Node).
+const OFF_HOSTS = ['https://ch.openfoodfacts.org', 'https://world.openfoodfacts.org'];
 const USER_AGENT = 'Kalorientracker/1.0 (Prototyping-Projekt; Kontakt via App)';
 const FIELDS = 'code,product_name,product_name_de,brands,nutriments';
 
@@ -29,14 +31,21 @@ export async function GET({ url, locals }) {
 	}
 
 	let data;
-	try {
-		const res = await fetch(`${OFF_PRODUCT_URL}/${code}.json?fields=${FIELDS}`, {
-			headers: { 'User-Agent': USER_AGENT }
-		});
-		if (!res.ok) throw new Error(`OFF antwortete mit ${res.status}`);
-		data = await res.json();
-	} catch (err) {
-		console.error('Barcode-Lookup fehlgeschlagen:', err);
+	let lastError;
+	for (const host of OFF_HOSTS) {
+		try {
+			const res = await fetch(`${host}/api/v2/product/${code}.json?fields=${FIELDS}`, {
+				headers: { 'User-Agent': USER_AGENT }
+			});
+			if (!res.ok) throw new Error(`OFF antwortete mit ${res.status}`);
+			data = await res.json();
+			break;
+		} catch (err) {
+			lastError = err;
+		}
+	}
+	if (!data) {
+		console.error('Barcode-Lookup fehlgeschlagen:', lastError);
 		throw error(502, 'Lebensmittel-Datenbank momentan nicht erreichbar.');
 	}
 
