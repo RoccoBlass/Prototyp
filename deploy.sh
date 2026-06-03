@@ -17,6 +17,14 @@ set -euo pipefail
 # In den App-Ordner wechseln (liegt neben diesem Skript).
 cd "$(dirname "$0")/kalorientracker"
 
+# Cloudflare-Zugangsdaten aus der (gitignorierten) .env laden, falls vorhanden
+# und noch nicht in der Umgebung gesetzt. So braucht es keinen wrangler-Login.
+if [ -f .env ]; then
+	[ -z "${CLOUDFLARE_API_TOKEN:-}" ] && CLOUDFLARE_API_TOKEN="$(grep -E '^CLOUDFLARE_API_TOKEN=' .env | head -1 | cut -d= -f2- | tr -d '"')"
+	[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] && CLOUDFLARE_ACCOUNT_ID="$(grep -E '^CLOUDFLARE_ACCOUNT_ID=' .env | head -1 | cut -d= -f2- | tr -d '"')"
+	export CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
+fi
+
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 case "$BRANCH" in
 	main)       PROJECT="kalorientracker-main" ;;
