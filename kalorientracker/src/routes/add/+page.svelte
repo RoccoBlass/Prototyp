@@ -2,13 +2,22 @@
 	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
 	import PhotoScan from '$lib/components/PhotoScan.svelte';
+	import FoodTextScan from '$lib/components/FoodTextScan.svelte';
 	import { MEAL_TYPES, defaultMealType } from '$lib/food.js';
 
 	let { data, form } = $props();
 
 	let selectedType = $state(defaultMealType(new Date().getHours()));
 	const initialTab = page.url.searchParams.get('tab');
-	let tab = $state(initialTab === 'foods' ? 'foods' : initialTab === 'scan' ? 'scan' : 'meals');
+	let tab = $state(
+		initialTab === 'foods'
+			? 'foods'
+			: initialTab === 'scan'
+				? 'scan'
+				: initialTab === 'text'
+					? 'text'
+					: 'meals'
+	);
 
 	// Foto direkt beim Klick auf den Tab „Foto analysieren" aufnehmen/wählen.
 	let scanFile = $state(null);
@@ -141,6 +150,10 @@
 			<span>Foto analysieren</span>
 			<input type="file" accept="image/*" capture="environment" hidden onchange={onScanFile} />
 		</label>
+		<button type="button" class="tab tab-text" class:active={tab === 'text'} onclick={() => (tab = 'text')}>
+			<Icon name="sparkles" size={15} />
+			<span>Text</span>
+		</button>
 	</div>
 
 	{#if tab === 'meals'}
@@ -244,9 +257,13 @@
 				</ul>
 			{/if}
 		</section>
-	{:else}
+	{:else if tab === 'scan'}
 		<section class="panel">
 			<PhotoScan {selectedType} incomingFile={scanFile} />
+		</section>
+	{:else}
+		<section class="panel">
+			<FoodTextScan {selectedType} />
 		</section>
 	{/if}
 </div>
@@ -350,10 +367,17 @@
 		padding: var(--space-1);
 		background: var(--surface-2);
 		border-radius: var(--radius-md);
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.tabs::-webkit-scrollbar {
+		display: none;
 	}
 
 	.tab {
-		flex: 1;
+		flex: 1 0 auto;
+		white-space: nowrap;
 		padding: var(--space-3);
 		border: none;
 		border-radius: var(--radius-sm);
@@ -364,6 +388,13 @@
 		font-family: inherit;
 		cursor: pointer;
 		transition: background 0.18s, color 0.18s;
+	}
+
+	.tab-text {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-1);
 	}
 
 	.tab.active {

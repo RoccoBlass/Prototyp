@@ -334,6 +334,17 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 
 ![Foto-Schätzung: KI füllt die Nährwerte aus einem Foto](docs/screenshots/scan-result.png)
 
+### 4.9 KI-Nährwertschätzung aus Freitext
+
+- **Beschreibung & Nutzen:** Auf der „Hinzufügen"-Seite gibt es zusätzlich den Tab **„Text"**. Statt jedes Lebensmittel einzeln zu suchen, beschreibt man eine Mahlzeit **in eigenen Worten** (z. B. *„2 Eier und ein Toast mit Butter"*). Ein Sprachmodell schätzt daraus **Menge und Nährwerte je 100 g/ml**. Die Werte erscheinen – wie bei der Foto-Schätzung – in einem **editierbaren** Formular mit Live-Vorschau der Portion und lassen sich **direkt für heute erfassen** oder **als Lebensmittel speichern**. Damit wird die in der Evaluation kritisierte mühsame manuelle Eingabe weiter gesenkt; die Eingabe per Sprache ist für viele Alltagsfälle der schnellste Weg.
+- **Wo umgesetzt:**
+  - **Frontend:** vierter Tab „Text" in [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) mit der Komponente [src/lib/components/FoodTextScan.svelte](kalorientracker/src/lib/components/FoodTextScan.svelte) (Freitextfeld mit Beispiel-Vorschlägen, ruft den Schätz-Endpunkt per `fetch` auf, editierbare Felder mit Portions-Vorschau).
+  - **Backend:** Server-Endpunkt [src/routes/api/estimate-food-text/+server.js](kalorientracker/src/routes/api/estimate-food-text/+server.js) und KI-Client [src/lib/server/foodText.js](kalorientracker/src/lib/server/foodText.js) (Prompt-Aufbau, Aufruf der OpenRouter-API, robustes JSON-Parsing, Validierung/Begrenzung der Werte). Eintragen/Speichern über dieselben Actions `logFood` bzw. `saveScannedFood` wie bei der Foto-Schätzung.
+  - **Konfiguration:** dasselbe `OPENROUTER_API_KEY`/`OPENROUTER_MODEL` wie KI-Coach und Foto-Schätzung (hier genügt ein Textmodell).
+- **Technik:** OpenRouter über die OpenAI-kompatible Chat-Completions-API per `fetch`; die Antwort ist striktes JSON, das serverseitig validiert und begrenzt wird. Schlägt der Aufruf fehl oder ist nichts erkennbar, bleibt die App nutzbar und zeigt eine verständliche Meldung.
+- **Referenz:** KI-Nutzung zur Laufzeit siehe Kap. 6.
+- **Aus Evaluation abgeleitet?:** **Teilweise** – adressiert wie 4.8 die manuelle Nährwerteingabe (Kap. 3.5, Problem 2).
+
 ## 5. Projektorganisation
 
 - **Repository & Struktur:** SvelteKit-Standard mit `src/routes/` (Routen + Server-Loader/Actions), `src/lib/components/` (UI), `src/lib/` (reine Hilfslogik), `src/lib/server/` (DB-Layer & Auth, nur serverseitig importierbar), `static/` (Assets). `Informationen/`, `Usability-Evaluation/`, `.claude/`, `.env`, `node_modules/`, `build/` und `.svelte-kit/` sind in `.gitignore` ausgeschlossen.
@@ -355,7 +366,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 - **Eingesetzte Tools:** **Claude Code** (Anthropic, Modell Claude Opus 4.x) als zentrales Werkzeug für die Implementierung – im agentischen Workflow (siehe Kap. 6.4). Konzept, Mockup und Evaluation entstanden ohne weitere KI-Tools.
 - **Zweck & Umfang:** KI wurde umfassend für die **technische Umsetzung** eingesetzt: Erstellen und Refactoring des SvelteKit-Codes (Routen, Komponenten, Datenbank-Layer, Authentifizierung, Anbindung der Lebensmittel-API), CSS/Design-Feinschliff, Verifikation per Build- und Browser-Tests sowie Textentwürfe (u. a. diese README). Das **Produkt- und UX-Konzept, die Feature-Entscheide, die Auswahl zwischen Optionen** (z. B. Berechnungsmethode für den Kalorienbedarf, Foto-Speicherung in der DB, Wahl der Lebensmittel-Datenbank) sowie das **Testen** habe ich vorgegeben bzw. selbst durchgeführt; die KI hat auf diese Vorgaben hin umgesetzt und Optionen vorgeschlagen.
 - **Eigene Leistung (Abgrenzung):** Problemraumanalyse und App-Konzept, das Figma-Mockup und das Dokument „Workflows und Designentscheide", die Festlegung des Funktionsumfangs, sämtliche Produkt- und Designentscheidungen, das Abnehmen/Testen der Ergebnisse sowie die Vorbereitung und Durchführung der Usability-Evaluation.
-- **KI als Produkt-Feature (Laufzeit):** Über die in Kap. 4.7 und 4.8 beschriebenen Funktionen nutzt die App **zur Laufzeit selbst** ein (multimodales) Sprachmodell über OpenRouter: der **KI-Coach** übermittelt die Tageswerte (Ziel und Tagessummen, keine Klarnamen oder Kontaktdaten), die **Foto-Nährwertschätzung** übermittelt das vom Nutzer aufgenommene **Bild** an den Anbieter. Beides ist von der KI-Nutzung zur *Entwicklung* (oben) zu unterscheiden.
+- **KI als Produkt-Feature (Laufzeit):** Über die in Kap. 4.7–4.9 beschriebenen Funktionen nutzt die App **zur Laufzeit selbst** ein (multimodales) Sprachmodell über OpenRouter: der **KI-Coach** übermittelt die Tageswerte (Ziel und Tagessummen, keine Klarnamen oder Kontaktdaten), die **Foto-Nährwertschätzung** das aufgenommene **Bild** und die **Freitext-Schätzung** die eingegebene **Beschreibung** an den Anbieter. Das ist von der KI-Nutzung zur *Entwicklung* (oben) zu unterscheiden.
 
 ### 6.2 Prompt-Vorgehen
 Ich bin **iterativ in kleinen Schritten** vorgegangen – Funktion für Funktion statt einer einzigen „bau mir die App"-Anfrage. Pro Schritt habe ich den Kontext und die gewünschte Konvention vorgegeben (z. B. Svelte-5-Runes statt Stores, DB-Zugriffe nur im Server-Layer) und bei grösseren Entscheidungen bewusst Rückfragen bzw. Optionen abgewogen, bevor umgesetzt wurde. Vorschläge habe ich vor der Übernahme gelesen, im Browser getestet und bei Bedarf angepasst. Beispiel-Prompt: _„Baue ein Onboarding, das Geschlecht/Alter/Grösse/Gewicht/Aktivität/Ziel abfragt und daraus mit Mifflin-St Jeor ein Kalorien- und Makroziel berechnet und im Profil speichert."_
@@ -398,12 +409,10 @@ cd kalorientracker
 # Abhängigkeiten installieren
 npm install
 
-# .env anlegen (MongoDB-URI; OpenRouter optional – nur für den KI-Coach, Kap. 4.7)
-cat > .env <<'EOF'
-DB_URI="<mongodb-connection-string>"
-OPENROUTER_API_KEY="<dein-openrouter-token>"
-OPENROUTER_MODEL="openai/gpt-4o-mini"
-EOF
+# .env aus der Vorlage anlegen und Werte eintragen
+# (MongoDB-URI erforderlich; OpenRouter optional – nur für die KI-Funktionen 4.7–4.9)
+cp .env.example .env
+# anschliessend .env öffnen und DB_URI (und optional OPENROUTER_*) ausfüllen
 
 # Dev-Server
 npm run dev
