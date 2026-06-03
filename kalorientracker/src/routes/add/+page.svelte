@@ -3,23 +3,18 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import PhotoScan from '$lib/components/PhotoScan.svelte';
 	import FoodTextScan from '$lib/components/FoodTextScan.svelte';
+	import BarcodeScan from '$lib/components/BarcodeScan.svelte';
 	import { MEAL_TYPES, defaultMealType } from '$lib/food.js';
 
 	let { data, form } = $props();
 
 	let selectedType = $state(defaultMealType(new Date().getHours()));
+	// Standard-Tab: „Foto" (schnelle KI-Erfassung); per ?tab=… überschreibbar.
+	const TABS = ['scan', 'text', 'barcode', 'foods', 'meals'];
 	const initialTab = page.url.searchParams.get('tab');
-	let tab = $state(
-		initialTab === 'foods'
-			? 'foods'
-			: initialTab === 'scan'
-				? 'scan'
-				: initialTab === 'text'
-					? 'text'
-					: 'meals'
-	);
+	let tab = $state(TABS.includes(initialTab) ? initialTab : 'scan');
 
-	// Foto direkt beim Klick auf den Tab „Foto analysieren" aufnehmen/wählen.
+	// Foto direkt beim Klick auf den Tab „Foto" aufnehmen/wählen.
 	let scanFile = $state(null);
 	function onScanFile(event) {
 		const file = event.currentTarget.files?.[0];
@@ -139,20 +134,26 @@
 	</section>
 
 	<div class="tabs">
-		<button type="button" class="tab" class:active={tab === 'meals'} onclick={() => (tab = 'meals')}>
-			Mahlzeiten
-		</button>
-		<button type="button" class="tab" class:active={tab === 'foods'} onclick={() => (tab = 'foods')}>
-			Lebensmittel
-		</button>
 		<label class="tab tab-foto" class:active={tab === 'scan'} onclick={() => (tab = 'scan')}>
 			<Icon name="camera" size={15} />
-			<span>Foto analysieren</span>
+			<span>Foto</span>
 			<input type="file" accept="image/*" capture="environment" hidden onchange={onScanFile} />
 		</label>
-		<button type="button" class="tab tab-text" class:active={tab === 'text'} onclick={() => (tab = 'text')}>
+		<button type="button" class="tab" class:active={tab === 'text'} onclick={() => (tab = 'text')}>
 			<Icon name="sparkles" size={15} />
 			<span>Text</span>
+		</button>
+		<button type="button" class="tab" class:active={tab === 'barcode'} onclick={() => (tab = 'barcode')}>
+			<Icon name="barcode" size={15} />
+			<span>Barcode</span>
+		</button>
+		<button type="button" class="tab" class:active={tab === 'foods'} onclick={() => (tab = 'foods')}>
+			<Icon name="search" size={15} />
+			<span>Lebensmittel</span>
+		</button>
+		<button type="button" class="tab" class:active={tab === 'meals'} onclick={() => (tab = 'meals')}>
+			<Icon name="utensils" size={15} />
+			<span>Mahlzeiten</span>
 		</button>
 	</div>
 
@@ -261,9 +262,13 @@
 		<section class="panel">
 			<PhotoScan {selectedType} incomingFile={scanFile} />
 		</section>
-	{:else}
+	{:else if tab === 'text'}
 		<section class="panel">
 			<FoodTextScan {selectedType} />
+		</section>
+	{:else}
+		<section class="panel">
+			<BarcodeScan {selectedType} />
 		</section>
 	{/if}
 </div>
@@ -377,8 +382,12 @@
 
 	.tab {
 		flex: 1 0 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-1);
 		white-space: nowrap;
-		padding: var(--space-3);
+		padding: var(--space-3) var(--space-4);
 		border: none;
 		border-radius: var(--radius-sm);
 		background: transparent;
@@ -390,26 +399,10 @@
 		transition: background 0.18s, color 0.18s;
 	}
 
-	.tab-text {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-1);
-	}
-
 	.tab.active {
 		background: var(--surface);
 		color: var(--brand-strong);
 		box-shadow: var(--shadow-sm);
-	}
-
-	.tab-foto {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-1);
-		flex: 1.4;
-		white-space: nowrap;
 	}
 
 	.panel {

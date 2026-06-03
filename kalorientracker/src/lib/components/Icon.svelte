@@ -131,5 +131,12 @@
 	{:else if name === 'camera'}
 		<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
 		<circle cx="12" cy="13" r="3" />
+	{:else if name === 'barcode'}
+		<path d="M3 5v14M7 5v14M11 5v14M14 5v14M18 5v14M21 5v14" />
+	{:else if name === 'x'}
+		<path d="M18 6 6 18M6 6l12 12" />
+	{:else if name === 'search'}
+		<circle cx="11" cy="11" r="7" />
+		<path d="m21 21-4.3-4.3" />
 	{/if}
 </svg>
