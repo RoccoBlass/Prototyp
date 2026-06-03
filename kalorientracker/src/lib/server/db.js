@@ -1,18 +1,30 @@
 import { MongoClient, ObjectId } from 'mongodb';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { env } from '$env/dynamic/private';
 import { scaleNutrition, mealTotals } from '$lib/food.js';
 
-let db;
-let connectPromise;
+let nodeDb;
+let nodeConnectPromise;
 let indexesEnsured = false;
 
 // Cloudflare Workers: eine DB-Verbindung darf NICHT über Requests hinweg
 // wiederverwendet werden – sonst hängt sich der nächste Request auf ("Worker
-// hung"). Dort deshalb pro Aufruf frisch verbinden; auf Node (Netlify) bleibt
-// die Verbindung global gecacht (performant).
+// hung"). Gleichzeitig ist es teuer (CPU/Speicher), pro DB-Abfrage neu zu
+// verbinden – mehrere Verbindungen pro Request sprengen auf dem Free-Plan das
+// Limit ("Worker exceeded resource limits", Error 1102).
+//
+// Lösung: pro Request genau EINE Verbindung. Sie wird beim ersten getDb()
+// geöffnet, über den AsyncLocalStorage an alle weiteren getDb()-Aufrufe
+// desselben Requests weitergereicht und am Request-Ende (withRequestDb)
+// geschlossen. So entsteht nur ein TLS-Handshake pro Request und der
+// Worker-Speicher läuft nicht voll. Auf Node (lokaler Dev / Node-Hosting)
+// bleibt die Verbindung global gecacht (performant).
 const IS_WORKERS =
 	typeof globalThis.WebSocketPair !== 'undefined' ||
 	globalThis.navigator?.userAgent === 'Cloudflare-Workers';
+
+// Hält pro Request die geöffnete Verbindung (nur auf Workers genutzt).
+const requestStore = new AsyncLocalStorage();
 
 async function ensureIndexes(database) {
 	if (indexesEnsured) return;
@@ -34,34 +46,82 @@ async function ensureIndexes(database) {
 	}
 }
 
-async function openDb() {
+async function createConnection() {
 	const uri = env.DB_URI;
 	if (!uri) {
 		throw new Error('DB_URI ist nicht gesetzt. Bitte die Umgebungsvariable im Hosting hinterlegen.');
 	}
 	const mongo = new MongoClient(uri);
 	await mongo.connect();
-	const database = mongo.db('KalorienTrackerDB');
-	await ensureIndexes(database);
-	return database;
+	return { client: mongo, database: mongo.db('KalorienTrackerDB') };
 }
 
-/** Verbindung herstellen. Auf Cloudflare pro Request neu, auf Node gecacht. */
-export async function getDb() {
-	if (IS_WORKERS) return openDb();
-	if (db) return db;
-	if (!connectPromise) {
-		connectPromise = openDb()
-			.then((d) => {
-				db = d;
-				return d;
+// Node: eine global gecachte Verbindung für die gesamte Prozesslaufzeit.
+// Indexe werden hier einmalig sichergestellt. Auf Workers existieren sie
+// bereits (in früheren Deploys angelegt) – dort bleibt die Index-Erstellung
+// bewusst aus dem Request-Pfad heraus, um CPU-Zeit zu sparen.
+async function getNodeDb() {
+	if (nodeDb) return nodeDb;
+	if (!nodeConnectPromise) {
+		nodeConnectPromise = createConnection()
+			.then(async ({ database }) => {
+				await ensureIndexes(database);
+				nodeDb = database;
+				return database;
 			})
 			.catch((error) => {
-				connectPromise = undefined;
+				nodeConnectPromise = undefined;
 				throw error;
 			});
 	}
-	return connectPromise;
+	return nodeConnectPromise;
+}
+
+/**
+ * Liefert die Datenbank. Auf Node global gecacht; auf Cloudflare die eine
+ * Verbindung des aktuellen Requests (geteilt über withRequestDb).
+ */
+export async function getDb() {
+	if (!IS_WORKERS) return getNodeDb();
+
+	const store = requestStore.getStore();
+	if (!store) {
+		// Außerhalb eines Requests (z. B. beim Build): Einzelverbindung.
+		const { database } = await createConnection();
+		return database;
+	}
+	if (!store.promise) {
+		store.promise = createConnection().then((conn) => {
+			store.conn = conn;
+			return conn.database;
+		});
+	}
+	return store.promise;
+}
+
+/**
+ * Umschließt die Verarbeitung eines Requests (aus hooks.server.js aufgerufen).
+ * Auf Cloudflare wird die in diesem Request geöffnete Verbindung am Ende
+ * geschlossen, damit der Worker-Speicher nicht volläuft. Auf Node ein einfacher
+ * Durchlauf ohne Schließen (Verbindung bleibt global gecacht).
+ */
+export async function withRequestDb(fn) {
+	if (!IS_WORKERS) return fn();
+
+	const store = {};
+	return requestStore.run(store, async () => {
+		try {
+			return await fn();
+		} finally {
+			if (store.conn) {
+				try {
+					await store.conn.client.close();
+				} catch (error) {
+					console.error('DB-Verbindung schließen fehlgeschlagen:', error);
+				}
+			}
+		}
+	});
 }
 
 // --- Serialisierung ---
