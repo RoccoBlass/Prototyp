@@ -85,11 +85,25 @@ Gewählt habe ich Variante (b). Entscheidkriterien waren minimaler Aufwand pro L
 
 ![User-Journey-Map des Hauptworkflows](docs/journey-map.svg)
 
-**Mockup:** Als Referenz für die Ausgestaltung diente ein selbst erstellter, klickbarer **Figma-Prototyp**: <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>. Er legte den Kern-Workflow und die Screen-Struktur fest (Dashboard mit Fortschritt, Hinzufügen-Flow, Listen-/Detailansichten). Die umgesetzte Oberfläche (Screenshots in Kap. 3.4.1) realisiert dieses Konzept und geht in mehreren Punkten darüber hinaus (siehe Kap. 4).
+**Mockup:** Als Referenz für die Ausgestaltung diente ein selbst erstellter, klickbarer **Figma-Prototyp**: <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>. Er legte den Kern-Workflow und die Screen-Struktur fest (Dashboard mit Fortschritt, Hinzufügen-Flow, Listen-/Detailansichten). Die umgesetzte Oberfläche (Screenshots in Kap. 3.4.2) realisiert dieses Konzept und geht in mehreren Punkten darüber hinaus (siehe Kap. 4).
 
 ### 3.4 Prototype
 
-#### 3.4.1 Entwurf (Design)
+#### 3.4.1 Erster Prototyp (für die Evaluation)
+
+Zunächst entstand ein **bewusst schlanker erster Prototyp**, der in der Usability-Evaluation (Kap. 3.5) mit Nutzer:innen getestet wurde. Er ist als eigener Branch [`prototyp-1`](https://github.com/RoccoBlass/Prototyp/tree/prototyp-1) eingefroren und separat deployt: <https://kalorientracker-prototyp.pages.dev>.
+
+**Umfang des ersten Prototyps:** Dashboard mit Kalorienring & Makros, manuelles Hinzufügen einzelner Lebensmittel (frei eingetippte Nährwerte), Tagesverlauf und Profil – als Einzelnutzer-App **ohne Login**, mit **fest hinterlegtem Tagesziel** und **ohne** Datenbank-Suche, zusammengesetzte Mahlzeiten, Gewichtstracker oder KI. Genau diese Lücken wurden im Test sichtbar und führten zu den Erweiterungen in Kap. 4.
+
+| | |
+| --- | --- |
+| ![Erster Prototyp – Dashboard](docs/screenshots/prototype-dashboard.png) | ![Erster Prototyp – Lebensmittel hinzufügen](docs/screenshots/prototype-add-new.png) |
+
+*Erster Prototyp (Stand der Evaluation): Dashboard und manuelle Lebensmittel-Erfassung – schlanker und ohne die späteren Erweiterungen.*
+
+#### 3.4.2 Entwurf & Design der umgesetzten App
+
+Aus dem ersten Prototyp wurde – getrieben von der Evaluation (3.5) und den daraus abgeleiteten Erweiterungen (Kap. 4) – die folgende **umgesetzte App**.
 
 **Informationsarchitektur** – nach Login flach und aufgabenorientiert:
 
@@ -98,7 +112,7 @@ Gewählt habe ich Variante (b). Entscheidkriterien waren minimaler Aufwand pro L
 | `/login` | Registrierung & Anmeldung |
 | `/onboarding` | Ersteinrichtung: Körperdaten → automatisch berechnetes Ziel |
 | `/` | Dashboard (Tagesüberblick: Kalorienring, Makros, Einträge) |
-| `/add` | Hinzufügen-Hub mit Tabs „Mahlzeiten", „Lebensmittel" und „Foto analysieren" (KI-Schätzung) |
+| `/add` | Hinzufügen-Hub mit Tabs „Foto", „Text", „Barcode" (KI/Datenbank), „Lebensmittel" (Suche) und „Mahlzeiten" |
 | `/add/food/new`, `/add/food/[id]` | Eigenes Lebensmittel anlegen / bearbeiten |
 | `/add/meal/new`, `/add/meal/[id]` | Mahlzeit aus Lebensmitteln zusammenstellen / bearbeiten |
 | `/weight` | Gewichtstracker mit Verlaufs-Chart |
@@ -107,6 +121,8 @@ Gewählt habe ich Variante (b). Entscheidkriterien waren minimaler Aufwand pro L
 | `/api/food-search` | Server-Endpunkt für die Open-Food-Facts-Suche |
 | `/api/coach` | Server-Endpunkt für das KI-Coach-Feedback (OpenRouter) |
 | `/api/estimate-nutrition` | Server-Endpunkt für die KI-Nährwertschätzung aus einem Foto (OpenRouter, Vision) |
+| `/api/estimate-food-text` | Server-Endpunkt für die KI-Nährwertschätzung aus Freitext (OpenRouter) |
+| `/api/product-by-barcode`, `/api/read-barcode` | Barcode-Lookup (Open Food Facts) bzw. KI-Barcode-Erkennung aus dem Foto |
 | `/logout` | Abmelden (POST-Endpunkt) |
 
 Auf dem Desktop wird die Navigation als Sidebar dargestellt, mobil als Bottom-Nav mit hervorgehobenem „+"-Button. Nicht angemeldete Nutzer:innen werden auf `/login` geleitet, angemeldete ohne abgeschlossenes Onboarding auf `/onboarding` (Zugriffsschutz in `src/hooks.server.js`).
@@ -135,7 +151,11 @@ Tagesüberblick mit Kalorienring, Makro-Fortschritt, KI-Coach-Karte (Kap. 4.7) u
 
 ![Hinzufügen-Hub](docs/screenshots/add.png)
 
-Mahlzeitentyp wählen, danach über die Tabs eine gespeicherte Mahlzeit oder ein einzelnes Lebensmittel erfassen.
+Mahlzeitentyp wählen, danach über fünf Tabs erfassen: **Foto** (KI-Schätzung, Kap. 4.8), **Text** (KI aus Freitext, Kap. 4.9), **Barcode** (Open-Food-Facts-Abgleich, Kap. 4.10), **Lebensmittel** (Suche & eigene) und **Mahlzeiten**.
+
+| | |
+| --- | --- |
+| ![Hinzufügen – Text-Eingabe](docs/screenshots/add-text.png) | ![Hinzufügen – Barcode](docs/screenshots/add-barcode.png) |
 
 **Lebensmittel anlegen**
 
@@ -176,7 +196,7 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 - **Onboarding als geführter Wizard:** Statt die Nutzer:innen ein Kalorienziel raten zu lassen, wird es aus den Körperdaten berechnet (siehe Kap. 4.2).
 - **Mahlzeit als ein aufklappbarer Block** im Tagesprotokoll: übersichtlich, Zutaten bei Bedarf einsehbar.
 
-#### 3.4.2 Umsetzung (Technik)
+#### 3.4.3 Umsetzung (Technik)
 
 **Technologie-Stack:** SvelteKit (Svelte 5 mit Runes-Syntax, JavaScript ohne TypeScript), MongoDB Atlas über den offiziellen `mongodb`-Treiber, Plain CSS mit Custom Properties (kein UI-Framework). Vite als Build-Tool, Cloudflare-Adapter (`adapter-cloudflare`) für das Deployment auf Cloudflare Pages. Passwort-Hashing mit dem Node-Kern (`node:crypto`, scrypt) ohne externe Auth-Bibliothek. Anbindung an die öffentliche **Open-Food-Facts**-Datenbank (ohne API-Key).
 
@@ -258,7 +278,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/login/+page.svelte](kalorientracker/src/routes/login/+page.svelte) (Umschalter Anmelden/Registrieren), Abmelden im Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte).
   - **Backend:** [src/lib/server/auth.js](kalorientracker/src/lib/server/auth.js) (Hashing, Sessions), [src/routes/login/+page.server.js](kalorientracker/src/routes/login/+page.server.js), [src/routes/logout/+server.js](kalorientracker/src/routes/logout/+server.js), Zugriffsschutz in [src/hooks.server.js](kalorientracker/src/hooks.server.js).
   - **Datenbank:** Collections `users` (eindeutiger E-Mail-Index) und `sessions` (TTL-Index).
-- **Referenz:** vgl. Kap. 3.4.2 (Daten & Schnittstellen).
+- **Referenz:** vgl. Kap. 3.4.3 (Umsetzung).
 - **Aus Evaluation abgeleitet?:** **Ja** – die Tester:innen vermissten ein Konto/Login; ohne Anmeldung wirkten die Daten unpersönlich und ihre dauerhafte, private Speicherung unklar (Kap. 3.5, Problem 1). Zugleich Voraussetzung für die übrigen Erweiterungen.
 
 ### 4.2 Onboarding mit automatischer Bedarfsberechnung
@@ -267,7 +287,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/onboarding/+page.svelte](kalorientracker/src/routes/onboarding/+page.svelte) (Wizard mit Live-Vorschau), Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte).
   - **Backend:** Berechnungslogik [src/lib/nutrition.js](kalorientracker/src/lib/nutrition.js); Speicherung über [src/routes/onboarding/+page.server.js](kalorientracker/src/routes/onboarding/+page.server.js) und [src/routes/profile/+page.server.js](kalorientracker/src/routes/profile/+page.server.js); Onboarding-Zwang im Hook.
   - **Datenbank:** Körperdaten und berechnete Ziele am `users`-Dokument.
-- **Referenz:** Kap. 3.4.1 (Designentscheidungen).
+- **Referenz:** Kap. 3.4.2 (Designentscheidungen).
 - **Aus Evaluation abgeleitet?:** **Ja** – der frei einzugebende Zielwert wirkte in der Evaluation willkürlich; gewünscht war ein aus den Körperdaten berechneter Vorschlag (Kap. 3.5, Problem 3).
 
 ### 4.3 Lebensmittel-Datenbank (Open Food Facts) & eigene Lebensmittel mit Foto
@@ -276,7 +296,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) (Suche + Tag-Logging), [src/lib/components/FoodForm.svelte](kalorientracker/src/lib/components/FoodForm.svelte) (Formular + Foto-Verkleinerung im Browser).
   - **Backend:** Server-Endpunkt [src/routes/api/food-search/+server.js](kalorientracker/src/routes/api/food-search/+server.js); Lebensmittel-Routen [src/routes/add/food/new/+page.server.js](kalorientracker/src/routes/add/food/new/+page.server.js) und [src/routes/add/food/[id]/+page.server.js](kalorientracker/src/routes/add/food/%5Bid%5D/+page.server.js); Validierung [src/lib/server/foodInput.js](kalorientracker/src/lib/server/foodInput.js).
   - **Datenbank:** Collection `foods` (eigene Lebensmittel inkl. Foto als Base64).
-- **Referenz:** Kap. 3.4.2 (Externe Schnittstelle).
+- **Referenz:** Kap. 3.4.3 (Umsetzung).
 - **Aus Evaluation abgeleitet?:** **Ja** – im Prototyp liessen sich nur selbst angelegte Mahlzeiten erfassen; die manuelle Nährwerteingabe war mühsam, eine Lebensmittel-Suche wurde gewünscht (Kap. 3.5, Problem 2).
 
 ### 4.4 Mahlzeiten aus mehreren Lebensmitteln
@@ -294,7 +314,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** [src/routes/weight/+page.svelte](kalorientracker/src/routes/weight/+page.svelte), Diagramm [src/lib/components/WeightChart.svelte](kalorientracker/src/lib/components/WeightChart.svelte).
   - **Backend:** [src/routes/weight/+page.server.js](kalorientracker/src/routes/weight/+page.server.js) (Erfassen/Löschen, „neu berechnen"-Action).
   - **Datenbank:** Collection `weightEntries` (ein Eintrag pro Tag, eindeutiger Index).
-- **Referenz:** Kap. 3.4.1.
+- **Referenz:** Kap. 3.4.2.
 - **Aus Evaluation abgeleitet?:** Nein – Produktentscheid.
 
 ### 4.6 Wählbares Farbschema (Dark/Light Mode)
@@ -303,7 +323,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
   - **Frontend:** Umschalter „Darstellung" im Profil [src/routes/profile/+page.svelte](kalorientracker/src/routes/profile/+page.svelte) (mit Live-Vorschau); Design-Tokens inkl. Dark-Variante in [src/app.css](kalorientracker/src/app.css); `data-theme`-Platzhalter in [src/app.html](kalorientracker/src/app.html).
   - **Backend:** Serverseitiges Setzen des Schemas in [src/hooks.server.js](kalorientracker/src/hooks.server.js) (`transformPageChunk`, Default Dark); Validierung & Speicherung in [src/routes/profile/+page.server.js](kalorientracker/src/routes/profile/+page.server.js); Default und Serialisierung in [src/lib/server/db.js](kalorientracker/src/lib/server/db.js) und [src/lib/server/auth.js](kalorientracker/src/lib/server/auth.js).
   - **Datenbank:** Feld `theme` (`'dark'`/`'light'`, Default `dark`) am `users`-Dokument.
-- **Referenz:** Kap. 3.4.1 (Designentscheidungen: grünes Theming).
+- **Referenz:** Kap. 3.4.2 (Designentscheidungen: grünes Theming).
 
 | Dark Mode (Standard) | Light Mode |
 | --- | --- |
@@ -327,7 +347,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 - **Wo umgesetzt:**
   - **Frontend:** Tab „Foto" in [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) – ein natives Datei-Label mit `capture="environment"`, das beim Klick direkt Kamera/Dateidialog öffnet – mit der Komponente [src/lib/components/PhotoScan.svelte](kalorientracker/src/lib/components/PhotoScan.svelte) – Foto wird im Browser verkleinert, der Schätz-Endpunkt per `fetch` aufgerufen, die Felder sind editierbar mit Live-Vorschau der Portion.
   - **Backend:** Server-Endpunkt [src/routes/api/estimate-nutrition/+server.js](kalorientracker/src/routes/api/estimate-nutrition/+server.js) und KI-Client [src/lib/server/vision.js](kalorientracker/src/lib/server/vision.js) (Vision-Prompt, Aufruf der OpenRouter-API, robustes JSON-Parsing, Validierung/Begrenzung der Werte). Speichern/Eintragen über die Actions `saveScannedFood` bzw. `logFood` in [src/routes/add/+page.server.js](kalorientracker/src/routes/add/+page.server.js).
-  - **Konfiguration:** dasselbe `OPENROUTER_API_KEY`/`OPENROUTER_MODEL` wie der KI-Coach; das Modell muss Bildeingabe (Vision) unterstützen (getestet mit `google/gemini-3.1-flash-lite`).
+  - **Konfiguration:** dasselbe `OPENROUTER_API_KEY`/`OPENROUTER_MODEL` wie der KI-Coach; das Modell muss Bildeingabe (Vision) unterstützen (im Einsatz: `google/gemini-3-flash-preview`).
 - **Technik:** OpenRouter wird über die OpenAI-kompatible Chat-Completions-API mit einer **Bild-Nachricht** (Foto als data-URL) angesprochen. Die Antwort ist striktes JSON, das serverseitig validiert wird. Schlägt der Aufruf fehl oder wird kein Lebensmittel erkannt, bleibt die App nutzbar und zeigt eine verständliche Meldung.
 - **Referenz:** Screenshot unten; KI-Nutzung zur Laufzeit siehe Kap. 6.
 - **Aus Evaluation abgeleitet?:** **Teilweise** – adressiert die in der Evaluation als mühsam empfundene manuelle Nährwerteingabe (Kap. 3.5, Problem 2).

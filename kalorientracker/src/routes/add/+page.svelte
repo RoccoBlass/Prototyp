@@ -106,7 +106,7 @@
 <div class="add-page">
 	<div class="page-header">
 		<h1>Hinzufügen</h1>
-		<p class="subtitle">Erfasse eine Mahlzeit oder ein einzelnes Lebensmittel.</p>
+		<p class="subtitle">Per Foto, Text, Barcode, Suche oder gespeicherter Mahlzeit erfassen.</p>
 	</div>
 
 	{#if form?.error}
