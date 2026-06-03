@@ -37,7 +37,7 @@ Der Kalorientracker ist ein persönlicher, schlanker Ernährungstracker mit Benu
   - **Tageseinträge:** eine ganze Mahlzeit *oder* ein einzelnes Lebensmittel (mit Gramm/Milliliter) zu einem Tag hinzufügen, jeweils mit Mahlzeitentyp (Frühstück, Mittag, Abendessen, Snack).
   - **Dashboard** mit Kalorienring und Makro-Übersicht, **Verlauf** der letzten 7 Tage, **Gewichtstracker** mit Verlaufs-Chart, **Profil** mit anpassbarem Ziel und wählbarem Farbschema (Dark/Light).
 - **Annahmen:** Nutzer:innen wollen wenig Aufwand pro Logging-Vorgang und ein nachvollziehbares Tagesziel, das sie nicht selbst ausrechnen müssen.
-- **Abgrenzung:** Kein Barcode-Scan; keine sozialen Funktionen (Teilen, Freunde); keine Offline-Nutzung; kein Auswertungszeitraum > 7 Tage im Verlauf; die Datenqualität der externen Lebensmittel-Datenbank wird nicht kuratiert.
+- **Abgrenzung:** Keine sozialen Funktionen (Teilen, Freunde); keine Offline-Nutzung; kein Auswertungszeitraum > 7 Tage im Verlauf; die Datenqualität der externen Lebensmittel-Datenbank wird nicht kuratiert. *(Der ursprünglich ausgeklammerte Barcode-Scan wurde später als Erweiterung ergänzt, siehe Kap. 4.10.)*
 
 > **Hinweis zur Entwicklung:** Das Projekt startete als minimaler Tracker mit „Mahlzeitenvorlagen" (siehe Phasen 3.1–3.3) und wurde anschliessend bewusst zu einem vollwertigen, personalisierten Tracker ausgebaut. Die über den ursprünglichen Umfang hinausgehenden Funktionen sind in **Kapitel 4 (Erweiterungen)** dokumentiert.
 
@@ -257,7 +257,7 @@ Persönliche Angaben, Körperdaten & Ziel, Farbschema (Dark/Light, Kap. 4.6) sow
 - Schreiboperationen laufen über SvelteKit-Form-Actions (progressively enhanced).
 - Der DB-Verbindungsstring liegt in `.env` (`DB_URI`) und wird über `$env/dynamic/private` eingebunden – bewusst die **dynamische** Variante statt des in der Vorlesung gezeigten `$env/static/private`, weil die Variablen auf der Cloudflare-Workers-Runtime erst zur Laufzeit (nicht zur Build-Zeit) verfügbar sind.
 
-**Deployment:** Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime). Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` hochgeladen (Hilfsskript [`deploy.sh`](deploy.sh) im Repo-Root); die Projekte bleiben mit dem GitHub-Repository verknüpft. Beide Seiten sind live:
+**Deployment:** Ursprünglich lief das Hosting auf **Netlify**; nach Erreichen des **kostenlosen Build-/Credit-Limits** erfolgte der Umzug auf **Cloudflare Pages** (Wechsel von `adapter-netlify` auf `adapter-cloudflare`). Aktuell also Cloudflare Pages (zwei Projekte, je ein Branch; Adapter `adapter-cloudflare`, `wrangler.toml` mit `nodejs_compat` für den MongoDB-Treiber auf der Workers-Runtime). Der Produktions-Build wird lokal erzeugt und per `wrangler pages deploy` hochgeladen (Hilfsskript [`deploy.sh`](deploy.sh) im Repo-Root); die Projekte bleiben mit dem GitHub-Repository verknüpft. Beide Seiten sind live:
 - **Hauptseite (Branch `main`):** https://kalorientracker-main.pages.dev
 - **Erster Prototyp (Branch `prototyp-1`):** https://kalorientracker-prototyp.pages.dev
 
@@ -344,7 +344,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 
 ### 4.8 KI-Nährwertschätzung aus Foto
 
-- **Beschreibung & Nutzen:** Auf der „Hinzufügen"-Seite gibt es neben *Lebensmittel* und *Mahlzeiten* den Tab **„Foto"**. Ein Klick auf den Tab öffnet **direkt** die Kamera (mobil, via `capture`) bzw. den Dateidialog (Desktop). Aus dem aufgenommenen oder gewählten Foto schätzt ein **multimodales Sprachmodell die Nährwerte je 100 g/ml** (Kalorien, Protein, Kohlenhydrate, Fett). Die Werte erscheinen in einem editierbaren Formular – man prüft/korrigiert sie und kann den Eintrag **direkt für heute erfassen** oder **als wiederverwendbares Lebensmittel speichern**. Das senkt genau die in der Evaluation kritisierte Hürde der manuellen Nährwerteingabe.
+- **Beschreibung & Nutzen:** Auf der „Hinzufügen"-Seite ist **„Foto"** einer der fünf Erfassungs-Tabs. Ein Klick auf den Tab öffnet **direkt** die Kamera (mobil, via `capture`) bzw. den Dateidialog (Desktop). Aus dem aufgenommenen oder gewählten Foto schätzt ein **multimodales Sprachmodell die Nährwerte je 100 g/ml** (Kalorien, Protein, Kohlenhydrate, Fett). Die Werte erscheinen in einem editierbaren Formular – man prüft/korrigiert sie und kann den Eintrag **direkt für heute erfassen** oder **als wiederverwendbares Lebensmittel speichern**. Das senkt genau die in der Evaluation kritisierte Hürde der manuellen Nährwerteingabe.
 - **Wo umgesetzt:**
   - **Frontend:** Tab „Foto" in [src/routes/add/+page.svelte](kalorientracker/src/routes/add/+page.svelte) – ein natives Datei-Label mit `capture="environment"`, das beim Klick direkt Kamera/Dateidialog öffnet – mit der Komponente [src/lib/components/PhotoScan.svelte](kalorientracker/src/lib/components/PhotoScan.svelte) – Foto wird im Browser verkleinert, der Schätz-Endpunkt per `fetch` aufgerufen, die Felder sind editierbar mit Live-Vorschau der Portion.
   - **Backend:** Server-Endpunkt [src/routes/api/estimate-nutrition/+server.js](kalorientracker/src/routes/api/estimate-nutrition/+server.js) und KI-Client [src/lib/server/vision.js](kalorientracker/src/lib/server/vision.js) (Vision-Prompt, Aufruf der OpenRouter-API, robustes JSON-Parsing, Validierung/Begrenzung der Werte). Speichern/Eintragen über die Actions `saveScannedFood` bzw. `logFood` in [src/routes/add/+page.server.js](kalorientracker/src/routes/add/+page.server.js).
@@ -385,6 +385,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 | Herausforderung | Lösung |
 | --- | --- |
 | **Separater Branch für den ersten Prototyp** – für die Evaluation getrennt vorhalten und einzeln deployen | Branch `prototyp-1` + eigenes Cloudflare-Projekt + isolierte DB (eigene Live-URL) |
+| **Hosting-Wechsel Netlify → Cloudflare** – das ursprüngliche Hosting (Netlify) stiess an das kostenlose Build-/Credit-Limit | Umzug auf **Cloudflare Pages** (Free-Tier); Adapter von `adapter-netlify` auf `adapter-cloudflare` gewechselt, Deployment & Umgebungsvariablen entsprechend angepasst |
 | **Deployment: lokaler Build vs. Cloud-Build** – Cloudflares Build-Container bündelt den nativen MongoDB-Treiber fehlerhaft (zirkuläre CommonJS-Abhängigkeiten); lokal gebaut läuft alles | Build lokal erzeugen + `wrangler pages deploy` (Skript `deploy.sh`); automatische Cloud-Builds deaktiviert, git-Verknüpfung bleibt bestehen |
 | **MongoDB auf der Workers-Runtime** – globale DB-Verbindung „hängt" beim 2. Request | Verbindung pro Request frisch öffnen (Workers-Erkennung in `kalorientracker/src/lib/server/db.js`) |
 | **Umgebungsvariablen auf Cloudflare** | `$env/dynamic/private` (Laufzeit) statt `static` (Build-Zeit); Secrets als Pages-Variablen hinterlegt |
@@ -396,7 +397,7 @@ Die folgenden Funktionen gehen über den ursprünglichen Mindestumfang (schlanke
 ### 6.1 KI-Tools
 - **Eingesetzte Tools:** **Claude Code** (Anthropic, Modell Claude Opus 4.x) als zentrales Werkzeug für die Implementierung – im agentischen Workflow (siehe Kap. 6.4). Konzept, Mockup und Evaluation entstanden ohne weitere KI-Tools.
 - **Zweck & Umfang:** KI wurde umfassend für die **technische Umsetzung** eingesetzt: Erstellen und Refactoring des SvelteKit-Codes (Routen, Komponenten, Datenbank-Layer, Authentifizierung, Anbindung der Lebensmittel-API), CSS/Design-Feinschliff, Verifikation per Build- und Browser-Tests sowie Textentwürfe (u. a. diese README). Das **Produkt- und UX-Konzept, die Feature-Entscheide, die Auswahl zwischen Optionen** (z. B. Berechnungsmethode für den Kalorienbedarf, Foto-Speicherung in der DB, Wahl der Lebensmittel-Datenbank) sowie das **Testen** habe ich vorgegeben bzw. selbst durchgeführt; die KI hat auf diese Vorgaben hin umgesetzt und Optionen vorgeschlagen.
-- **Eigene Leistung (Abgrenzung):** Problemraumanalyse und App-Konzept, das Figma-Mockup und das Dokument „Workflows und Designentscheide", die Festlegung des Funktionsumfangs, sämtliche Produkt- und Designentscheidungen, das Abnehmen/Testen der Ergebnisse sowie die Vorbereitung und Durchführung der Usability-Evaluation.
+- **Eigene Leistung (Abgrenzung):** Bei mir lagen das **Projektmanagement und die Projektorganisation** (Planung, Priorisierung, Zeit- und Ablaufsteuerung der Einzelarbeit), die Problemraumanalyse und das App-Konzept, das Figma-Mockup und das Dokument „Workflows und Designentscheide", die Festlegung des Funktionsumfangs sowie **sämtliche Produkt- und Designentscheidungen**. Ebenso lagen **technische Korrekturen und das Review der KI-Vorschläge**, das **Testen und die Abnahme** aller Ergebnisse sowie die Vorbereitung und Durchführung der Usability-Evaluation bei mir. Die KI setzte auf diese Vorgaben hin um und schlug Optionen vor.
 - **KI als Produkt-Feature (Laufzeit):** Über die in Kap. 4.7–4.10 beschriebenen Funktionen nutzt die App **zur Laufzeit selbst** ein (multimodales) Sprachmodell über OpenRouter: der **KI-Coach** übermittelt die Tageswerte (Ziel und Tagessummen, keine Klarnamen oder Kontaktdaten), die **Foto-Nährwertschätzung** das aufgenommene **Bild**, die **Freitext-Schätzung** die eingegebene **Beschreibung** und der **Barcode-Scanner** als Fallback das Barcode-**Foto** an den Anbieter. Das ist von der KI-Nutzung zur *Entwicklung* (oben) zu unterscheiden.
 
 ### 6.2 Prompt-Vorgehen
@@ -441,7 +442,7 @@ cd kalorientracker
 npm install
 
 # .env aus der Vorlage anlegen und Werte eintragen
-# (MongoDB-URI erforderlich; OpenRouter optional – nur für die KI-Funktionen 4.7–4.9)
+# (MongoDB-URI erforderlich; OpenRouter optional – nur für die KI-Funktionen 4.7–4.10)
 cp .env.example .env
 # anschliessend .env öffnen und DB_URI (und optional OPENROUTER_*) ausfüllen
 
