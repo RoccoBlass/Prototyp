@@ -51,7 +51,13 @@ async function createConnection() {
 	if (!uri) {
 		throw new Error('DB_URI ist nicht gesetzt. Bitte die Umgebungsvariable im Hosting hinterlegen.');
 	}
-	const mongo = new MongoClient(uri);
+	// Auf Workers wird die Verbindung pro Request geöffnet: genau EIN Socket
+	// reicht (mehrere Abfragen laufen seriell darüber – billiger als ein zweiter
+	// TLS-Handshake) und ein knappes Timeout lässt einen Request lieber schnell
+	// scheitern als Worker-Zeit zu verbrennen. Auf Node bleibt der Standard-Pool
+	// (eine global gecachte Verbindung, die über viele Requests wiederverwendet wird).
+	const options = IS_WORKERS ? { maxPoolSize: 1, serverSelectionTimeoutMS: 8000 } : {};
+	const mongo = new MongoClient(uri, options);
 	await mongo.connect();
 	return { client: mongo, database: mongo.db('KalorienTrackerDB') };
 }
@@ -354,6 +360,31 @@ export async function getEntriesByDate(userId, date) {
 		console.error('Fehler beim Laden der Einträge:', error);
 		return [];
 	}
+}
+
+/**
+ * Lädt die Einträge mehrerer Tage in EINER Abfrage und gruppiert sie nach Datum.
+ * Liefert für jedes angefragte Datum einen Eintrag (auch wenn leer), in der
+ * Reihenfolge von `dates`. Spart auf Cloudflare die DB-Roundtrips der
+ * /history-Seite (vorher eine Abfrage pro Tag).
+ */
+export async function getEntriesForDates(userId, dates) {
+	const byDate = new Map(dates.map((d) => [d, []]));
+	try {
+		const database = await getDb();
+		const docs = await database
+			.collection('entries')
+			.find({ userId: new ObjectId(userId), date: { $in: dates } })
+			.sort({ createdAt: -1 })
+			.toArray();
+		for (const doc of docs) {
+			const list = byDate.get(doc.date);
+			if (list) list.push(serializeEntry(doc));
+		}
+	} catch (error) {
+		console.error('Fehler beim Laden der Einträge:', error);
+	}
+	return dates.map((date) => ({ date, meals: byDate.get(date) ?? [] }));
 }
 
 export async function addFoodEntry(userId, { date, mealType, foodId, name, unit, amount, caloriesPer100, proteinPer100, carbsPer100, fatPer100 }) {

@@ -1,4 +1,4 @@
-import { getEntriesByDate, deleteEntry } from '$lib/server/db.js';
+import { getEntriesForDates, deleteEntry } from '$lib/server/db.js';
 import { redirect } from '@sveltejs/kit';
 
 function getDateStr(daysAgo) {
@@ -8,20 +8,17 @@ function getDateStr(daysAgo) {
 }
 
 export async function load({ locals }) {
-	const days = await Promise.all(
-		Array.from({ length: 7 }, (_, i) => i).map(async (i) => {
-			const date = getDateStr(i);
-			const meals = await getEntriesByDate(locals.user.id, date);
-			return {
-				date,
-				meals,
-				totalCalories: meals.reduce((sum, m) => sum + (m.calories || 0), 0),
-				totalProtein: meals.reduce((sum, m) => sum + (m.protein || 0), 0),
-				totalCarbs: meals.reduce((sum, m) => sum + (m.carbs || 0), 0),
-				totalFat: meals.reduce((sum, m) => sum + (m.fat || 0), 0)
-			};
-		})
-	);
+	const dates = Array.from({ length: 7 }, (_, i) => getDateStr(i));
+	// Eine einzige DB-Abfrage für alle 7 Tage statt sieben einzelner.
+	const entriesByDate = await getEntriesForDates(locals.user.id, dates);
+	const days = entriesByDate.map(({ date, meals }) => ({
+		date,
+		meals,
+		totalCalories: meals.reduce((sum, m) => sum + (m.calories || 0), 0),
+		totalProtein: meals.reduce((sum, m) => sum + (m.protein || 0), 0),
+		totalCarbs: meals.reduce((sum, m) => sum + (m.carbs || 0), 0),
+		totalFat: meals.reduce((sum, m) => sum + (m.fat || 0), 0)
+	}));
 	return { days };
 }
 
