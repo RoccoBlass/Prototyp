@@ -3,9 +3,7 @@
 **Wichtige Links:**
 - **Live-App (Hauptseite):** <https://kalorientracker-main.pages.dev>
 - **Erster Prototyp (Stand der Evaluation):** <https://kalorientracker-prototyp.pages.dev>
-- **GitHub-Repository:** <https://github.com/RoccoBlass/Prototyp>
 - **Figma-Mockup:** <https://www.figma.com/proto/WGIBvorlP9wmaHF67J3IIC/Fitness-App>
-- **Video-Walkthrough:** Link folgt nach der Aufnahme
 
 ## Inhaltsverzeichnis
 
