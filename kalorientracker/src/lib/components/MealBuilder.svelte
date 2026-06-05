@@ -1,8 +1,19 @@
 <script>
 	import Icon from './Icon.svelte';
+	import { enhance } from '$app/forms';
 	import { mealTotals, scaleNutrition } from '$lib/food.js';
 
 	let { meal = null, foods = [], action = '?/save', submitLabel = 'Speichern' } = $props();
+
+	// Lade-Zustand beim Speichern (Rückmeldung + kein Doppel-Klick), siehe FoodForm.
+	let submitting = $state(false);
+	function onSave() {
+		submitting = true;
+		return async ({ update }) => {
+			await update();
+			submitting = false;
+		};
+	}
 
 	let nextKey = 0;
 	const initItems = (meal?.items ?? []).map((it) => ({ ...it, amount: String(it.amount), key: nextKey++ }));
@@ -119,7 +130,7 @@
 	}
 </script>
 
-<form method="POST" {action} class="builder">
+<form method="POST" {action} use:enhance={onSave} class="builder">
 	<input type="hidden" name="items" value={itemsJson} />
 
 	<section class="card">
@@ -264,9 +275,9 @@
 		</div>
 	</section>
 
-	<button type="submit" class="save-btn" disabled={!canSave}>
+	<button type="submit" class="save-btn" disabled={!canSave || submitting}>
 		<Icon name="check-circle" size={18} />
-		<span>{submitLabel}</span>
+		<span>{submitting ? 'Speichert…' : submitLabel}</span>
 	</button>
 </form>
 

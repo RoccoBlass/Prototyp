@@ -1,8 +1,21 @@
 <script>
 	import Icon from './Icon.svelte';
+	import { enhance } from '$app/forms';
 	import { scaleNutrition } from '$lib/food.js';
 
 	let { food = null, action = '?/save', submitLabel = 'Speichern' } = $props();
+
+	// Beim Speichern sofort Rückmeldung geben (Button deaktiviert + Text), damit
+	// eine langsame erste Antwort nicht wie ein „Hänger" wirkt und Doppel-Klicks
+	// vermieden werden.
+	let submitting = $state(false);
+	function onSave() {
+		submitting = true;
+		return async ({ update }) => {
+			await update();
+			submitting = false;
+		};
+	}
 
 	let name = $state(food?.name ?? '');
 	let unit = $state(food?.unit ?? 'g');
@@ -69,7 +82,7 @@
 	}
 </script>
 
-<form method="POST" {action} class="food-form">
+<form method="POST" {action} use:enhance={onSave} class="food-form">
 	<input type="hidden" name="photo" value={photo} />
 
 	<section class="card">
@@ -156,9 +169,9 @@
 		{#if photoError}<p class="photo-error">{photoError}</p>{/if}
 	</section>
 
-	<button type="submit" class="save-btn">
+	<button type="submit" class="save-btn" disabled={submitting}>
 		<Icon name="check-circle" size={18} />
-		<span>{submitLabel}</span>
+		<span>{submitting ? 'Speichert…' : submitLabel}</span>
 	</button>
 </form>
 
@@ -368,11 +381,16 @@
 		transition: transform 0.12s ease, background 0.15s;
 	}
 
-	.save-btn:hover {
+	.save-btn:hover:not(:disabled) {
 		background: var(--brand-strong);
 	}
 
-	.save-btn:active {
+	.save-btn:active:not(:disabled) {
 		transform: translateY(1px);
+	}
+
+	.save-btn:disabled {
+		opacity: 0.6;
+		cursor: progress;
 	}
 </style>
