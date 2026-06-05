@@ -92,13 +92,13 @@ Gewählt habe ich Variante (b). Entscheidkriterien waren minimaler Aufwand pro L
 
 Zunächst entstand ein **bewusst schlanker erster Prototyp**, der in der Usability-Evaluation (Kap. 3.5) mit Nutzer:innen getestet wurde. Er ist als eigener Branch [`prototyp-1`](https://github.com/RoccoBlass/Prototyp/tree/prototyp-1) eingefroren und separat deployt: <https://kalorientracker-prototyp.pages.dev>.
 
-**Umfang des ersten Prototyps:** Dashboard mit Kalorienring & Makros, manuelles Hinzufügen einzelner Lebensmittel (frei eingetippte Nährwerte), Tagesverlauf und Profil. Es ist eine Einzelnutzer-App **ohne Login**, mit **fest hinterlegtem Tagesziel** und **ohne** Datenbank-Suche, zusammengesetzte Mahlzeiten, Gewichtstracker oder KI. Genau diese Lücken wurden im Test sichtbar und führten zu den Erweiterungen in Kap. 4.
+**Umfang des ersten Prototyps:** Dashboard mit Kalorienring & Makros, manuelles Anlegen wiederverwendbarer Mahlzeitenvorlagen (frei eingetippte Nährwerte), Tagesverlauf und Profil. Es ist eine Einzelnutzer-App **ohne Login**, mit **fest hinterlegtem Tagesziel** und **ohne** Datenbank-Suche, zusammengesetzte Mahlzeiten, Gewichtstracker oder KI. Genau diese Lücken wurden im Test sichtbar und führten zu den Erweiterungen in Kap. 4.
 
 | | |
 | --- | --- |
-| ![Erster Prototyp, Dashboard](docs/screenshots/prototype-dashboard.png) | ![Erster Prototyp, Lebensmittel hinzufügen](docs/screenshots/prototype-add-new.png) |
+| ![Erster Prototyp, Dashboard](docs/screenshots/prototype-dashboard.png) | ![Erster Prototyp, Mahlzeitenvorlage anlegen](docs/screenshots/prototype-add-new.png) |
 
-*Erster Prototyp (Stand der Evaluation): Dashboard und manuelle Lebensmittel-Erfassung, schlanker und ohne die späteren Erweiterungen.*
+*Erster Prototyp (Stand der Evaluation): Dashboard und das Anlegen einer wiederverwendbaren Mahlzeitenvorlage, schlanker und ohne die späteren Erweiterungen.*
 
 ### 3.5 Validate
 
